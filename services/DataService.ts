@@ -38,7 +38,7 @@ export default class DataService {
         //console.log(data);
 
         const afData = DataService.transformApiData(data, fallback);
-        //console.log(afData);
+        console.log("Transformed army data", afData);
 
         callback(afData);
       })
@@ -47,6 +47,11 @@ export default class DataService {
   public static transformApiData(input, fallback?: (err: string) => void) {
     try {
       const countRegex = /^(\d+)x\s/;
+
+      const getId = (len, msg) => {
+        console.log("No id found...", msg);
+        return nanoid(len);
+      }
 
       const upgradePackages: IUpgradePackage[] = input.upgradePackages.map(pkg => ({
         ...pkg,
@@ -59,7 +64,7 @@ export default class DataService {
           delete section.replaceWhat;
 
           return {
-            id: section.id ?? nanoid(7),
+            id: section.id ?? getId(7, "section.id"),
             ...section,
             ...upgrade,
             options: section.options.map((opt: IUpgradeOption) => {
@@ -91,7 +96,7 @@ export default class DataService {
                 ...opt,
                 isModel: upgrade.attachModel ?? false,
                 cost: typeof (opt.cost ?? 0) === "number" ? opt.cost : parseInt((opt.cost as any).toString().replace(/pts?/, "")),
-                id: opt.id || nanoid(5), // Assign ID to upgrade option if one doesn't exist
+                id: opt.id || getId(5, "option.id"), // Assign ID to upgrade option if one doesn't exist
 
                 // Group same items back together and sum the count
                 gains: Object.values(gainsGroups).map((grp: any[]) => {

@@ -7,7 +7,17 @@ export interface ISaveData {
   armyName: string;
   modified: string;
   listPoints: number;
-  list: ListState;
+  list: ISavedListState;
+  saveVersion: number;
+}
+
+export interface ISavedListState extends Omit<ListState, 'units'> {
+  units: ISavedUnit[];
+}
+
+export interface ISavedUnit extends IUnitSelectionData {
+  id: string;
+  equipment: { id: string, count: number }[];
 }
 
 export interface ISpecialRule {
@@ -19,6 +29,7 @@ export interface ISpecialRule {
 }
 
 export interface IUnit {
+  id: string;
   category?: string;
   name: string;
   size: number;
@@ -31,13 +42,15 @@ export interface IUnit {
   disabledUpgradeSections: string[];
 }
 
-export interface ISelectedUnit extends IUnit {
+export interface IUnitSelectionData {
   selectionId: string;
   customName?: string;
   selectedUpgrades: IUpgradeOption[];
   combined: boolean;
   joinToUnit?: string;
 }
+
+export interface ISelectedUnit extends IUnit, IUnitSelectionData { }
 
 export interface IUpgrade {
   id: string;
