@@ -1,6 +1,6 @@
 import { Dispatch } from "react";
 import { ArmyState, loadArmyData, setGameSystem } from "../data/armySlice";
-import { ISaveData, ISelectedUnit, ISpecialRule, IUpgradeGainsWeapon } from "../data/interfaces";
+import { ISaveData, ISavedListState, ISelectedUnit, ISpecialRule, IUnit, IUpgradeGainsWeapon } from "../data/interfaces";
 import { ListState, loadSavedList } from "../data/listSlice";
 import DataService from "./DataService";
 import { groupBy } from "./Helpers";
@@ -43,8 +43,9 @@ export default class PersistenceService {
       armyFile: army.armyFile,
       armyName: army.data.name,
       modified: new Date().toJSON(),
+      saveVersion: 2,
       listPoints: 0,
-      list
+      list: this.getDataForSave(list)
     };
 
     console.log("Creating save...", saveData);
@@ -54,6 +55,25 @@ export default class PersistenceService {
     localStorage[this.getSaveKey(list)] = json;
 
     return creationTime;
+  }
+
+  public static getDataForSave(list: ListState): ISavedListState {
+    return {
+      ...list,
+      units: list.units.map(u => ({
+        id: u.id,
+        // TODO: This isn't ideal!
+        equipment: u.equipment.map(e => ({
+          id: e.id,
+          count: e.count
+        })),
+        customName: u.customName,
+        selectionId: u.selectionId,
+        selectedUpgrades: u.selectedUpgrades,
+        combined: u.combined,
+        joinToUnit: u.joinToUnit
+      }))
+    };
   }
 
   public static updateSave(list: ListState) {
@@ -69,7 +89,7 @@ export default class PersistenceService {
       ...existingSave,
       modified: new Date().toJSON(),
       listPoints: points,
-      list,
+      list: this.getDataForSave(list)
     };
 
     console.log("Updating save...", saveData);
@@ -83,6 +103,35 @@ export default class PersistenceService {
     delete localStorage[this.getSaveKey(list)];
   }
 
+  public static buildListFromSave(savedList: ISavedListState, armyData): ListState {
+
+    const allSections = armyData.upgradePackages.reduce((current, next) => current.concat(next.sections), []);
+    const allOptions = allSections.reduce((current, next) => current.concat(next.options), []);
+
+    return {
+      ...savedList,
+      units: savedList.units.map(u => {
+        const unitDefinition: IUnit = armyData.units.find(unit => unit.id === u.id);
+        return ({
+          ...unitDefinition,
+          ...u,
+          equipment: unitDefinition.equipment.map(e => ({
+            ...e,
+            count: u.equipment.find(ue => ue.id === e.id)?.count ?? e.count
+          })),
+          selectedUpgrades: u.selectedUpgrades.map(upg => {
+            const originalUpgrade = allOptions.find(opt => opt.id === upg.id);
+
+            // TODO! Dep on schnickers api???
+            return ({
+              ...upg,
+            });
+          })
+        });
+      })
+    };
+  }
+
   public static load(dispatch: Dispatch<any>, save: ISaveData, callback: (armyData: any) => void) {
 
     console.log("Loading save...", save);
@@ -90,7 +139,8 @@ export default class PersistenceService {
     const loaded = data => {
       dispatch(setGameSystem(save.gameSystem));
       dispatch(loadArmyData(data));
-      dispatch(loadSavedList(save.list));
+      const list: ListState = this.buildListFromSave(save.list, data);
+      dispatch(loadSavedList(list));
     };
 
     if (save.armyId) {

@@ -38,7 +38,7 @@ export default class DataService {
         //console.log(data);
 
         const afData = DataService.transformApiData(data, fallback);
-        //console.log(afData);
+        console.log("Transformed army data", afData);
 
         callback(afData);
       })
@@ -47,6 +47,11 @@ export default class DataService {
   public static transformApiData(input, fallback?: (err: string) => void) {
     try {
       const countRegex = /^(\d+)x\s/;
+
+      const getId = (len, msg) => {
+        console.log("No id found...", msg);
+        return nanoid(len);
+      }
 
       const upgradePackages: IUpgradePackage[] = input.upgradePackages.map(pkg => ({
         ...pkg,
