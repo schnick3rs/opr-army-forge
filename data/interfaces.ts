@@ -19,6 +19,7 @@ export interface ISpecialRule {
 }
 
 export interface IUnit {
+  id: string;
   category?: string;
   name: string;
   size: number;
