@@ -4,20 +4,23 @@ import { useRouter } from 'next/router';
 import { AppBar, IconButton, Paper, Toolbar, Typography } from '@mui/material';
 import BackIcon from '@mui/icons-material/ArrowBackIosNew';
 import { useEffect } from 'react';
+import NotificationBanner from '../views/components/NotificationBanner';
 
 export default function GameSystem() {
 
   const dispatch = useDispatch();
   const router = useRouter();
-  const isLive = typeof(window) !== "undefined"
-  ? window.location.host === "opr-army-forge.vercel.app" || window.location.host === "army-forge.onepagerules.com"
-  : true;
+  const isLive = true;
+  const isLive2 = typeof (window) !== "undefined"
+    ? window.location.host === "opr-army-forge.vercel.app" || window.location.host === "army-forge.onepagerules.com"
+    : true;
 
   const gameSystems = ["gf", "gff", "aof", "aofs"];
+  const liveGameSystems = ["gf"];//, "aof"];
 
   const selectGameSystem = (gameSystem: string) => {
     dispatch(setGameSystem(gameSystem));
-    router?.push({pathname: "/files", query: {...router.query, gameSystem: gameSystem}});
+    router?.push({ pathname: "/files", query: { ...router.query, gameSystem: gameSystem } });
   };
 
   useEffect(() => {
@@ -25,11 +28,12 @@ export default function GameSystem() {
       console.log(router.query)
       let gameSystem = router.query.gameSystem as string
       if (gameSystems.includes(gameSystem)) selectGameSystem(gameSystem)
-    } 
-  }, [])
+    }
+  }, []);
 
   return (
     <>
+      <NotificationBanner />
       <Paper elevation={2} color="primary" square>
         <AppBar position="static" elevation={0}>
           <Toolbar>
@@ -62,15 +66,20 @@ export default function GameSystem() {
           <div className="columns is-multiline is-mobile">
             {
               // For each game system
-              gameSystems.map(gameSystem => (
-                <div key={gameSystem} className="column is-half">
-                  <Paper>
-                    <img onClick={() => isLive && gameSystem !== "gf" ? false : selectGameSystem(gameSystem)} src={`img/${gameSystem}_cover.jpg`}
-                      className={"game-system-tile "+ (isLive && gameSystem !== "gf" ? "" : "interactable")}
-                      style={{ borderRadius: "4px", display: "block", filter: isLive && gameSystem !== "gf" ? "grayscale(95%)" : null }} />
-                  </Paper>
-                </div>
-              ))
+              gameSystems.map(gameSystem => {
+
+                const enabled = isLive ? liveGameSystems.indexOf(gameSystem) >= 0 : true;
+                console.log(gameSystem, enabled);
+                return (
+                  <div key={gameSystem} className="column is-half">
+                    <Paper>
+                      <img onClick={() => enabled ? selectGameSystem(gameSystem) : false} src={`img/${gameSystem}_cover.jpg`}
+                        className={"game-system-tile " + (enabled ? "interactable" : "")}
+                        style={{ borderRadius: "4px", display: "block", filter: enabled ? null : "grayscale(95%)" }} />
+                    </Paper>
+                  </div>
+                );
+              })
             }
           </div>
         </div>

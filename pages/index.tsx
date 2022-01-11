@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { Button, createTheme } from '@mui/material';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import AddIcon from '@mui/icons-material/Add';
+import NotificationBanner from "../views/components/NotificationBanner";
 
 export default function Home() {
 
@@ -21,6 +22,7 @@ export default function Home() {
 
   return (
     <>
+      <NotificationBanner />
       <div className={styles.homeContainer + " container"}>
         <div className={styles.outerColumn}>
           <div className={styles.homeColumn + " mx-auto has-text-centered p-4 pt-6"}>

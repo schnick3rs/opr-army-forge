@@ -137,7 +137,7 @@ export default function ListConfigurationDialog({ isEdit, open, setOpen, customA
         <div className="mx-auto" style={{ maxWidth: "480px" }}>
           <div className="is-flex is-flex-direction-column p-4 mx-auto">
             <div className="mb-6">
-              <ArmyImage name={army.data?.name} />
+              <ArmyImage name={army.data?.name} armyData={army} />
             </div>
             <TextField variant="filled" label="List Name" className="mb-4" value={armyName} onChange={(e) => setArmyName(e.target.value)} />
             <TextField variant="filled" label="Points Limit" type="number" className="mb-4" value={pointsLimit ?? ""} onChange={(e) => setPointsLimit(e.target.value ? parseInt(e.target.value) : null)} />
