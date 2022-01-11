@@ -129,6 +129,7 @@ export default class DataService {
           }
         }),
         disabledUpgradeSections: (() => {
+
           const sections: { id: string, options: { gains: { name: string } }[], replaceWhat: string[] }[] = _.compact(u.upgrades
             // Map all upgrade packages
             .map(uid => upgradePackages.find(pkg => pkg.uid === uid)))
@@ -138,7 +139,24 @@ export default class DataService {
           const allGains: IUpgradeGains[] = sections
             .reduce((opts, next) => opts.concat(next.options), [])
             .reduce((gains, next) => gains.concat(next.gains), [])
-            //.map(gain => gain.name);
+            .reduce((gains, next) => {
+              
+              const isItem = next.type === "ArmyBookItem";
+
+              // Add root item/weapon/etc
+              gains.push(next);
+
+              // For items, also add the content
+              if (isItem) {
+                gains = gains.concat(next.content);
+              }
+              return gains;
+            }, [])
+          //.map(gain => gain.name);
+
+          if (u.id === "_nbz3zj") {
+            debugger;
+          }
 
           const disabledSections: string[] = [];
 
@@ -148,7 +166,7 @@ export default class DataService {
             for (let what of section.replaceWhat) {
 
               // Does equipment contain this thing?
-              const equipmentMatch = u.equipment.some(e => EquipmentService.compareEquipment({...e, label:e.label.replace(countRegex, "")}, what));
+              const equipmentMatch = u.equipment.some(e => EquipmentService.compareEquipment({ ...e, label: e.label.replace(countRegex, "") }, what));
               // If equipment, then we won't be disabling this section...
               if (equipmentMatch)
                 continue;
