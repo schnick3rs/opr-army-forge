@@ -56,8 +56,8 @@ export default function UnitEquipmentTable({ unit, square }: { unit: ISelectedUn
     specialRules: u.content.filter(c => c.type === "ArmyBookRule" || c.type === "ArmyBookDefense") as IUpgradeGainsRule[]
   })));
 
-  const weaponGroups = _.groupBy(weapons, w => w.label + w.attacks);
-  const itemGroups = _.groupBy(combinedEquipment, w => w.label);
+  const weaponGroups = _.groupBy(weapons, w => pluralise.singular(w.name ?? w.label) + w.attacks);
+  const itemGroups = _.groupBy(combinedEquipment, w => pluralise.singular(w.name ?? w.label));
 
   const cellStyle = { paddingLeft: "8px", paddingRight: "8px", borderBottom: "none" };
   const headerStyle = { ...cellStyle, fontWeight: 600 };

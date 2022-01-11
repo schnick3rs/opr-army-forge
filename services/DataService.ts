@@ -151,12 +151,7 @@ export default class DataService {
                 gains = gains.concat(next.content);
               }
               return gains;
-            }, [])
-          //.map(gain => gain.name);
-
-          if (u.id === "_nbz3zj") {
-            debugger;
-          }
+            }, []);
 
           const disabledSections: string[] = [];
 
