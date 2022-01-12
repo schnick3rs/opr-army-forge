@@ -28,18 +28,20 @@ interface IFaction {
 export default function Files() {
 
   const army = useSelector((state: RootState) => state.army);
-  const [armyFiles, setArmyFiles] = useState(null);
+
   const [customArmies, setCustomArmies]: [(IArmyData | IFaction)[], any] = useState(null);
   const [newArmyDialogOpen, setNewArmyDialogOpen] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [searchText, setSearchText] = useState("");
   const dispatch = useDispatch();
   const router = useRouter();
+  const gameSystem = army.gameSystem;
 
   const filtered = (armies) => armies && armies.filter(a => {
     return a.name.toLowerCase().includes(searchText.toLowerCase()) || a.username?.toLowerCase().includes(searchText.toLowerCase())
   })
-  const filteredArmies = customArmies ? filtered(customArmies) : []
+
+  const filteredArmies = customArmies ? filtered(customArmies) : [];
 
   const isLive = typeof (window) !== "undefined"
     ? window.location.host === "opr-army-forge.vercel.app" || window.location.host === "army-forge.onepagerules.com"
@@ -60,18 +62,11 @@ export default function Files() {
     // Clear any existing units?
     dispatch(resetList());
 
-    // List of "official" armies from AF
-    fetch("definitions/army-files.json")
-      .then((res) => res.json())
-      .then((data) => {
-        setArmyFiles(data);
-      });
-
     // AF to Web Companion game type mapping
     const slug = (() => {
       switch (army.gameSystem) {
         case "gf": return "grimdark-future";
-        case "gff": return "grimdark-future-firefight";
+        case "gff": return "grimdark-future";//-firefight";
         case "aof": return "age-of-fantasy";
         case "aofs": return "age-of-fantasy-skirmish";
       }
@@ -84,27 +79,26 @@ export default function Files() {
       .then((data) => {
         //console.log(data);
         const valid = data
-          .map(d => ({...d, official: d.official || d.username === "onepagerules"}))
+          .map(d => ({ ...d, official: d.official || d.username === "onepagerules" }))
         //  .filter(a => a.unitCount > 2)
         //.filter(a => useStaging || a.username === "Darguth" || a.username === "adam");
 
         setCustomArmies(valid);
-        return valid
+        return valid;
       })
   }, [army.gameSystem]);
 
   useEffect(() => {
     if (customArmies && router.query) {
-      let armyId = router.query.armyId as string
+      let armyId = (router.query.armyId as string)?.replace("-skirmish", "");
+      // TODO: GFF support!
       let army = customArmies.find((t: IArmyData) => t.uid == armyId)
       if (army) {
-        selectCustomList(army)
+        chooseArmy(army);
       }
     }
 
   }, [customArmies])
-
-  const armies = armyFiles?.filter(grp => grp.key === army.gameSystem)[0]?.items;
 
   const officialFactions = !customArmies
     ? []
@@ -140,9 +134,15 @@ export default function Files() {
   };
 
   const chooseArmy = (army) => {
-    router.replace({ query: { ...router.query, armyId: army.uid } }, null, { shallow: true })
-    selectCustomList(army)
-  }
+    debugger;
+    const uid = army.uid + (gameSystem === "gff" ? "-skirmish" : "");
+    router.replace({ query: { ...router.query, armyId: uid } }, null, { shallow: true })
+    selectCustomList({
+      ...army,
+      uid: uid
+    })
+  };
+
   const selectCustomList = (customArmy) => {
     if (customArmy.factionName) {
       if (customArmies) {
@@ -189,7 +189,7 @@ export default function Files() {
       </InputAdornment>
     } />
 
-  const webAppMode = army.gameSystem === "gf" || army.gameSystem === "aof";
+  const webAppMode = true; //army.gameSystem === "gf" || army.gameSystem === "aof";
 
   return (
     <>
@@ -239,20 +239,6 @@ export default function Files() {
               </>
             )
           }
-          <div className="columns is-mobile is-multiline">
-            {
-              webAppMode || !armyFiles ? null : filtered(armies)?.map((file, index) => {
-
-                return (
-                  <Tile
-                    key={index}
-                    army={file}
-                    enabled={true}
-                    onSelect={army => selectArmy(army.path)} />
-                );
-              })
-            }
-          </div>
           {(!isLive || router.query.dataSourceUrl) && (customArmies ? (
             <>
               <h3>Custom Armies</h3>
