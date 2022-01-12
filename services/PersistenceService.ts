@@ -12,7 +12,7 @@ export default class PersistenceService {
 
   private static prefix = "AF_Save_";
 
-  private static getSaveKey(list: ListState) {
+  private static getSaveKey(list: ISavedListState) {
     return this.prefix + list.creationTime;
   }
 
@@ -166,7 +166,7 @@ export default class PersistenceService {
     a.dispatchEvent(new MouseEvent('click'));
   }
 
-  public static checkExists(list: ListState): boolean {
+  public static checkExists(list: ISavedListState): boolean {
     return !!localStorage[this.getSaveKey(list)];
   }
 
