@@ -66,7 +66,7 @@ export default function Files() {
     const slug = (() => {
       switch (army.gameSystem) {
         case "gf": return "grimdark-future";
-        case "gff": return "grimdark-future";//-firefight";
+        case "gff": return "grimdark-future-firefight";
         case "aof": return "age-of-fantasy";
         case "aofs": return "age-of-fantasy-skirmish";
       }
@@ -90,7 +90,7 @@ export default function Files() {
 
   useEffect(() => {
     if (customArmies && router.query) {
-      let armyId = (router.query.armyId as string)?.replace("-skirmish", "");
+      let armyId = router.query.armyId as string;
       // TODO: GFF support!
       let army = customArmies.find((t: IArmyData) => t.uid == armyId)
       if (army) {
@@ -135,7 +135,7 @@ export default function Files() {
 
   const chooseArmy = (army) => {
     debugger;
-    const uid = army.uid + (gameSystem === "gff" ? "-skirmish" : "");
+    const uid = army.uid;
     router.replace({ query: { ...router.query, armyId: uid } }, null, { shallow: true })
     selectCustomList({
       ...army,

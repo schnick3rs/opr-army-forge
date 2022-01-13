@@ -42,7 +42,7 @@ export default function ListConfigurationDialog({ isEdit, open, setOpen, customA
   // Update default name once data comes in
   useEffect(() => {
     if (!isEdit && army.data && army.data.name) {
-      var armyName = (army.data.uid && customArmies) ? customArmies?.find(t => t.uid === army.data.uid || t.uid === army.data.uid.replace("-skirmish", "")).name : army.data.name
+      var armyName = (army.data.uid && customArmies) ? customArmies?.find(t => t.uid === army.data.uid).name : army.data.name
       setArmyName(armyName);
       setSelectedChild(armyName);
     }
