@@ -157,10 +157,13 @@ export default function Load() {
                                 position: "relative", zIndex: 1
                               }}></div>
                             </Avatar> */}
-                            <ArmyImage  image={save.coverImagePath} name={save.armyName} armyData={save.armyData} size={"32px"} />
+                            <ArmyImage  image={save.coverImagePath} name={save.armyName} armyData={save.armyData ?? {}} size={"32px"} />
                           </ListItemAvatar>
                           {/* <ArmyImage name={save.armyName} /> */}
-                          <ListItemText className="ml-2" primary={title} secondary={"Modified " + modified.toLocaleDateString() + " " + time} />
+                          <ListItemText
+                            className={"ml-2" + (save.saveVersion === 2 ? "" : " has-text-danger")}
+                            primary={title}
+                            secondary={save.saveVersion === 2 ? ("Modified " + modified.toLocaleDateString() + " " + time) : "Outdated save format!"} />
                         </ListItemButton>
                       </ListItem>
                     );
