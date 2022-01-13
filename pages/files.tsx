@@ -134,7 +134,6 @@ export default function Files() {
   };
 
   const chooseArmy = (army) => {
-    debugger;
     const uid = army.uid;
     router.replace({ query: { ...router.query, armyId: uid } }, null, { shallow: true })
     selectCustomList({

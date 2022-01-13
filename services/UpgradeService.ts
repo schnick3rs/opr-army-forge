@@ -299,7 +299,7 @@ export default class UpgradeService {
             return false;
           }
 
-        } else if (appliedInGroup >= upgrade.select) {
+        } else if (appliedInGroup >= upgrade.select || appliedInGroup >= available) {
           return false;
         }
 
@@ -313,7 +313,7 @@ export default class UpgradeService {
   };
 
   public static apply(unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption) {
-    
+
     // Function to apply the upgrade option to the unit
     const apply = (replacedCount?: number, replacedItems?: any[]) => {
 
@@ -334,7 +334,8 @@ export default class UpgradeService {
           count: applyCount(g),
           originalCount: applyCount(g) // e.g. If a unit of 5 has 4 CCWs left...
         })),
-        replacedWhat: replacedItems?.map(i => i.parentId ?? i.id) ?? upgrade.replaceWhat // Keep track of what this option replaced
+        replacedWhat: replacedItems?.map(i => i.parentId ?? i.id) ?? upgrade.replaceWhat, // Keep track of what this option replaced
+        isAttachment: upgrade.attachment
       };
 
       // Apply counts to item content
@@ -390,8 +391,12 @@ export default class UpgradeService {
 
         // If we're replacing an upgrade...
         if (toReplace.type) {
-          // ...then track which upgrade replaced it
-          (toReplace.dependencies || (toReplace.dependencies = [])).push(option.id);
+          if (upgrade.attachment) {
+            (toReplace.attachments || (toReplace.attachments = [])).push(option.id);
+          } else {
+            // ...then track which upgrade replaced it
+            (toReplace.dependencies || (toReplace.dependencies = [])).push(option.id);
+          }
         }
 
         replaceAction(toReplace, replaceCount);
@@ -444,6 +449,15 @@ export default class UpgradeService {
         // TODO: Use Math.max... ?
         if (toReplace.count <= 0)
           toReplace.count = 0;
+
+
+
+        // Delete attachments for this item until there are only as many left as there are items
+        while ((toReplace.attachments?.length ?? 0) > toReplace.count) {
+          debugger;
+          const attachment = toReplace.attachments.splice(toReplace.attachments.length - 1);
+          this.removeDependencies(unit, attachment);
+        }
       };
 
       let replaceCount = 999;
@@ -476,30 +490,38 @@ export default class UpgradeService {
     }
   }
 
+  // Remove anything that depends on this upgrade (cascade remove)
+  public static removeDependencies(unit, dependencies) {
+    if (!dependencies)
+      return;
+    for (let upgradeId of dependencies) {
+      const dependency = unit.selectedUpgrades.find(u => u.id === upgradeId);
+      console.log("Removing dependency", dependency);
+      // Might have already been removed!
+      if (dependency)
+        this.remove(unit, {
+          id: "",
+          replaceWhat: dependency.replacedWhat,
+          type: dependency.isAttachment ? "upgrade" : "replace"
+        }, dependency);
+    }
+  }
+
   public static remove(unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption) {
     const removeAt = unit.selectedUpgrades.findLastIndex(u => u.id === option.id);
     const toRemove = unit.selectedUpgrades[removeAt];
 
-    // Remove anything that depends on this upgrade (cascade remove)
-    const removeDependencies = (dependencies) => {
-      if (!dependencies)
-        return;
-      for (let upgradeId of dependencies) {
-        const dependency = unit.selectedUpgrades.find(u => u.id === upgradeId);
-        // Might have already been removed!
-        if (dependency)
-          this.remove(unit, { id: "", replaceWhat: dependency.replacedWhat, type: "replace" }, dependency);
-      }
-    }
-    
     // Remove dependencies for each item gained from this upgrade
     for (let gains of toRemove.gains) {
       // Also check the item's children
       if ((gains as IUpgradeGainsItem).content)
         for (let content of (gains as IUpgradeGainsItem).content) {
-          removeDependencies(content.dependencies);
+          this.removeDependencies(unit, content.dependencies);
         }
-      removeDependencies(gains.dependencies);
+      const deps = gains.dependencies ?? [];
+      const attached = (gains as any).attachments ?? [];
+      // Adding this in case an upgrade also has attachments...
+      this.removeDependencies(unit, deps.concat(attached));
     }
 
     const count = toRemove.gains[0]?.count;
