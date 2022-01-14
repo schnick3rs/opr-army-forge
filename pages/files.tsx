@@ -78,8 +78,7 @@ export default function Files() {
       .then((res) => res.json())
       .then((data) => {
         //console.log(data);
-        const valid = data
-          .map(d => ({ ...d, official: d.official || d.username === "onepagerules" }))
+        const valid = data;
         //  .filter(a => a.unitCount > 2)
         //.filter(a => useStaging || a.username === "Darguth" || a.username === "adam");
 
