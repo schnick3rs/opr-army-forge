@@ -2,7 +2,7 @@
   "name": "OPR Army Forge",
   "short_name": "Army Forge",
   "theme_color": "#ffffff",
-  "background_color": "#004740",
+  "background_color": "#1976D2",
   "display": "fullscreen",
   "orientation": "portrait",
   "scope": "/",
