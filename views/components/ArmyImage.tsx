@@ -6,7 +6,9 @@ const rotations = {} as any;
 
 export default function ArmyImage({ imageUrl = null, armyData = null, name = null, size = "100px", ...props }) {
 
-  const path = armyData.gameSystemId === 4 ? "aof" : "gf_armies";
+  const path = armyData.gameSystem
+    ? (armyData.gameSystem.indexOf("aof") === 0 ? "aof" : "gf_armies")
+    : armyData.gameSystemId === 4 ? "aof" : "gf_armies";
 
   const url = imageUrl ?? `img/${path}/${name}.png`;
   const army = armyData ?? useSelector((state: RootState) => state.army).data;

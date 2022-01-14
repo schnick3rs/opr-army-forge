@@ -157,7 +157,7 @@ export default function Load() {
                                 position: "relative", zIndex: 1
                               }}></div>
                             </Avatar> */}
-                            <ArmyImage  image={save.coverImagePath} name={save.armyName} armyData={save.armyData} size={"32px"} />
+                            <ArmyImage image={save.coverImagePath} name={save.armyName} armyData={{ gameSystem: save.gameSystem }} size={"32px"} />
                           </ListItemAvatar>
                           {/* <ArmyImage name={save.armyName} /> */}
                           <ListItemText className="ml-2" primary={title} secondary={"Modified " + modified.toLocaleDateString() + " " + time} />
