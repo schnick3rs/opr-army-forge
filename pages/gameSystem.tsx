@@ -15,7 +15,7 @@ export default function GameSystem() {
     : true;
 
   const gameSystems = ["gf", "gff", "aof", "aofs"];
-  const liveGameSystems = ["gf"];//, "aof"];
+  const liveGameSystems = ["gf", "gff"];//, "aof"];
 
   const selectGameSystem = (gameSystem: string) => {
     dispatch(setGameSystem(gameSystem));
