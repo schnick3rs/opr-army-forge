@@ -189,6 +189,8 @@ export default function Files() {
 
   const webAppMode = true; //army.gameSystem === "gf" || army.gameSystem === "aof";
 
+  const activeArmies = isLive ? officialActiveArmies : (officialActiveArmies.concat(officialInactiveArmies));
+
   return (
     <>
       <Paper elevation={2} color="primary" square>
@@ -223,9 +225,9 @@ export default function Files() {
                   <CircularProgress />
                   <p>Loading armies...</p>
                 </div>}
-                {officialArmies && <>
+                {<>
                   <div className="columns is-mobile is-multiline">
-                    {gfSection(_.sortBy(officialActiveArmies, a => a.name), true)}
+                    {gfSection(_.sortBy(activeArmies, a => a.name), true)}
                   </div>
                   {officialInactiveArmies.length > 0 && <>
                     <h3 className="is-size-4 has-text-centered mb-4 pt-4">Coming Soon...</h3>

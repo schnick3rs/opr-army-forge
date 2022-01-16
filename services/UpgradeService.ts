@@ -299,7 +299,7 @@ export default class UpgradeService {
             return false;
           }
 
-        } else if (appliedInGroup >= upgrade.select || appliedInGroup >= available) {
+        } else if (appliedInGroup >= upgrade.select || (upgrade.attachment && appliedInGroup >= available)) {
           return false;
         }
 

@@ -36,7 +36,7 @@ export default function List() {
     })();
 
     // Load army rules
-    fetch(`https://opr-list-builder.herokuapp.com/api/content/game-systems/${slug}/special-rules`)
+    fetch(`https://webapp.onepagerules.com/api/content/game-systems/${slug}/special-rules`)
       .then(res => res.json())
       .then(res => {
         const rules = res.map(rule => ({
