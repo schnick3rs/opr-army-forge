@@ -12,6 +12,8 @@ export default function ArmyImage({ imageUrl = null, armyData = null, name = nul
   //const url = imageUrl || `https://onepagerules.files.wordpress.com/2022/01/${name.replace(/\s+/g, '-').toLowerCase()}.png`;// `img/${path}/${name}.png`;
   const url = imageUrl || `img/${path}/${name}.png`;
 
+  console.log(url);
+
   return (
     <div {...props} className={`${props.className ?? ""} is-flex p-2`} style={{ ...props.style, position: "relative", height: size, flexBasis: size, boxSizing: "content-box" }}>
       <div style={{
@@ -26,7 +28,7 @@ export default function ArmyImage({ imageUrl = null, armyData = null, name = nul
       <div className="is-flex" style={{
         height: "100%",
         width: "100%",
-        backgroundImage: `url(${url})`,
+        backgroundImage: `url("${url}")`,
         backgroundPosition: "center",
         backgroundSize: "contain",
         backgroundRepeat: 'no-repeat',
