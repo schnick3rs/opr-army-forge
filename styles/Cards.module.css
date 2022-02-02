@@ -31,30 +31,43 @@
 }
 
 .profileStat {
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
   margin-left: 1rem;
   margin-right: 1rem;
   width: 86px;
-  border: 1px solid #bbb;
-  border-bottom-left-radius: 16px;
-  border-bottom-right-radius: 16px;
+  border: 1px solid rgba(33, 33, 33, 0.08);
+  border-radius: 4px;
+  background-color: #fafdff;
 }
 
 .profileStat p:first-child {
-  padding: 5px;
-  text-align: center;
-  background-color: #ebebeb;
-  border-bottom: 1px solid #bbb;
+  padding: 2px;
+  text-indent: 4px;
+  background-color: #0f71b4;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+  text-transform: uppercase;
+  position: relative;
+}
+
+.profileStat p:first-child::after {
+  content: " ";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 28px;
+  border-left: 4px solid transparent;
+  border-bottom: 4px solid #fafdff;
 }
 
 .profileStat p:last-child {
   text-align: center;
   font-weight: bold;
-  font-size: 36px;
+  font-size: 26px;
   font-weight: bold;
-  background-color: #fafafa;
-  border-bottom-left-radius: 16px;
-  border-bottom-right-radius: 16px;
-  padding: 5px;
+  border-radius: 4px;
 }
