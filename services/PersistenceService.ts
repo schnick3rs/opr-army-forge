@@ -100,7 +100,10 @@ export default class PersistenceService {
   }
 
   public static delete(list: ListState) {
-    delete localStorage[this.getSaveKey(list)];
+    const key = Object
+      .keys(localStorage)
+      .find(key => key.endsWith(list.creationTime));
+    delete localStorage[key];
   }
 
   public static buildListFromSave(savedList: ISavedListState, armyData): ListState {
