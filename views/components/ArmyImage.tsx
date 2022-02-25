@@ -1,7 +1,4 @@
-import { useSelector } from "react-redux";
-import { RootState } from '../../data/store'
 const rotations = {} as any;
-
 
 export default function ArmyImage({ imageUrl = null, armyData = null, name = null, size = "100px", ...props }) {
 
@@ -9,8 +6,8 @@ export default function ArmyImage({ imageUrl = null, armyData = null, name = nul
     ? (armyData.gameSystem.indexOf("aof") === 0 ? "aof" : "gf_armies")
     : armyData.gameSystemId === 4 ? "aof" : "gf_armies";
 
-  //const url = imageUrl || `https://onepagerules.files.wordpress.com/2022/01/${name.replace(/\s+/g, '-').toLowerCase()}.png`;// `img/${path}/${name}.png`;
-  const url = imageUrl || `img/${path}/${name}.png`;
+  const url = imageUrl || `https://onepagerules.files.wordpress.com/2022/02/${name.replace(/\s+/g, '-').toLowerCase()}.png`;// `img/${path}/${name}.png`;
+  //const url = imageUrl || `img/${path}/${name}.png`;
 
   console.log(url);
 
