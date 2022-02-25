@@ -1,8 +1,4 @@
-import { useSelector } from "react-redux";
-import { useState, useMemo, useEffect } from "react";
-import { RootState } from '../../data/store'
 const rotations = {} as any;
-
 
 export default function ArmyImage({ imageUrl = null, armyData = null, name = null, size = "100px", ...props }) {
 
@@ -10,24 +6,10 @@ export default function ArmyImage({ imageUrl = null, armyData = null, name = nul
     ? (armyData.gameSystem.indexOf("aof") === 0 ? "aof" : "gf_armies")
     : armyData.gameSystemId === 4 ? "aof" : "gf_armies";
 
-  const url = imageUrl ?? `img/${path}/${name}.png`;
-  const army = armyData ?? useSelector((state: RootState) => state.army).data;
-  const [img, setImg] = useState(null)
-  useEffect(() => {
-    fetch(url)
-      .then((data) => {
-        if (data.ok) {
-          //console.log("got an image", data);
-          let b = data.blob().then(blob => {
-            setImg(URL.createObjectURL(blob))
-          })
-        } else {
-          //console.log("didn't get an image, trying web.");
-          setImg(army?.coverImagePath || "img/default_army.png")
-        }
-      });
-    //console.log(army)
-  }, [army, name]);
+  const url = imageUrl || `https://onepagerules.files.wordpress.com/2022/02/${name.replace(/\s+/g, '-').toLowerCase()}.png`;// `img/${path}/${name}.png`;
+  //const url = imageUrl || `img/${path}/${name}.png`;
+
+  console.log(url);
 
   return (
     <div {...props} className={`${props.className ?? ""} is-flex p-2`} style={{ ...props.style, position: "relative", height: size, flexBasis: size, boxSizing: "content-box" }}>
