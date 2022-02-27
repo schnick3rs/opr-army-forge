@@ -1036,3 +1036,10 @@ test("High Elf weapon platform", () => {
   var result = parse(input);
   //expect(result).toStrictEqual({});
 });
+
+test("Take one Tyrannosaur upgrade", () => {
+  var input = 'Take one Tyrannosaur upgrade:';
+  var res = DataParsingService.parseUpgradeText(input);
+  console.log(res);
+
+});
