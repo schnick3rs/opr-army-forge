@@ -71,13 +71,13 @@ export default function ViewCards({ showPsychic, showFullRules, showPointCosts }
               <Card elevation={1}>
                 <div className="mb-4">
                   <div className="card-body">
-                    <h3 className="is-size-4 my-2" style={{ fontWeight: 500, textAlign: "center" }}>
+                    <h3 className="is-size-5 my-2" style={{ fontWeight: 500, textAlign: "center" }}>
                       {count > 1 ? `${count}x ` : ""}{u.customName || u.name}
-                      {(u.size > 1) && <span className="" style={{ color: "#666666" }}> [{u.size}]</span>}
+                      <span className="" style={{ color: "#666666" }}> [{u.size}]</span>
                       {showPointCosts && <span className="is-size-6 ml-1" style={{ color: "#666666" }}>- {UpgradeService.calculateUnitTotal(u)}pts</span>}</h3>
                     <hr className="my-0" />
 
-                    <div className="is-flex mb-2" style={{ justifyContent: "center" }}>
+                    <div className="is-flex" style={{ justifyContent: "center" }}>
 
                       <div className={style.profileStat}>
                         <p>Quality</p>

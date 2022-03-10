@@ -25,7 +25,7 @@ export default function ArmyImage({ imageUrl = null, armyData = null, name = nul
       <div className="is-flex" style={{
         height: "100%",
         width: "100%",
-        backgroundImage: `url(${img})`,
+        backgroundImage: `url("${url}")`,
         backgroundPosition: "center",
         backgroundSize: "contain",
         backgroundRepeat: 'no-repeat',

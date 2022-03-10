@@ -22,7 +22,10 @@ export default class ValidationService {
       const heroes = units.filter(u => u.specialRules.some(rule => rule.name === "Hero"))
       const heroCount = heroes.length;
       const joinedHeroes = heroes.filter(u => (u.joinToUnit && units.some(t => t.selectionId === u.joinToUnit)))
-      const joinedIds = joinedHeroes.map(u => u.joinToUnit)
+      const joinedIds = joinedHeroes.map(u => u.joinToUnit);
+      const duplicateUnitLimit = 1 + Math.floor((list.pointsLimit / 1000));
+      const nonCombinedUnitsGroupedByName = _.groupBy(units.filter(u => !(u.combined && (!u.joinToUnit))), u => u.name);
+      const isOverDuplicateUnitLimit = Object.values(nonCombinedUnitsGroupedByName).some((grp: any[]) => grp.length > duplicateUnitLimit)
 
       if (heroCount > Math.floor(points / 500))
         errors.push(`Max 1 hero per full 500pts.`);
@@ -34,8 +37,8 @@ export default class ValidationService {
         errors.push(`Heroes cannot join units that only contain a single model.`);
       if (new Set(joinedIds).size < joinedIds.length)
         errors.push(`A unit can only have a maximum of one Hero attached.`);
-      if (Object.values(_.groupBy(units.filter(u => !(u.combined && (!u.joinToUnit))), u => u.name)).some((grp: any[]) => grp.length > 3))
-        errors.push(`Cannot have more than 3 copies of a particular unit.`); // combined units still count as one
+      if (isOverDuplicateUnitLimit)
+        errors.push(`Cannot have more than ${duplicateUnitLimit} copies of a particular unit.`); // combined units still count as one
     }
     
     return errors;

@@ -24,13 +24,10 @@ export default function View() {
   const [showPsychic, setShowPsychic] = useState(listContainsPyschic(list));
   const [showFullRules, setShowFullRules] = useState(false);
   const [showPointCosts, setShowPointCosts] = useState(true);
+  const [combineSameUnits, setCombineSameUnits] = useState(true);
 
   return (
     <>
-      {/* <Head>
-        <title>OPR Army Forge</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head> */}
       <Paper elevation={2} color="primary" square>
         <AppBar position="static" elevation={0}>
           <Toolbar>
@@ -78,6 +75,10 @@ export default function View() {
           <ListItem>
             <ListItemText>Show point costs</ListItemText>
             <Switch edge="end" checked={showPointCosts} onChange={() => setShowPointCosts(!showPointCosts)} />
+          </ListItem>
+          <ListItem>
+            <ListItemText>Combine Similar Units</ListItemText>
+            <Switch edge="end" checked={combineSameUnits} onChange={() => setCombineSameUnits(!combineSameUnits)} />
           </ListItem>
         </List>
       </Drawer>
