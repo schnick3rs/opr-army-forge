@@ -32,6 +32,7 @@ export default function List() {
         case "gff": return "grimdark-future-firefight";
         case "aof": return "age-of-fantasy";
         case "aofs": return "age-of-fantasy-skirmish";
+        case "aofr": return "age-of-fantasy-regiments";
       }
     })();
 
