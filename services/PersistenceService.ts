@@ -2,11 +2,11 @@ import { Dispatch } from "react";
 import { ArmyState, loadArmyData, setGameSystem } from "../data/armySlice";
 import { ISaveData, ISavedListState, ISelectedUnit, ISpecialRule, IUnit, IUpgradeGainsWeapon } from "../data/interfaces";
 import { ListState, loadSavedList } from "../data/listSlice";
-import DataService from "./DataService";
 import { groupBy } from "./Helpers";
 import RulesService from "./RulesService";
 import UnitService from "./UnitService";
 import UpgradeService from "./UpgradeService";
+import WebappApiService from "./WebappApiService";
 
 export default class PersistenceService {
 
@@ -135,7 +135,7 @@ export default class PersistenceService {
     };
   }
 
-  public static load(dispatch: Dispatch<any>, save: ISaveData, callback: (armyData: any) => void) {
+  public static async load(dispatch: Dispatch<any>, save: ISaveData, callback: (armyData: any) => void) {
 
     console.log("Loading save...", save);
 
@@ -146,17 +146,10 @@ export default class PersistenceService {
       dispatch(loadSavedList(list));
     };
 
-    if (save.armyId) {
-      DataService.getApiData(save.armyId, data => {
-        loaded(data);
-        callback(data);
-      });
-    } else {
-      DataService.getJsonData(save.armyFile, data => {
-        loaded(data);
-        callback(data);
-      });
-    }
+    const data = await WebappApiService.getArmyBookData(save.armyId, save.gameSystem);
+
+    loaded(data);
+    callback(data);
   }
 
   public static download(list: ListState) {
