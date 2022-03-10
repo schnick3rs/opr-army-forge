@@ -87,6 +87,8 @@ export default function Files() {
             return "age-of-fantasy";
           case "aofs":
             return "age-of-fantasy-skirmish";
+          case "aofr":
+            return "age-of-fantasy-regiments";
         }
       })();
 
@@ -99,7 +101,6 @@ export default function Files() {
   useEffect(() => {
     if (customArmies && router.query) {
       let armyId = router.query.armyId as string;
-      // TODO: GFF support!
       let army = customArmies.find((t: IArmyData) => t.uid == armyId);
       if (army) {
         chooseArmy(army);
