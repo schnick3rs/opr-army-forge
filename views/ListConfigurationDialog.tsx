@@ -63,12 +63,14 @@ export default function ListConfigurationDialog({
   // Update default name once data comes in
   useEffect(() => {
     if (!isEdit && army.data && army.data.name) {
-      var armyName =
+      const armyName =
         army.data.uid && customArmies
-          ? customArmies?.find((t) => t.uid === army.data.uid).name
+          ? customArmies?.find((t) => t.uid === army.data.uid)?.name
           : army.data.name;
-      setArmyName(armyName);
-      setSelectedChild(armyName);
+      if (armyName) {
+        setArmyName(armyName);
+        setSelectedChild(armyName);
+      }
     }
   }, [army.data, customArmies, isEdit]);
 
