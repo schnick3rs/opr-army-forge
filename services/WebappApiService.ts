@@ -8,7 +8,7 @@ export default class WebappApiService {
     const fromQuery = router.query.dataSourceUrl;
     if (fromQuery) return `https://${fromQuery}.herokuapp.com/api`;
 
-    return "http://localhost:3000/api";
+    //return "http://localhost:3000/api";
 
     return this.webCompanionUrl;
   }
