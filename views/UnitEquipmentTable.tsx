@@ -5,9 +5,6 @@ import pluralise from "pluralize";
 import RuleList from './components/RuleList';
 import { Fragment } from 'react';
 import _ from "lodash";
-import UpgradeService from '../services/UpgradeService';
-import { useSelector } from 'react-redux';
-import { RootState } from '../data/store';
 
 export function WeaponRow({ unit, e, isProfile }: { unit: ISelectedUnit, e: IUpgradeGainsWeapon, isProfile: boolean }) {
 
@@ -41,13 +38,10 @@ export function WeaponRow({ unit, e, isProfile }: { unit: ISelectedUnit, e: IUpg
 export default function UnitEquipmentTable({ unit, square }: { unit: ISelectedUnit, square: boolean }) {
 
   const isWeapon = e => e.attacks;
-  const upgradePackages = useSelector((state: RootState) => state.army.data.upgradePackages);
 
-  const builtUnit = UpgradeService.buildUpgrades(upgradePackages, unit);
-
-  const equipment = builtUnit.equipment.filter(e => !isWeapon(e));
+  const equipment = unit.equipment.filter(e => !isWeapon(e));
   //const itemUpgrades = UnitService.getAllUpgradeItems(unit);
-  const weapons = builtUnit.equipment.filter(e => isWeapon(e)); //UnitService.getAllWeapons(unit);
+  const weapons = unit.equipment.filter(e => isWeapon(e)); //UnitService.getAllWeapons(unit);
 
   const hasEquipment = equipment.length > 0;// || itemUpgrades.length > 0;
   const hasWeapons = weapons.length > 0;

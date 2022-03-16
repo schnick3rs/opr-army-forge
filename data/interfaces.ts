@@ -58,7 +58,7 @@ export interface IUpgrade {
   type: "replace" | "upgrade" | "upgradeRule" | "attachment";
   affects?: "any" | "all" | number;
   select?: string | number;
-  replaceWhat?: string[] | string[][];
+  replaceWhat?: string[];
   model?: boolean;
   attachment?: boolean;
   attachModel?: boolean;
@@ -72,7 +72,7 @@ export interface IUpgradeOption {
   label: string;
   isModel?: boolean;
   gains: IUpgradeGains[];// IEquipment[] | ISpecialRule[];
-  replacedWhat?: string[] | string[][];
+  replacedWhat?: string[];
   type: "ArmyBookUpgradeOption";
 }
 
@@ -84,6 +84,8 @@ export interface IUpgradeGains {
   originalCount: number;
   type: "ArmyBookRule" | "ArmyBookWeapon" | "ArmyBookItem" | "ArmyBookDefense" | "ArmyBookMultiWeapon"; // TODO: Add these
   dependencies?: string[];
+  attacks?: number;
+  specialRules?: IUpgradeGainsRule[];
 }
 
 export interface IUpgradeGainsItem extends IUpgradeGains {
