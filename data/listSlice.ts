@@ -265,10 +265,10 @@ export const listSlice = createSlice({
       const { unitId, upgrade, option } = action.payload;
       const unit = state.units.filter(u => u.selectionId === unitId)[0];
 
-      UpgradeService.remove(unit, upgrade, option);
+      UpgradeService.remove(unit, option);
       if (unit.combined && upgrade.affects == "all") {
         const partner = state.units.find(t => (t.selectionId == unit.joinToUnit) || (t.combined && (t.joinToUnit == unit.selectionId)))
-        UpgradeService.remove(partner, upgrade, option);
+        UpgradeService.remove(partner, option);
       }
 
       state.points = UpgradeService.calculateListTotal(state.units);

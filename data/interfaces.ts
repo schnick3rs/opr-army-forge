@@ -66,6 +66,7 @@ export interface IUpgrade {
 }
 
 export interface IUpgradeOption {
+  instanceId: string;
   id: string;
   parentSectionId: string;
   cost: number;
@@ -83,7 +84,7 @@ export interface IUpgradeGains {
   count: number;
   originalCount: number;
   type: "ArmyBookRule" | "ArmyBookWeapon" | "ArmyBookItem" | "ArmyBookDefense" | "ArmyBookMultiWeapon"; // TODO: Add these
-  dependencies?: string[];
+  dependencies?: IUpgradeDependency[];
   attacks?: number;
   specialRules?: IUpgradeGainsRule[];
 }
@@ -116,4 +117,9 @@ export interface IUpgradePackage {
   hint: string,
   uid: string;
   sections: IUpgrade[];
+}
+
+export interface IUpgradeDependency {
+  upgradeInstanceId: string;
+  count: number;
 }

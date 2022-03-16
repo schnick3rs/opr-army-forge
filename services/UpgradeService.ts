@@ -6,6 +6,7 @@ import RulesService from "./RulesService";
 import { current } from "immer";
 import { nanoid } from "nanoid";
 import _ from "lodash";
+import { minHeight } from "@mui/system";
 
 export default class UpgradeService {
   static calculateListTotal(list: ISelectedUnit[]) {
@@ -115,19 +116,13 @@ export default class UpgradeService {
     return unit.selectedUpgrades.filter(u => u.id === option.id).length;
   }
 
-  public static findUpgrade(unit: ISelectedUnit, what: string, forRestore: boolean) {
-
-    const selectedGains: IUpgradeGains[] = unit.selectedUpgrades.reduce((gains, next) => gains.concat(next.gains), []);
-    const upgradeGains: IUpgradeGains[] = forRestore
-      ? selectedGains.concat(unit.equipment)
-      : (unit.equipment as IUpgradeGains[]).concat(selectedGains);
+  public static findUpgrade(unit: ISelectedUnit, what: string) {
 
     // Try and find an upgrade instead
-    for (let i = upgradeGains.length - 1; i >= 0; i--) {
-      const gain = upgradeGains[i];
+    for (let gain of unit.equipment) {
       const isMatch = EquipmentService.compareEquipment(gain, what);
 
-      if (isMatch && (forRestore ? gain.count < gain.originalCount : gain.count > 0))
+      if (isMatch && gain.count > 0)
         return gain;
 
       // Check inside items
@@ -137,35 +132,7 @@ export default class UpgradeService {
           .content
           .filter(e => EquipmentService.compareEquipment(e, what))[0];
 
-        if (toReplace && (forRestore ? toReplace.count < toReplace.originalCount : toReplace.count > 0))
-          return toReplace;
-      }
-    }
-
-    return null;
-  }
-
-  public static findUpgradeById(unit: ISelectedUnit, id: string) {
-
-    const selectedGains: IUpgradeGains[] = unit.selectedUpgrades.reduce((gains, next) => gains.concat(next.gains), []);
-    const upgradeGains: IUpgradeGains[] = selectedGains.concat(unit.equipment);
-
-    // Try and find an upgrade instead
-    for (let i = upgradeGains.length - 1; i >= 0; i--) {
-      const gain = upgradeGains[i];
-      const isMatch = gain.id === id;
-
-      if (isMatch)
-        return gain;
-
-      // Check inside items
-      if (gain.type === "ArmyBookItem") {
-        const item = gain as IUpgradeGainsItem;
-        const toReplace = item
-          .content
-          .filter(e => e.id === id)[0];
-
-        if (toReplace)
+        if (toReplace && toReplace.count > 0)
           return toReplace;
       }
     }
@@ -230,7 +197,8 @@ export default class UpgradeService {
 
     const controlType = this.getControlType(unit, upgrade);
     //const alreadySelected = this.countApplied(unit, upgrade, option);
-    const appliedInGroup = upgrade.options.reduce((total, next) => total + this.countApplied(unit, upgrade, next), 0);
+    const appliedInGroup = upgrade.options
+      .reduce((total, opt) => total + this.countApplied(unit, upgrade, opt), 0);
 
     // if it's a radio, it's valid if any other upgrade in the group is already applied
     if (controlType === "radio")
@@ -239,18 +207,22 @@ export default class UpgradeService {
 
     if (upgrade.type === "replace") {
 
-      const replaceCount = typeof (upgrade.affects) === "number"
+      const requiredCount = typeof (upgrade.affects) === "number"
         ? upgrade.affects
         : 1;
 
+      const groups = _.groupBy(unit.equipment, e => e.name);
+
       for (let what of upgrade.replaceWhat) {
 
-        const toReplace = this.findUpgrade(unit, what, false);
+        const toReplace: IUpgradeGains[] = groups[what];
         if (!toReplace)
           return false;
 
+        const toReplaceCount = toReplace.reduce((count, gain) => count + gain.count, 0);
+
         // Would not have enough to replace
-        if ((toReplace.count - replaceCount) < 0)
+        if (requiredCount > toReplaceCount)
           return false;
 
         // May only select up to the limit
@@ -318,8 +290,81 @@ export default class UpgradeService {
 
   public static apply(unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption) {
 
-    unit.selectedUpgrades.push(option);
+    const optionToApply = {
+      ...option,
+      instanceId: nanoid(9),
+      gains: option.gains.map(g => ({
+        ...g,
+        dependencies: []
+      }))
+    };
 
+    // Figure out deps...
+    if (upgrade.replaceWhat?.length > 0) {
+
+      const affectsCount = typeof (upgrade.affects) === "number"
+        ? upgrade.affects
+        : upgrade.affects === "all"
+          ? unit.size || 1 // All in unit
+          : 1;
+
+      const dependOnUpgrade = (target: string, upgrade: IUpgradeOption) => {
+        for (let gain of upgrade.gains) {
+
+          // Continue if this is not the thing we're looking for
+          if (!EquipmentService.compareEquipment(gain, target))
+            continue;
+
+          // This is a thing we're looking for, check to see if it can be depended upon
+          const alreadyTaken = gain.dependencies.reduce((count, dep) => count + dep.count, 0);
+          const remaining = gain.count - alreadyTaken;
+          if (remaining >= affectsCount) {
+            gain.dependencies.push({
+              upgradeInstanceId: optionToApply.instanceId,
+              // TODO!
+              count: affectsCount
+            });
+            return true;
+          }
+        }
+        return false;
+      }
+
+      // Find a thing to depend on for each thing we're replacing
+      for (let target of upgrade.replaceWhat) {
+
+        let remainingToReplace = affectsCount;
+
+        // Check each applied upgrade, in reverse order until we find a thing to depend upon
+        for (let i = unit.selectedUpgrades.length; i > 0; i--) {
+
+          // Stop looking if we've replaced enough
+          if (remainingToReplace <= 0)
+            break;
+
+          const upgrade = unit.selectedUpgrades[i - 1];
+          const upgradeItem = upgrade.gains.find(g => EquipmentService.compareEquipment(g, target));
+          if (!upgradeItem)
+            continue;
+
+          // gain is a thing we're looking for, check to see if it can be depended upon
+          const alreadyTaken = upgradeItem.dependencies.reduce((count, dep) => count + dep.count, 0);
+          const remainingAvailable = upgradeItem.count - alreadyTaken;
+
+          // The lesser of "the amount we have" vs "the amount we need"
+          const count = Math.min(remainingAvailable, remainingToReplace);
+
+          upgradeItem.dependencies.push({
+            upgradeInstanceId: optionToApply.instanceId,
+            count: count
+          });
+
+          remainingToReplace -= count;
+        }
+      }
+    }
+
+    unit.selectedUpgrades.push(optionToApply);
   }
 
   // Remove anything that depends on this upgrade (cascade remove)
@@ -331,29 +376,28 @@ export default class UpgradeService {
       console.log("Removing dependency", dependency);
       // Might have already been removed!
       if (dependency)
-        this.remove(unit, {
-          id: "",
-          replaceWhat: dependency.replacedWhat,
-          type: dependency.isAttachment ? "upgrade" : "replace"
-        }, dependency);
+        this.remove(unit, dependency);
     }
   }
 
-  public static remove(unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption) {
-    const removeAt = unit.selectedUpgrades.findLastIndex(u => u.id === option.id);
+  public static remove(unit: ISelectedUnit, option: IUpgradeOption) {
+
+    console.log("Removing option...", JSON.parse(JSON.stringify(option)));
+
+    const removeId = unit.selectedUpgrades.findLast(u => u.id === option.id).instanceId;
+    this.removeById(unit, removeId);
+  }
+
+  public static removeById(unit: ISelectedUnit, optionInstanceId: string) {
+    const removeAt = unit.selectedUpgrades.findLastIndex(u => u.instanceId === optionInstanceId);
     const toRemove = unit.selectedUpgrades[removeAt];
 
-    // Remove dependencies for each item gained from this upgrade
-    for (let gains of toRemove.gains) {
-      // Also check the item's children
-      if ((gains as IUpgradeGainsItem).content)
-        for (let content of (gains as IUpgradeGainsItem).content) {
-          this.removeDependencies(unit, content.dependencies);
-        }
-      const deps = gains.dependencies ?? [];
-      const attached = (gains as any).attachments ?? [];
-      // Adding this in case an upgrade also has attachments...
-      this.removeDependencies(unit, deps.concat(attached));
+    console.log("Removing...", JSON.parse(JSON.stringify(toRemove)));
+
+    for (let gain of toRemove.gains) {
+      for (let dep of gain.dependencies) {
+        this.removeById(unit, dep.upgradeInstanceId);
+      }
     }
 
     // Remove the upgrade

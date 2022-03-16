@@ -24,7 +24,7 @@ export function Upgrades({ mobile = false, competitive = true }) {
   const [dummy, setDummy] = useState(false)
 
   const selectedUnit = UpgradeService.buildUpgrades(army.upgradePackages, UnitService.getSelected(list));
-
+  console.log("Built selected unit...", selectedUnit);
   useEffect(() => {
     setDummy(selectedUnit?.selectionId === "dummy")
   }, [list.selectedUnitId])

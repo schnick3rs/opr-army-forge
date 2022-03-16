@@ -44,10 +44,18 @@ export default class WebappApiService {
         ...upgradePackage,
         sections: upgradePackage.sections.map(section => ({
           ...section,
-          options: section.options.map(option => ({
-            ...option,
-            parentSectionId: section.id
-          }))
+          options: section.options.map(option => {
+            const result: any = {
+              ...option,
+              parentSectionId: section.id
+            };
+            delete result.proposedCost;
+            delete result.proposedCostHint;
+            delete result.proposedVersion;
+            delete result.parentPackageUid;
+            delete result.parentSectionUid;
+            return result;
+          })
         }))
       }))
     };
