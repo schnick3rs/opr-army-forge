@@ -1,4 +1,5 @@
 import router from "next/router";
+import { IArmyData } from "../data/armySlice";
 
 export default class WebappApiService {
 
@@ -34,9 +35,25 @@ export default class WebappApiService {
 
     const armyBookRes = await fetch(this.getUrl() + `/army-books/${armyId}~${gameSystemId}?armyForge=true`);
 
-    const data = await armyBookRes.json();
-    console.log("Army data", data);
+    const data: IArmyData = await armyBookRes.json();
 
-    return data;
+
+    const transformedData: IArmyData = {
+      ...data,
+      upgradePackages: data.upgradePackages.map(upgradePackage => ({
+        ...upgradePackage,
+        sections: upgradePackage.sections.map(section => ({
+          ...section,
+          options: section.options.map(option => ({
+            ...option,
+            parentSectionId: section.id
+          }))
+        }))
+      }))
+    };
+
+    console.log("Army data", transformedData);
+
+    return transformedData;
   };
 }

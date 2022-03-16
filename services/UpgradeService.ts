@@ -1,10 +1,11 @@
-import { ISelectedUnit, IUpgrade, IUpgradeGains, IUpgradeGainsItem, IUpgradeOption } from "../data/interfaces";
+import { ISelectedUnit, IUpgrade, IUpgradeGains, IUpgradeGainsItem, IUpgradeOption, IUpgradePackage } from "../data/interfaces";
 import EquipmentService from "./EquipmentService";
 import "../extensions";
 import DataParsingService from "./DataParsingService";
 import RulesService from "./RulesService";
 import { current } from "immer";
 import { nanoid } from "nanoid";
+import _ from "lodash";
 
 export default class UpgradeService {
   static calculateListTotal(list: ISelectedUnit[]) {
@@ -13,58 +14,82 @@ export default class UpgradeService {
       .reduce((value, current) => value + UpgradeService.calculateUnitTotal(current), 0);
   }
 
-  // DEPRECATED
-  public static displayName(upgrade: IUpgrade, unit: ISelectedUnit): string {
-    const numbers = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight"];
+  public static buildUpgrades(upgradePackages: IUpgradePackage[], unit: ISelectedUnit) {
 
-    function capitaliseFirstLetter(string) {
-      return string.charAt(0).toUpperCase() + string.slice(1);
+    if (!unit)
+      return null;
+
+    const sections: IUpgrade[] = _.flatMap(upgradePackages, (pkg: IUpgradePackage) => pkg.sections);
+
+    const copyUnit: ISelectedUnit = JSON.parse(JSON.stringify(unit));
+    console.log("Build upgrades", copyUnit);
+
+    for (let upgrade of unit.selectedUpgrades) {
+      this.applyUpgrade(
+        copyUnit,
+        sections.find(s => s.id === upgrade.parentSectionId),
+        JSON.parse(JSON.stringify(upgrade)));
     }
 
-    const combinedMultiplier = 1 //unit && unit.combined ? 2 : 1;
+    return copyUnit;
+  }
 
-    const affects = typeof (upgrade.affects) === "number"
-      ? numbers[upgrade.affects * combinedMultiplier]
-      : upgrade.affects;
+  private static applyUpgrade(unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption) {
 
-    const select = upgrade.select
-      ? typeof (upgrade.select) === "number"
-        ? (upgrade.select * combinedMultiplier) > 1
-          ? `up to ${numbers[upgrade.select * combinedMultiplier]}`
-          : numbers[upgrade.select * combinedMultiplier]
-        : upgrade.select
-      : "";
+    const affectsCount = typeof (upgrade.affects) === "number"
+      ? upgrade.affects
+      : upgrade.affects === "all"
+        ? unit.size || 1 // All in unit
+        : 1;
 
-    if (upgrade.type === "upgrade") {
-      if (upgrade.model) {
-        if (upgrade.attachment)
-          return `${capitaliseFirstLetter(affects)} model may take${select ? ` ${select}` : ""} ${upgrade.replaceWhat[0]} attachment`.trim();
-        if (select && !affects)
-          return `Upgrade ${select} models with`.trim();
-        return `Upgrade ${affects} model${affects === "all" ? "s" : ""} with ${select}`.trim();
-      } else {
-        if (upgrade.attachment)
-          return `Take ${select} ${upgrade.replaceWhat[0]} attachment`.trim();
-        else if (upgrade.replaceWhat)
-          return `Upgrade ${affects} ${upgrade.replaceWhat[0]} with ${select}`.trim();
-        return `Upgrade with ${select}`.trim();
-      }
+    const isAffectsAll = upgrade.affects === "all";
+
+    if (upgrade.type === "upgradeRule") {
+      // TODO: Refactor this - shouldn't be using display name func to compare probably!
+      const existingRuleIndex = unit
+        .specialRules
+        .findIndex(r => RulesService.displayName(r) === (upgrade.replaceWhat[0] as string));
+
+      // Remove existing rule
+      if (existingRuleIndex > -1)
+        unit.specialRules.splice(existingRuleIndex, 1);
+
+
+      return;
+    }
+    else if (upgrade.type === "upgrade") {
+
+      unit.equipment = unit.equipment.concat(option.gains);
+
     }
     else if (upgrade.type === "replace") {
-      const what = upgrade.replaceWhat.join(" and ");
-      if (affects) {
-        if (upgrade.model) {
-          if (upgrade.attachment) {
 
-          } else {
-            return `${capitaliseFirstLetter(affects)} model may replace${select ? ` ${select}` : ""} ${what}`.trim();
-          }
-        } else {
-          return `Replace ${affects}${select ? ` ${select}` : ""} ${what}`.trim();
+      console.log("Replace upgrade", upgrade);
+      console.log("Replace option", option);
+
+      let removeCount = affectsCount;
+
+      if (isAffectsAll) {
+        for (let what of upgrade.replaceWhat as string[]) {
+          const toReplace = unit.equipment.find(e => EquipmentService.compareEquipment(e, what));
+          if (toReplace.count < removeCount)
+            removeCount = toReplace.count;
         }
-      } else {
-        return `Replace${select ? ` ${select}` : ""} ${what}`.trim();
       }
+
+      for (let what of upgrade.replaceWhat as string[]) {
+        const toReplace = unit.equipment.find(e => EquipmentService.compareEquipment(e, what));
+        toReplace.count -= removeCount;
+      }
+
+      unit.equipment = unit.equipment
+        .concat(option.gains.map(g => ({
+          ...g,
+          // "Replace all" is replacing each item with "g.count" copies,
+          // whereas "replace 2x something" is replacing 2 with "g.count"
+          count: isAffectsAll ? g.count * removeCount : g.count
+        })))
+        .filter(e => e.count > 0);
     }
   }
 
@@ -203,6 +228,8 @@ export default class UpgradeService {
 
   public static isValid(unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption): boolean {
 
+    return true;
+
     const controlType = this.getControlType(unit, upgrade);
     //const alreadySelected = this.countApplied(unit, upgrade, option);
     const appliedInGroup = upgrade.options.reduce((total, next) => total + this.countApplied(unit, upgrade, next), 0);
@@ -313,6 +340,12 @@ export default class UpgradeService {
   };
 
   public static apply(unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption) {
+
+    unit.selectedUpgrades.push(option);
+    //this.buildUpgrades(unit);
+    return;
+
+
 
     // Function to apply the upgrade option to the unit
     const apply = (replacedCount?: number, replacedItems?: any[]) => {
@@ -524,62 +557,7 @@ export default class UpgradeService {
       this.removeDependencies(unit, deps.concat(attached));
     }
 
-    const count = toRemove.gains[0]?.count;
-
-    console.log(`Removing ${count} of option...`, option);
-
     // Remove the upgrade
     unit.selectedUpgrades.splice(removeAt, 1);
-
-    if (upgrade.type === "upgradeRule") {
-
-      // Re-add original rule
-      unit.specialRules.push(DataParsingService.parseRule(upgrade.replaceWhat[0] as string));
-
-      return;
-    }
-
-    if (upgrade.type === "replace") {
-
-      const restore = (options: string[]) => {
-
-        const items = [];
-        if (!Array.isArray(options)) {
-          options = [options];
-        }
-        // For each bit of equipment that was originally replaced
-        for (let what of options) {
-
-          // Check by name, if not found by ID
-          let toRestore = this.findUpgradeById(unit, what) || this.findUpgrade(unit, what, true);
-
-          if (!toRestore) {
-            // Uh oh
-            console.log("Could not restore " + what, current(unit));
-            return false;
-          }
-
-          items.push(toRestore);
-        }
-
-        console.log("Will restore...", items);
-
-        for (let toRestore of items) {
-
-          // Increase the count by however much was replaced
-          toRestore.count += count;
-        }
-
-        return true;
-      };
-
-      if (typeof (upgrade.replaceWhat[0]) !== "string") {
-        for (let set of upgrade.replaceWhat as string[][]) {
-          restore(set);
-        }
-      } else {
-        restore(upgrade.replaceWhat as string[]);
-      }
-    }
   }
 }

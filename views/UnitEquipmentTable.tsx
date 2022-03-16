@@ -1,12 +1,13 @@
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { ISelectedUnit, IUpgradeGains, IUpgradeGainsItem, IUpgradeGainsMultiWeapon, IUpgradeGainsRule, IUpgradeGainsWeapon } from '../data/interfaces';
+import { ISelectedUnit, IUpgradeGainsWeapon } from '../data/interfaces';
 import EquipmentService from '../services/EquipmentService';
 import pluralise from "pluralize";
 import RuleList from './components/RuleList';
-import UnitService from '../services/UnitService';
-import DataParsingService from '../services/DataParsingService';
 import { Fragment } from 'react';
 import _ from "lodash";
+import UpgradeService from '../services/UpgradeService';
+import { useSelector } from 'react-redux';
+import { RootState } from '../data/store';
 
 export function WeaponRow({ unit, e, isProfile }: { unit: ISelectedUnit, e: IUpgradeGainsWeapon, isProfile: boolean }) {
 
@@ -40,24 +41,27 @@ export function WeaponRow({ unit, e, isProfile }: { unit: ISelectedUnit, e: IUpg
 export default function UnitEquipmentTable({ unit, square }: { unit: ISelectedUnit, square: boolean }) {
 
   const isWeapon = e => e.attacks;
+  const upgradePackages = useSelector((state: RootState) => state.army.data.upgradePackages);
 
-  const equipment = unit.equipment.filter(e => !isWeapon(e));
-  const itemUpgrades = UnitService.getAllUpgradeItems(unit);
-  const weapons = UnitService.getAllWeapons(unit);
+  const builtUnit = UpgradeService.buildUpgrades(upgradePackages, unit);
 
-  const hasEquipment = equipment.length > 0 || itemUpgrades.length > 0;
+  const equipment = builtUnit.equipment.filter(e => !isWeapon(e));
+  //const itemUpgrades = UnitService.getAllUpgradeItems(unit);
+  const weapons = builtUnit.equipment.filter(e => isWeapon(e)); //UnitService.getAllWeapons(unit);
+
+  const hasEquipment = equipment.length > 0;// || itemUpgrades.length > 0;
   const hasWeapons = weapons.length > 0;
 
-  const combinedEquipment = equipment.map(e => ({
-    label: e.label || e.name,
-    specialRules: e.specialRules.map(DataParsingService.parseRule)
-  })).concat(itemUpgrades.map(u => ({
-    label: u.name,
-    specialRules: u.content.filter(c => c.type === "ArmyBookRule" || c.type === "ArmyBookDefense") as IUpgradeGainsRule[]
-  })));
+  // const combinedEquipment = equipment.map(e => ({
+  //   label: e.label || e.name,
+  //   specialRules: e.specialRules.map(DataParsingService.parseRule)
+  // })).concat(itemUpgrades.map(u => ({
+  //   label: u.name,
+  //   specialRules: u.content.filter(c => c.type === "ArmyBookRule" || c.type === "ArmyBookDefense") as IUpgradeGainsRule[]
+  // })));
 
   const weaponGroups = _.groupBy(weapons, w => pluralise.singular(w.name ?? w.label) + w.attacks);
-  const itemGroups = _.groupBy(combinedEquipment, w => pluralise.singular(w.name ?? w.label));
+  const itemGroups = _.groupBy(equipment, w => pluralise.singular(w.name ?? w.label));
 
   const cellStyle = { paddingLeft: "8px", paddingRight: "8px", borderBottom: "none" };
   const headerStyle = { ...cellStyle, fontWeight: 600 };

@@ -38,7 +38,7 @@ export interface IUnit {
   defense: string;
   specialRules?: ISpecialRule[];
   upgrades: string[];
-  equipment: IUpgradeGainsWeapon[]; //IEquipment[];
+  equipment: IUpgradeGains[];// IUpgradeGainsWeapon[]; //IEquipment[];
   disabledUpgradeSections: string[];
 }
 
@@ -67,6 +67,7 @@ export interface IUpgrade {
 
 export interface IUpgradeOption {
   id: string;
+  parentSectionId: string;
   cost: number;
   label: string;
   isModel?: boolean;

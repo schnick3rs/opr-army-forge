@@ -31,10 +31,6 @@ export default class UnitService {
     return allRules;
   }
 
-  public static getAllWeapons(unit: ISelectedUnit): IUpgradeGainsWeapon[] {
-    return unit.equipment.concat(this.getAllUpgradeWeapons(unit) as IUpgradeGainsWeapon[]);
-  }
-
   public static getAllUpgradeWeapons(unit: ISelectedUnit): (IUpgradeGainsWeapon | IUpgradeGainsMultiWeapon)[] {
 
     const isWeapon = u => u.type === "ArmyBookWeapon" || u.type === "ArmyBookMultiWeapon";

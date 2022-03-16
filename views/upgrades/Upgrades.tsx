@@ -13,6 +13,7 @@ import SpellsTable from '../SpellsTable';
 import { CustomTooltip } from '../components/CustomTooltip';
 import LinkIcon from '@mui/icons-material/Link';
 import { useEffect, useState } from 'react';
+import UpgradeService from '../../services/UpgradeService';
 
 export function Upgrades({ mobile = false, competitive = true }) {
 
@@ -22,8 +23,7 @@ export function Upgrades({ mobile = false, competitive = true }) {
   const dispatch = useDispatch();
   const [dummy, setDummy] = useState(false)
 
-  const selectedUnit = UnitService.getSelected(list);
-  console.log(selectedUnit)
+  const selectedUnit = UpgradeService.buildUpgrades(army.upgradePackages, UnitService.getSelected(list));
 
   useEffect(() => {
     setDummy(selectedUnit?.selectionId === "dummy")
@@ -33,8 +33,8 @@ export function Upgrades({ mobile = false, competitive = true }) {
 
   const equipmentSpecialRules: ISpecialRule[] = selectedUnit && selectedUnit
     .equipment
-    .filter(e => !e.attacks && e.specialRules?.length) // No weapons, and only equipment with special rules
-    .reduce((value, e) => value.concat(e.specialRules), []); // Flatten array of special rules arrays
+    .filter((e: any) => !e.attacks && e.specialRules?.length) // No weapons, and only equipment with special rules
+    .reduce((value, e: any) => value.concat(e.specialRules), []); // Flatten array of special rules arrays
 
   const unitUpgradeRules: ISpecialRule[] = selectedUnit && UnitService
     .getAllUpgradedRules(selectedUnit);
@@ -170,7 +170,7 @@ export function Upgrades({ mobile = false, competitive = true }) {
                   {u.label}
                 </p>
               </div>
-              <UpgradeGroup upgrade={u} />
+              <UpgradeGroup unit={selectedUnit} upgrade={u} />
             </div>
           ))}
         </div>

@@ -111,6 +111,8 @@ export default class PersistenceService {
     const allSections = armyData.upgradePackages.reduce((current, next) => current.concat(next.sections), []);
     const allOptions = allSections.reduce((current, next) => current.concat(next.options), []);
 
+// TODO: Compensate for parentSectionId missing on upgrade options...
+
     return {
       ...savedList,
       units: savedList.units.map(u => {

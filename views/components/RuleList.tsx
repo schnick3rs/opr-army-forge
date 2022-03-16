@@ -13,7 +13,7 @@ export default function RuleList({ specialRules }: { specialRules: ISpecialRule[
   const armyRules = army.data.specialRules;
   const ruleDefinitions: IGameRule[] = gameRules.concat(armyRules);
 
-  const rules = specialRules.filter(r => !!r && r.name != "-");
+  const rules = specialRules?.filter(r => !!r && r.name != "-") ?? [];
 
   if (!rules || rules.length === 0)
     return null;
