@@ -217,7 +217,7 @@ export default class PersistenceService {
     // Fearless
     //
     // ...
-    for (let unit of list.units) {
+    for (let unit of list.units.filter(u => u.selectionId !== "dummy")) {
       lines.push(`${unit.customName ?? unit.name} [${unit.size}] | Qua ${unit.quality}+ Def ${unit.defense}+ | ${UpgradeService.calculateUnitTotal(unit)}pts`);
       lines.push(getWeapons(unit));
       lines.push(getRules(unit) + "\n");
