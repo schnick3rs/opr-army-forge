@@ -52,10 +52,12 @@ export interface IUnitSelectionData {
 
 export interface ISelectedUnit extends IUnit, IUnitSelectionData { }
 
+type UpgradeType = "replace" | "upgrade" | "upgradeRule" | "attachment";
+
 export interface IUpgrade {
   id: string;
   label?: string;
-  type: "replace" | "upgrade" | "upgradeRule" | "attachment";
+  type: UpgradeType;
   affects?: "any" | "all" | number;
   select?: string | number;
   replaceWhat?: string[];

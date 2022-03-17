@@ -5,6 +5,7 @@ import RulesService from "./RulesService";
 import { nanoid } from "nanoid";
 import _ from "lodash";
 import UnitService from "./UnitService";
+import { IArmyData } from "../data/armySlice";
 
 export default class UpgradeService {
   static calculateListTotal(list: ISelectedUnit[]) {
@@ -283,7 +284,7 @@ export default class UpgradeService {
 
 
 
-  public static apply(unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption) {
+  public static apply(unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption, army: IArmyData) {
 
     const optionToApply = {
       ...option,
@@ -299,6 +300,25 @@ export default class UpgradeService {
       }))
     };
 
+    // Add this upgrade to the unit
+    unit.selectedUpgrades.push(optionToApply);
+
+    // TODO: Honestly not a fan of this whole system, needs refactor again!
+    // Check if this upgrade displaced anything 
+    const builtUnit = this.buildUpgrades(army.upgradePackages, unit);
+    for (let equipment of unit.equipment.filter(e => e.dependencies?.length > 0)) {
+      const builtEquipment = builtUnit
+        .equipment
+        .find(e => EquipmentService.compareEquipment(e, equipment.name));
+      // If this piece of equipment that has dependencies is not found in the built
+      // unit's equipment, then something overwrote it and the deps should be removed
+      if (!builtEquipment) {
+        for (let dep of equipment.dependencies) {
+          this.removeById(unit, dep.upgradeInstanceId);
+        }
+      }
+    }
+
     // Figure out deps...
     if (upgrade.replaceWhat?.length > 0) {
 
@@ -313,8 +333,35 @@ export default class UpgradeService {
 
         let remainingToReplace = affectsCount;
 
+        const applyDependency = (equipment: IUpgradeGains[]) => {
+          const item = equipment.find(g => EquipmentService.compareEquipment(g, target));
+          if (!item)
+            return;
+
+          if (!item.dependencies)
+            item.dependencies = [];
+
+          // gain is a thing we're looking for, check to see if it can be depended upon
+          const alreadyTaken = item.dependencies.reduce((count, dep) => count + dep.count, 0);
+          const remainingAvailable = item.count - alreadyTaken;
+
+          // The lesser of "the amount we have" vs "the amount we need"
+          const count = Math.min(remainingAvailable, remainingToReplace);
+          if (count > 0) {
+            item.dependencies.push({
+              upgradeInstanceId: optionToApply.instanceId,
+              count: count
+            });
+
+            remainingToReplace -= count;
+          }
+        };
+
+        // -1 because we've added "this" upgrade already above, and want to skip it
+        const startAtIndex = unit.selectedUpgrades.length - 1;
+
         // Check each applied upgrade, in reverse order until we find a thing to depend upon
-        for (let i = unit.selectedUpgrades.length; i > 0; i--) {
+        for (let i = startAtIndex; i > 0; i--) {
 
           // Stop looking if we've replaced enough
           if (remainingToReplace <= 0)
@@ -325,29 +372,15 @@ export default class UpgradeService {
             upgrade.gains.filter(e => e.type === "ArmyBookItem"),
             (e: IUpgradeGainsItem) => e.content);
           const allGains = upgrade.gains.concat(nestedItems);
-          const upgradeItem = allGains.find(g => EquipmentService.compareEquipment(g, target));
-          if (!upgradeItem)
-            continue;
+          applyDependency(allGains);
+        }
 
-          // gain is a thing we're looking for, check to see if it can be depended upon
-          const alreadyTaken = upgradeItem.dependencies.reduce((count, dep) => count + dep.count, 0);
-          const remainingAvailable = upgradeItem.count - alreadyTaken;
-
-          // The lesser of "the amount we have" vs "the amount we need"
-          const count = Math.min(remainingAvailable, remainingToReplace);
-          if (count > 0) {
-            upgradeItem.dependencies.push({
-              upgradeInstanceId: optionToApply.instanceId,
-              count: count
-            });
-
-            remainingToReplace -= count;
-          }
+        // Add dependency to starting equipment if not found in upgrades
+        if (remainingToReplace > 0) {
+          applyDependency(unit.equipment);
         }
       }
     }
-
-    unit.selectedUpgrades.push(optionToApply);
   }
 
 

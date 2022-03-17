@@ -6,6 +6,7 @@ import { current } from 'immer';
 import PersistenceService from '../services/PersistenceService';
 import { nanoid } from "nanoid";
 import UnitService from '../services/UnitService';
+import { IArmyData } from './armySlice';
 
 export interface ListState {
   creationTime: string;
@@ -241,17 +242,17 @@ export const listSlice = createSlice({
 
       debounceSave(current(state));
     },
-    applyUpgrade: (state, action: PayloadAction<{ unitId: string, upgrade: IUpgrade, option: IUpgradeOption }>) => {
+    applyUpgrade: (state, action: PayloadAction<{ unitId: string, upgrade: IUpgrade, option: IUpgradeOption, army: IArmyData }>) => {
 
       // TODO: Refactor, break down, unit test...
 
-      const { unitId, upgrade, option } = action.payload;
+      const { unitId, upgrade, option, army } = action.payload;
       const unit = state.units.filter(u => u.selectionId === unitId)[0];
 
-      UpgradeService.apply(unit, upgrade, option);
+      UpgradeService.apply(unit, upgrade, option, army);
       if (unit.combined && upgrade.affects == "all") {
         const partner = state.units.find(t => (t.selectionId == unit.joinToUnit) || (t.combined && (t.joinToUnit == unit.selectionId)))
-        UpgradeService.apply(partner, upgrade, option);
+        UpgradeService.apply(partner, upgrade, option, army);
       }
 
       state.points = UpgradeService.calculateListTotal(state.units);
