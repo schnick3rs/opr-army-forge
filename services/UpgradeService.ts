@@ -207,6 +207,9 @@ export default class UpgradeService {
 
     if (upgrade.type === "replace") {
 
+      // if (option.gains[0].name == "Prism Cannon")
+      // debugger;
+
       const requiredCount = typeof (upgrade.affects) === "number"
         ? upgrade.affects
         : 1;
@@ -215,7 +218,11 @@ export default class UpgradeService {
 
       for (let what of upgrade.replaceWhat) {
 
-        const toReplace: IUpgradeGains[] = groups[what];
+        const groupKey = Object
+          .keys(groups)
+          .find(k => EquipmentService.compareEquipmentNames(k, what));
+
+        const toReplace: IUpgradeGains[] = groups[groupKey];
         if (!toReplace)
           return false;
 
