@@ -1,4 +1,4 @@
-import { ISelectedUnit, IUpgrade, IUpgradeGains, IUpgradeGainsItem, IUpgradeOption, IUpgradePackage } from "../data/interfaces";
+import { ISelectedUnit, IUpgrade, IUpgradeDependency, IUpgradeGains, IUpgradeGainsItem, IUpgradeOption, IUpgradePackage } from "../data/interfaces";
 import EquipmentService from "./EquipmentService";
 import "../extensions";
 import RulesService from "./RulesService";
@@ -415,5 +415,24 @@ export default class UpgradeService {
 
     // Remove the upgrade
     unit.selectedUpgrades.splice(removeAt, 1);
+
+    const removeFromDeps = (deps: IUpgradeDependency[]) => {
+      const idx = deps.findIndex(d => d.upgradeInstanceId === optionInstanceId);
+      if (idx >= 0)
+        deps.splice(idx, 1);
+    };
+
+    // Remove this item from dependencies of other items
+    for (let opt of unit.equipment)
+      removeFromDeps(opt.dependencies ?? []);
+
+    for (let opt of _.flatMap(unit.selectedUpgrades, x => x.gains) as IUpgradeGains[]) {
+      removeFromDeps(opt.dependencies ?? []);
+      if (opt.type === "ArmyBookItem") {
+        for (let content of (opt as IUpgradeGainsItem).content) {
+          removeFromDeps(content.dependencies ?? []);
+        }
+      }
+    }
   }
 }
