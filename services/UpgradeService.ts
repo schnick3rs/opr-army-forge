@@ -342,7 +342,9 @@ export default class UpgradeService {
             item.dependencies = [];
 
           // gain is a thing we're looking for, check to see if it can be depended upon
-          const alreadyTaken = item.dependencies.reduce((count, dep) => count + dep.count, 0);
+          const alreadyTaken = item.dependencies
+            .filter(dep => dep.type === "replace")
+            .reduce((count, dep) => count + dep.count, 0);
           const remainingAvailable = item.count - alreadyTaken;
 
           // The lesser of "the amount we have" vs "the amount we need"
@@ -357,6 +359,9 @@ export default class UpgradeService {
             remainingToReplace -= count;
           }
         };
+
+        // Try and depend on equipment before anything else
+        applyDependency(unit.equipment);
 
         // -1 because we've added "this" upgrade already above, and want to skip it
         const startAtIndex = unit.selectedUpgrades.length - 1;
@@ -374,11 +379,6 @@ export default class UpgradeService {
             (e: IUpgradeGainsItem) => e.content);
           const allGains = upgrade.gains.concat(nestedItems);
           applyDependency(allGains);
-        }
-
-        // Add dependency to starting equipment if not found in upgrades
-        if (remainingToReplace > 0) {
-          applyDependency(unit.equipment);
         }
       }
     }
