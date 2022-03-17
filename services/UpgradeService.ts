@@ -41,6 +41,21 @@ export default class UpgradeService {
 
     const isAffectsAll = upgrade.affects === "all";
 
+    const apply = () => {
+      unit.equipment = unit.equipment
+        .concat(option.gains);
+    };
+
+    const gainEquipment = option
+      .gains
+      .filter(item => item.type === "ArmyBookItem" || item.type === "ArmyBookWeapon");
+
+    const gainRules = option
+      .gains
+      .filter(item => item.type === "ArmyBookRule" || item.type === "ArmyBookDefense");
+
+    //unit.specialRules = unit.specialRules.concat(gainRules as any);
+
     if (upgrade.type === "upgradeRule") {
       // TODO: Refactor this - shouldn't be using display name func to compare probably!
       const existingRuleIndex = unit
@@ -56,7 +71,10 @@ export default class UpgradeService {
     }
     else if (upgrade.type === "upgrade") {
 
-      unit.equipment = unit.equipment.concat(option.gains);
+
+
+      unit.equipment = unit.equipment
+        .concat(gainEquipment);
 
     }
     else if (upgrade.type === "replace") {
@@ -77,7 +95,7 @@ export default class UpgradeService {
       }
 
       unit.equipment = unit.equipment
-        .concat(option.gains.map(g => ({
+        .concat(gainEquipment.map(g => ({
           ...g,
           // "Replace all" is replacing each item with "g.count" copies,
           // whereas "replace 2x something" is replacing 2 with "g.count"
