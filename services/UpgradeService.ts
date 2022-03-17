@@ -1,12 +1,9 @@
 import { ISelectedUnit, IUpgrade, IUpgradeGains, IUpgradeGainsItem, IUpgradeOption, IUpgradePackage } from "../data/interfaces";
 import EquipmentService from "./EquipmentService";
 import "../extensions";
-import DataParsingService from "./DataParsingService";
 import RulesService from "./RulesService";
-import { current } from "immer";
 import { nanoid } from "nanoid";
 import _ from "lodash";
-import { minHeight } from "@mui/system";
 
 export default class UpgradeService {
   static calculateListTotal(list: ISelectedUnit[]) {
@@ -23,7 +20,6 @@ export default class UpgradeService {
     const sections: IUpgrade[] = _.flatMap(upgradePackages, (pkg: IUpgradePackage) => pkg.sections);
 
     const copyUnit: ISelectedUnit = JSON.parse(JSON.stringify(unit));
-    console.log("Build upgrades", copyUnit);
 
     for (let upgrade of unit.selectedUpgrades) {
       this.applyUpgrade(
@@ -64,9 +60,6 @@ export default class UpgradeService {
 
     }
     else if (upgrade.type === "replace") {
-
-      console.log("Replace upgrade", upgrade);
-      console.log("Replace option", option);
 
       let removeCount = affectsCount;
 
@@ -207,9 +200,6 @@ export default class UpgradeService {
 
     if (upgrade.type === "replace") {
 
-      // if (option.gains[0].name == "Prism Cannon")
-      // debugger;
-
       const requiredCount = typeof (upgrade.affects) === "number"
         ? upgrade.affects
         : 1;
@@ -315,28 +305,6 @@ export default class UpgradeService {
           ? unit.size || 1 // All in unit
           : 1;
 
-      const dependOnUpgrade = (target: string, upgrade: IUpgradeOption) => {
-        for (let gain of upgrade.gains) {
-
-          // Continue if this is not the thing we're looking for
-          if (!EquipmentService.compareEquipment(gain, target))
-            continue;
-
-          // This is a thing we're looking for, check to see if it can be depended upon
-          const alreadyTaken = gain.dependencies.reduce((count, dep) => count + dep.count, 0);
-          const remaining = gain.count - alreadyTaken;
-          if (remaining >= affectsCount) {
-            gain.dependencies.push({
-              upgradeInstanceId: optionToApply.instanceId,
-              // TODO!
-              count: affectsCount
-            });
-            return true;
-          }
-        }
-        return false;
-      }
-
       // Find a thing to depend on for each thing we're replacing
       for (let target of upgrade.replaceWhat) {
 
@@ -360,13 +328,14 @@ export default class UpgradeService {
 
           // The lesser of "the amount we have" vs "the amount we need"
           const count = Math.min(remainingAvailable, remainingToReplace);
+          if (count > 0) {
+            upgradeItem.dependencies.push({
+              upgradeInstanceId: optionToApply.instanceId,
+              count: count
+            });
 
-          upgradeItem.dependencies.push({
-            upgradeInstanceId: optionToApply.instanceId,
-            count: count
-          });
-
-          remainingToReplace -= count;
+            remainingToReplace -= count;
+          }
         }
       }
     }
