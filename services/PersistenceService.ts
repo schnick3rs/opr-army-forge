@@ -111,6 +111,8 @@ export default class PersistenceService {
     const allSections = armyData.upgradePackages.reduce((current, next) => current.concat(next.sections), []);
     const allOptions = allSections.reduce((current, next) => current.concat(next.options), []);
 
+// TODO: Compensate for parentSectionId missing on upgrade options...
+
     return {
       ...savedList,
       units: savedList.units.map(u => {
@@ -215,7 +217,7 @@ export default class PersistenceService {
     // Fearless
     //
     // ...
-    for (let unit of list.units) {
+    for (let unit of list.units.filter(u => u.selectionId !== "dummy")) {
       lines.push(`${unit.customName ?? unit.name} [${unit.size}] | Qua ${unit.quality}+ Def ${unit.defense}+ | ${UpgradeService.calculateUnitTotal(unit)}pts`);
       lines.push(getWeapons(unit));
       lines.push(getRules(unit) + "\n");

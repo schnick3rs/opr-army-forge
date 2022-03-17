@@ -1,24 +1,49 @@
-import { IconButton } from '@mui/material';
-import DownIcon from '@mui/icons-material/KeyboardArrowDown';
-import UpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { useDispatch } from 'react-redux';
-import { ISelectedUnit, IUpgrade, IUpgradeOption } from '../../../data/interfaces';
-import { applyUpgrade, removeUpgrade } from '../../../data/listSlice';
-import UpgradeService from '../../../services/UpgradeService';
+import { IconButton } from "@mui/material";
+import DownIcon from "@mui/icons-material/KeyboardArrowDown";
+import UpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  ISelectedUnit,
+  IUpgrade,
+  IUpgradeOption,
+} from "../../../data/interfaces";
+import { applyUpgrade, removeUpgrade } from "../../../data/listSlice";
+import UpgradeService from "../../../services/UpgradeService";
+import { RootState } from "../../../data/store";
 
-export default function UpgradeUpDown({ selectedUnit, upgrade, option }: { selectedUnit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption }) {
-
+export default function UpgradeUpDown({
+  selectedUnit,
+  upgrade,
+  option,
+}: {
+  selectedUnit: ISelectedUnit;
+  upgrade: IUpgrade;
+  option: IUpgradeOption;
+}) {
   const dispatch = useDispatch();
+  const army = useSelector((state: RootState) => state.army.data);
 
-  const incrementUpgrade = (unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption) => {
-    dispatch(applyUpgrade({ unitId: unit.selectionId, upgrade, option }));
+  const incrementUpgrade = (
+    unit: ISelectedUnit,
+    upgrade: IUpgrade,
+    option: IUpgradeOption
+  ) => {
+    dispatch(applyUpgrade({ unitId: unit.selectionId, upgrade, option, army }));
   };
-  const decrementUpgrade = (unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption) => {
+  const decrementUpgrade = (
+    unit: ISelectedUnit,
+    upgrade: IUpgrade,
+    option: IUpgradeOption
+  ) => {
     dispatch(removeUpgrade({ unitId: unit.selectionId, upgrade, option }));
   };
   try {
     const isApplied = UpgradeService.isApplied(selectedUnit, upgrade, option);
-    const countApplied = UpgradeService.countApplied(selectedUnit, upgrade, option);
+    const countApplied = UpgradeService.countApplied(
+      selectedUnit,
+      upgrade,
+      option
+    );
     const isValid = UpgradeService.isValid(selectedUnit, upgrade, option);
 
     // #endregion
@@ -28,11 +53,13 @@ export default function UpgradeUpDown({ selectedUnit, upgrade, option }: { selec
         <IconButton
           disabled={countApplied === 0}
           color={countApplied > 0 ? "primary" : "default"}
-          onClick={() => decrementUpgrade(selectedUnit, upgrade, option)}>
-
+          onClick={() => decrementUpgrade(selectedUnit, upgrade, option)}
+        >
           <DownIcon />
         </IconButton>
-        <div style={{ color: isValid ? "#000000" : "rgba(0,0,0,.5)" }}>{countApplied}</div>
+        <div style={{ color: isValid ? "#000000" : "rgba(0,0,0,.5)" }}>
+          {countApplied}
+        </div>
         <IconButton
           disabled={!isValid}
           color={"primary"}
@@ -42,8 +69,7 @@ export default function UpgradeUpDown({ selectedUnit, upgrade, option }: { selec
         </IconButton>
       </>
     );
-  }
-  catch (e) {
+  } catch (e) {
     console.log(selectedUnit);
     console.log(upgrade);
     console.log(option);

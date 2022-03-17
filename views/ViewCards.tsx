@@ -24,7 +24,9 @@ export default function ViewCards({ showPsychic, showFullRules, showPointCosts }
   const spells = army.data?.spells || [];
   const ruleDefinitions: IGameRule[] = gameRules.concat(armyRules);
 
-  const units = (list?.units ?? []).map(u => ({ ...u }));
+  const units = (list?.units ?? [])
+    .filter(u => u.selectionId !== "dummy")
+    .map(u => ({ ...u }));
   for (let unit of units) {
     delete unit.selectionId;
   }

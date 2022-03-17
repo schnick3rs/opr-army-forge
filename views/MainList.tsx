@@ -6,23 +6,18 @@ import RemoveIcon from '@mui/icons-material/Clear';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { selectUnit, removeUnit, addUnits, ListState } from "../data/listSlice";
 import UpgradeService from "../services/UpgradeService";
-import { Accordion, AccordionDetails, AccordionSummary, IconButton, ListItem, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from "@mui/material";
-import { useRouter } from "next/router";
+import { Accordion, AccordionDetails, AccordionSummary, ListItemIcon, ListItemText, MenuItem } from "@mui/material";
 import RuleList from "./components/RuleList";
 import UnitService from "../services/UnitService";
-import { distinct } from "../services/Helpers";
 import FullCompactToggle from "./components/FullCompactToggle";
 import LinkIcon from '@mui/icons-material/Link';
 import _ from "lodash";
-import { GroupSharp } from "@mui/icons-material";
 import { DropMenu } from "./components/DropMenu";
 
 export function MainList({ onSelected, onUnitRemoved, mobile=false }) {
 
   const list = useSelector((state: RootState) => state.list);
 
-  const dispatch = useDispatch();
-  const router = useRouter();
   const [expandAll, setExpandAll] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
 
@@ -103,9 +98,11 @@ export function MainList({ onSelected, onUnitRemoved, mobile=false }) {
 function MainListItem({ list, unit, expanded, onSelected, onUnitRemoved }) {
 
   const dispatch = useDispatch();
+  const upgradePackages = useSelector((state: RootState) => state.army.data.upgradePackages);
 
-  const weaponNames = UnitService.getAllWeapons(unit)
-    .filter(e => e.count > 0)
+  const builtUnit = UpgradeService.buildUpgrades(upgradePackages, unit);
+
+  const weaponNames = builtUnit.equipment
     .map(u => ({ name: u.name, count: u.count }));
 
   const weaponGroups = _.groupBy(weaponNames, x => x.name);

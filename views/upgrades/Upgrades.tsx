@@ -13,6 +13,7 @@ import SpellsTable from '../SpellsTable';
 import { CustomTooltip } from '../components/CustomTooltip';
 import LinkIcon from '@mui/icons-material/Link';
 import { useEffect, useState } from 'react';
+import UpgradeService from '../../services/UpgradeService';
 
 export function Upgrades({ mobile = false, competitive = true }) {
 
@@ -22,9 +23,8 @@ export function Upgrades({ mobile = false, competitive = true }) {
   const dispatch = useDispatch();
   const [dummy, setDummy] = useState(false)
 
-  const selectedUnit = UnitService.getSelected(list);
-  console.log(selectedUnit)
-
+  const selectedUnit = UpgradeService.buildUpgrades(army.upgradePackages, UnitService.getSelected(list));
+  console.log("Built selected unit...", selectedUnit);
   useEffect(() => {
     setDummy(selectedUnit?.selectionId === "dummy")
   }, [list.selectedUnitId])
@@ -170,7 +170,7 @@ export function Upgrades({ mobile = false, competitive = true }) {
                   {u.label}
                 </p>
               </div>
-              <UpgradeGroup upgrade={u} />
+              <UpgradeGroup unit={selectedUnit} upgrade={u} />
             </div>
           ))}
         </div>

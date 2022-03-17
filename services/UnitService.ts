@@ -11,6 +11,12 @@ export default class UnitService {
       : list.units.filter(u => u.selectionId === list.selectedUnitId)[0];
   }
 
+  public static getAllEquipment(unit: ISelectedUnit) {
+    const items = unit.equipment.filter(e => e.type === "ArmyBookItem")
+    const itemContent = _.flatMap(items, (i: IUpgradeGainsItem) => i.content);
+    return unit.equipment.concat(itemContent);
+  }
+
   public static getAllUpgrades(unit: ISelectedUnit, excludeModels: boolean): IUpgradeGains[] {
     return unit
       .selectedUpgrades
@@ -29,10 +35,6 @@ export default class UnitService {
     const allRules: IUpgradeGainsRule[] = rules.concat(rulesFromitems) as IUpgradeGainsRule[];
 
     return allRules;
-  }
-
-  public static getAllWeapons(unit: ISelectedUnit): IUpgradeGainsWeapon[] {
-    return unit.equipment.concat(this.getAllUpgradeWeapons(unit) as IUpgradeGainsWeapon[]);
   }
 
   public static getAllUpgradeWeapons(unit: ISelectedUnit): (IUpgradeGainsWeapon | IUpgradeGainsMultiWeapon)[] {
