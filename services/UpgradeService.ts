@@ -313,7 +313,7 @@ export default class UpgradeService {
       // If this piece of equipment that has dependencies is not found in the built
       // unit's equipment, then something overwrote it and the deps should be removed
       if (!builtEquipment) {
-        for (let dep of equipment.dependencies) {
+        for (let dep of equipment.dependencies.filter(dep => dep.type === "upgrade" || dep.type === "attachment")) {
           this.removeById(unit, dep.upgradeInstanceId);
         }
       }
@@ -350,7 +350,8 @@ export default class UpgradeService {
           if (count > 0) {
             item.dependencies.push({
               upgradeInstanceId: optionToApply.instanceId,
-              count: count
+              count: count,
+              type: upgrade.type
             });
 
             remainingToReplace -= count;

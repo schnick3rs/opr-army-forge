@@ -124,4 +124,5 @@ export interface IUpgradePackage {
 export interface IUpgradeDependency {
   upgradeInstanceId: string;
   count: number;
+  type: UpgradeType;
 }
