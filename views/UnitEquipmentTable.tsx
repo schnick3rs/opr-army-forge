@@ -20,51 +20,6 @@ import { Fragment } from "react";
 import _ from "lodash";
 import DataParsingService from "../services/DataParsingService";
 
-export function WeaponRow({
-  unit,
-  e,
-  isProfile,
-}: {
-  unit: ISelectedUnit;
-  e: IUpgradeGainsWeapon;
-  isProfile: boolean;
-}) {
-  const count = e.count;
-  const name =
-    e.count > 1 ? pluralise.plural(e.name) : pluralise.singular(e.name);
-  const weaponCount = count > 1 ? `${count}x ` : null;
-  const rules = e.specialRules.filter((r) => r.name !== "AP");
-
-  const cellStyle = { paddingLeft: "8px", paddingRight: "8px" };
-  const borderStyle = {
-    borderBottom: "none",
-    borderTop: isProfile ? "none" : "1px solid rgb(224, 224, 224)",
-  };
-
-  return (
-    <TableRow>
-      <TableCell style={{ ...borderStyle, ...cellStyle, fontWeight: 600 }}>
-        {weaponCount}
-        {isProfile ? `- ${name}` : name}
-      </TableCell>
-      <TableCell style={borderStyle}>{e.range ? e.range + '"' : "-"}</TableCell>
-      <TableCell style={borderStyle}>
-        {e.attacks ? "A" + e.attacks : "-"}
-      </TableCell>
-      <TableCell style={borderStyle}>
-        {EquipmentService.getAP(e) || "-"}
-      </TableCell>
-      <TableCell style={borderStyle}>
-        {rules && rules.length > 0 ? (
-          <RuleList specialRules={rules} />
-        ) : (
-          <span>-</span>
-        )}
-      </TableCell>
-    </TableRow>
-  );
-}
-
 export default function UnitEquipmentTable({
   unit,
   square,
@@ -83,8 +38,10 @@ export default function UnitEquipmentTable({
   );
   const weapons = unit.equipment
     .filter((e) => isWeapon(e))
-    .concat(weaponsFromItems);
-
+    .concat(
+      weaponsFromItems.map((item) => ({ ...item, count: item.count ?? 1 }))
+    );
+  console.log("Weapons", JSON.parse(JSON.stringify(weapons)));
   const equipment = unit.equipment.filter((e) => !isWeapon(e));
   const combinedEquipment = equipment.map((e) => {
     if (e.type === "ArmyBookItem")
@@ -146,7 +103,7 @@ export default function UnitEquipmentTable({
                 const e = { ...upgrade, count };
 
                 // Upgrade may have been replaced
-                if (!e.count) return null;
+                //if (!e.count) return null;
 
                 if (upgrade.type === "ArmyBookMultiWeapon") {
                   console.log(upgrade.profiles);
@@ -164,20 +121,13 @@ export default function UnitEquipmentTable({
                         </TableCell>
                       </TableRow>
                       {upgrade.profiles.map((profile, i) => (
-                        <WeaponRow
-                          key={i}
-                          unit={unit}
-                          e={profile}
-                          isProfile={true}
-                        />
+                        <WeaponRow key={i} weapon={profile} isProfile={true} />
                       ))}
                     </Fragment>
                   );
                 }
 
-                return (
-                  <WeaponRow key={key} unit={unit} e={e} isProfile={false} />
-                );
+                return <WeaponRow key={key} weapon={e} isProfile={false} />;
               })}
             </TableBody>
           </Table>
@@ -222,5 +172,50 @@ export default function UnitEquipmentTable({
         </TableContainer>
       )}
     </>
+  );
+}
+
+export function WeaponRow({
+  weapon,
+  isProfile,
+}: {
+  weapon: IUpgradeGainsWeapon;
+  isProfile: boolean;
+}) {
+  const count = weapon.count;
+  const name =
+    count > 1 ? pluralise.plural(weapon.name) : pluralise.singular(weapon.name);
+  const weaponCount = count > 1 ? `${count}x ` : null;
+  const rules = weapon.specialRules.filter((r) => r.name !== "AP");
+
+  const cellStyle = { paddingLeft: "8px", paddingRight: "8px" };
+  const borderStyle = {
+    borderBottom: "none",
+    borderTop: isProfile ? "none" : "1px solid rgb(224, 224, 224)",
+  };
+
+  return (
+    <TableRow>
+      <TableCell style={{ ...borderStyle, ...cellStyle, fontWeight: 600 }}>
+        {weaponCount}
+        {isProfile ? `- ${name}` : name}
+      </TableCell>
+      <TableCell style={borderStyle}>
+        {weapon.range ? weapon.range + '"' : "-"}
+      </TableCell>
+      <TableCell style={borderStyle}>
+        {weapon.attacks ? "A" + weapon.attacks : "-"}
+      </TableCell>
+      <TableCell style={borderStyle}>
+        {EquipmentService.getAP(weapon) || "-"}
+      </TableCell>
+      <TableCell style={borderStyle}>
+        {rules && rules.length > 0 ? (
+          <RuleList specialRules={rules} />
+        ) : (
+          <span>-</span>
+        )}
+      </TableCell>
+    </TableRow>
   );
 }
