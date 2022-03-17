@@ -4,6 +4,7 @@ import "../extensions";
 import RulesService from "./RulesService";
 import { nanoid } from "nanoid";
 import _ from "lodash";
+import UnitService from "./UnitService";
 
 export default class UpgradeService {
   static calculateListTotal(list: ISelectedUnit[]) {
@@ -41,11 +42,6 @@ export default class UpgradeService {
 
     const isAffectsAll = upgrade.affects === "all";
 
-    const apply = () => {
-      unit.equipment = unit.equipment
-        .concat(option.gains);
-    };
-
     const gainEquipment = option
       .gains
       .filter(item => item.type === "ArmyBookItem" || item.type === "ArmyBookWeapon");
@@ -66,12 +62,9 @@ export default class UpgradeService {
       if (existingRuleIndex > -1)
         unit.specialRules.splice(existingRuleIndex, 1);
 
-
       return;
     }
     else if (upgrade.type === "upgrade") {
-
-
 
       unit.equipment = unit.equipment
         .concat(gainEquipment);
@@ -80,17 +73,18 @@ export default class UpgradeService {
     else if (upgrade.type === "replace") {
 
       let removeCount = affectsCount;
+      const allEquipment = UnitService.getAllEquipment(unit);
 
       if (isAffectsAll) {
         for (let what of upgrade.replaceWhat as string[]) {
-          const toReplace = unit.equipment.find(e => EquipmentService.compareEquipment(e, what));
+          const toReplace = allEquipment.find(e => EquipmentService.compareEquipment(e, what));
           if (toReplace.count < removeCount)
             removeCount = toReplace.count;
         }
       }
 
       for (let what of upgrade.replaceWhat as string[]) {
-        const toReplace = unit.equipment.find(e => EquipmentService.compareEquipment(e, what));
+        const toReplace = allEquipment.find(e => EquipmentService.compareEquipment(e, what));
         toReplace.count -= removeCount;
       }
 
@@ -100,8 +94,16 @@ export default class UpgradeService {
           // "Replace all" is replacing each item with "g.count" copies,
           // whereas "replace 2x something" is replacing 2 with "g.count"
           count: isAffectsAll ? g.count * removeCount : g.count
-        })))
-        .filter(e => e.count > 0);
+        })));
+    }
+
+    unit.equipment = unit.equipment.filter(e => e.count > 0);
+    for (let item of unit.equipment.filter(i => i.type === "ArmyBookItem") as IUpgradeGainsItem[]) {
+      item.content = item.content
+        .filter(c =>
+          c.count === undefined // Keep items that don't have a count property at all
+          || c.count > 0 // Items that have a count
+        );
     }
   }
 
@@ -125,30 +127,6 @@ export default class UpgradeService {
 
   public static countApplied(unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption): number {
     return unit.selectedUpgrades.filter(u => u.id === option.id).length;
-  }
-
-  public static findUpgrade(unit: ISelectedUnit, what: string) {
-
-    // Try and find an upgrade instead
-    for (let gain of unit.equipment) {
-      const isMatch = EquipmentService.compareEquipment(gain, what);
-
-      if (isMatch && gain.count > 0)
-        return gain;
-
-      // Check inside items
-      if (gain.type === "ArmyBookItem") {
-        const item = gain as IUpgradeGainsItem;
-        const toReplace = item
-          .content
-          .filter(e => EquipmentService.compareEquipment(e, what))[0];
-
-        if (toReplace && toReplace.count > 0)
-          return toReplace;
-      }
-    }
-
-    return null;
   }
 
   public static getControlType(unit: ISelectedUnit, upgrade: IUpgrade): "check" | "radio" | "updown" {
@@ -222,7 +200,7 @@ export default class UpgradeService {
         ? upgrade.affects
         : 1;
 
-      const groups = _.groupBy(unit.equipment, e => e.name);
+      const groups = _.groupBy(UnitService.getAllEquipment(unit), e => e.name);
 
       for (let what of upgrade.replaceWhat) {
 
@@ -301,7 +279,9 @@ export default class UpgradeService {
     }
 
     return true;
-  };
+  }
+
+
 
   public static apply(unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption) {
 
@@ -310,7 +290,12 @@ export default class UpgradeService {
       instanceId: nanoid(9),
       gains: option.gains.map(g => ({
         ...g,
-        dependencies: []
+        dependencies: [],
+        content: g.type === "ArmyBookItem" ? (g as IUpgradeGainsItem).content.map(c => ({
+          ...c,
+          count: c.count ?? 1,
+          dependencies: []
+        })) : undefined
       }))
     };
 
@@ -336,7 +321,11 @@ export default class UpgradeService {
             break;
 
           const upgrade = unit.selectedUpgrades[i - 1];
-          const upgradeItem = upgrade.gains.find(g => EquipmentService.compareEquipment(g, target));
+          const nestedItems = _.flatMap(
+            upgrade.gains.filter(e => e.type === "ArmyBookItem"),
+            (e: IUpgradeGainsItem) => e.content);
+          const allGains = upgrade.gains.concat(nestedItems);
+          const upgradeItem = allGains.find(g => EquipmentService.compareEquipment(g, target));
           if (!upgradeItem)
             continue;
 
@@ -361,18 +350,7 @@ export default class UpgradeService {
     unit.selectedUpgrades.push(optionToApply);
   }
 
-  // Remove anything that depends on this upgrade (cascade remove)
-  public static removeDependencies(unit, dependencies) {
-    if (!dependencies)
-      return;
-    for (let upgradeId of dependencies) {
-      const dependency = unit.selectedUpgrades.find(u => u.id === upgradeId);
-      console.log("Removing dependency", dependency);
-      // Might have already been removed!
-      if (dependency)
-        this.remove(unit, dependency);
-    }
-  }
+
 
   public static remove(unit: ISelectedUnit, option: IUpgradeOption) {
 
@@ -389,6 +367,13 @@ export default class UpgradeService {
     console.log("Removing...", JSON.parse(JSON.stringify(toRemove)));
 
     for (let gain of toRemove.gains) {
+      if (gain.type === "ArmyBookItem") {
+        for (let nestedItem of (gain as IUpgradeGainsItem).content) {
+          for (let dep of nestedItem.dependencies) {
+            this.removeById(unit, dep.upgradeInstanceId);
+          }
+        }
+      }
       for (let dep of gain.dependencies) {
         this.removeById(unit, dep.upgradeInstanceId);
       }

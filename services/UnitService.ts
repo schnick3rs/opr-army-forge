@@ -11,6 +11,12 @@ export default class UnitService {
       : list.units.filter(u => u.selectionId === list.selectedUnitId)[0];
   }
 
+  public static getAllEquipment(unit: ISelectedUnit) {
+    const items = unit.equipment.filter(e => e.type === "ArmyBookItem")
+    const itemContent = _.flatMap(items, (i: IUpgradeGainsItem) => i.content);
+    return unit.equipment.concat(itemContent);
+  }
+
   public static getAllUpgrades(unit: ISelectedUnit, excludeModels: boolean): IUpgradeGains[] {
     return unit
       .selectedUpgrades
