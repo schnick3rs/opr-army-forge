@@ -1,7 +1,8 @@
 import { nanoid } from "@reduxjs/toolkit";
-import { IUnit, ISelectedUnit, IUpgradeGains, IUpgradeGainsItem, IUpgradeGainsMultiWeapon, IUpgradeGainsRule, IUpgradeGainsWeapon } from "../data/interfaces";
+import { IUnit, ISelectedUnit, IUpgradeGains, IUpgradeGainsItem, IUpgradeGainsMultiWeapon, IUpgradeGainsRule, IUpgradeGainsWeapon, IUpgradePackage, IUpgrade, IUpgradeOption } from "../data/interfaces";
 import { ListState } from "../data/listSlice";
 import _ from "lodash";
+import EquipmentService from "./EquipmentService";
 
 export default class UnitService {
 
@@ -62,7 +63,7 @@ export default class UnitService {
     const extraModelCount = unit.selectedUpgrades.filter(u => u.isModel).length;
     return unit.size + extraModelCount;
   }
-  
+
   public static getRealUnit(unit: IUnit, dummy = false): ISelectedUnit {
     return {
       ...unit,
@@ -77,17 +78,74 @@ export default class UnitService {
     }
   }
 
-  public static getAttachedUnits(list: ListState, unit: ISelectedUnit) : ISelectedUnit[] {
+  public static getAttachedUnits(list: ListState, unit: ISelectedUnit): ISelectedUnit[] {
     return list.units.filter(u => u.joinToUnit === unit.selectionId)
   }
-  public static getChildren(list: ListState, unit: ISelectedUnit) : ISelectedUnit[] {
+  public static getChildren(list: ListState, unit: ISelectedUnit): ISelectedUnit[] {
     return list.units.filter(u => u.selectionId === unit.joinToUnit)
   }
-  public static getFamily(list: ListState, unit: ISelectedUnit) : ISelectedUnit[] {
+  public static getFamily(list: ListState, unit: ISelectedUnit): ISelectedUnit[] {
     let parents = UnitService.getAttachedUnits(list, unit)
-    let grandparents = parents.flatMap(u => {return UnitService.getAttachedUnits(list, u)})
+    let grandparents = parents.flatMap(u => { return UnitService.getAttachedUnits(list, u) })
     let children = UnitService.getChildren(list, unit)
-    let grandchildren = children.flatMap(u => {return UnitService.getChildren(list, u)})
+    let grandchildren = children.flatMap(u => { return UnitService.getChildren(list, u) })
     return _.uniq([...grandparents, ...parents, unit, ...children, ...grandchildren])
+  }
+
+  private static readonly countRegex = /^(\d+)x\s/;
+
+  public static getDisabledUpgradeSections(u: IUnit, upgradePackages: IUpgradePackage[]) {
+
+    const packagesForUnit = u.upgrades
+      // Map all upgrade packages
+      .map(uid => upgradePackages.find(pkg => pkg.uid === uid))
+      .filter(pkg => !!pkg);
+    const sections = packagesForUnit
+      // Flatten down to array of all upgrade sections
+      .reduce<IUpgrade[]>((sections, next) => sections.concat(next.sections), []);
+
+    const allGains: IUpgradeGains[] = sections
+      .reduce<IUpgradeOption[]>((opts, next) => opts.concat(next.options), [])
+      .reduce<IUpgradeGains[]>((gains, next) => gains.concat(next.gains), [])
+      .reduce<IUpgradeGains[]>((gains, next) => {
+
+        // Add root item/weapon/etc
+        gains.push(next);
+
+        // For items, also add the content
+        if (next.type !== "ArmyBookItem")
+          return gains;
+
+        return gains.concat((next as IUpgradeGainsItem).content);
+      }, []);
+
+    const disabledSections: string[] = [];
+
+    // For each section, check that the unit has access to the things it wants to replace
+    // Only need sections that are replacing (or looking for) something
+    for (let section of sections.filter(s => s.replaceWhat)) {
+      for (let what of section.replaceWhat) {
+
+        const target = what.replace(this.countRegex, "");
+
+        // Does equipment contain this thing?
+        const equipmentMatch = u.equipment.some(e =>
+          EquipmentService.compareEquipment({ ...e, label: (e.label ?? e.name).replace(this.countRegex, "") }, target));
+        // If equipment, then we won't be disabling this section...
+        if (equipmentMatch)
+          continue;
+
+        // Do any upgrade sections contain this thing?
+        const upgradeGains = allGains.find(g => EquipmentService.compareEquipment(g, target));
+        // If upgrade gains found, don't disable this
+        if (upgradeGains)
+          continue;
+
+        // If neither was found, then disable this section
+        disabledSections.push(section.id);
+      }
+    }
+
+    return disabledSections;
   }
 }

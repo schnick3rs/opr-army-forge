@@ -1,5 +1,6 @@
 import router from "next/router";
 import { IArmyData } from "../data/armySlice";
+import UnitService from "./UnitService";
 
 export default class WebappApiService {
 
@@ -37,27 +38,32 @@ export default class WebappApiService {
 
     const data: IArmyData = await armyBookRes.json();
 
+    const upgradePackages = data.upgradePackages.map(upgradePackage => ({
+      ...upgradePackage,
+      sections: upgradePackage.sections.map(section => ({
+        ...section,
+        options: section.options.map(option => {
+          const result: any = {
+            ...option,
+            parentSectionId: section.id
+          };
+          delete result.proposedCost;
+          delete result.proposedCostHint;
+          delete result.proposedVersion;
+          delete result.parentPackageUid;
+          delete result.parentSectionUid;
+          return result;
+        })
+      }))
+    }));
 
     const transformedData: IArmyData = {
       ...data,
-      upgradePackages: data.upgradePackages.map(upgradePackage => ({
-        ...upgradePackage,
-        sections: upgradePackage.sections.map(section => ({
-          ...section,
-          options: section.options.map(option => {
-            const result: any = {
-              ...option,
-              parentSectionId: section.id
-            };
-            delete result.proposedCost;
-            delete result.proposedCostHint;
-            delete result.proposedVersion;
-            delete result.parentPackageUid;
-            delete result.parentSectionUid;
-            return result;
-          })
-        }))
-      }))
+      units: data.units.map(unit => ({
+        ...unit,
+        disabledUpgradeSections: UnitService.getDisabledUpgradeSections(unit, upgradePackages)
+      })),
+      upgradePackages: upgradePackages
     };
 
     console.log("Army data", transformedData);

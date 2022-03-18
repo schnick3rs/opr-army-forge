@@ -8,6 +8,9 @@ import UnitService from "./UnitService";
 import { IArmyData } from "../data/armySlice";
 
 export default class UpgradeService {
+
+  private static readonly countRegex = /^(\d+)x\s/;
+
   static calculateListTotal(list: ISelectedUnit[]) {
     return list
       .filter(u => u.selectionId !== "dummy")
@@ -85,8 +88,10 @@ export default class UpgradeService {
       }
 
       for (let what of upgrade.replaceWhat as string[]) {
-        const toReplace = allEquipment.find(e => EquipmentService.compareEquipment(e, what));
-        toReplace.count -= removeCount;
+        const target = what.replace(this.countRegex, "");
+        const toReplace = allEquipment.find(e => EquipmentService.compareEquipment(e, target));
+        const countMatch = this.countRegex.exec(what);
+        toReplace.count -= removeCount * (countMatch ? parseInt(countMatch[1]) : 1);
       }
 
       unit.equipment = unit.equipment
@@ -205,9 +210,13 @@ export default class UpgradeService {
 
       for (let what of upgrade.replaceWhat) {
 
+        const target = what.replace(this.countRegex, "");
+        const countMatch = this.countRegex.exec(what);
+        const requiredCountForTarget = requiredCount * (countMatch ? parseInt(countMatch[1]) : 1);
+
         const groupKey = Object
           .keys(groups)
-          .find(k => EquipmentService.compareEquipmentNames(k, what));
+          .find(k => EquipmentService.compareEquipmentNames(k, target));
 
         const toReplace: IUpgradeGains[] = groups[groupKey];
         if (!toReplace)
@@ -216,7 +225,7 @@ export default class UpgradeService {
         const toReplaceCount = toReplace.reduce((count, gain) => count + gain.count, 0);
 
         // Would not have enough to replace
-        if (requiredCount > toReplaceCount)
+        if (requiredCountForTarget > toReplaceCount)
           return false;
 
         // May only select up to the limit
@@ -237,9 +246,6 @@ export default class UpgradeService {
 
     if (upgrade.type === "upgrade") {
 
-      // Upgrade 'all' doesn't require there to be any; means none if that's all there is?
-      //if (upgrade.affects === "all") return true
-
       // upgrade (n? (models|weapons)?) with...
       var available = unit.size
 
@@ -256,7 +262,6 @@ export default class UpgradeService {
             .filter(g => EquipmentService.compareEquipment(g, what))
             // Count how many we have
             .reduce((count, next) => count + next.count, 0);
-
         }
       }
 
