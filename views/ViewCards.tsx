@@ -26,13 +26,14 @@ export default function ViewCards({ showPsychic, showFullRules, showPointCosts }
 
   const units = (list?.units ?? [])
     .filter(u => u.selectionId !== "dummy")
-    .map(u => ({ ...u }));
+    .map(u => UpgradeService.buildUpgrades(army.data.upgradePackages, u));
   for (let unit of units) {
     delete unit.selectionId;
   }
 
-  var usedRules = []
+  let usedRules = []
 
+  // TODO: This won't work now with instance IDs etc
   const unitGroups = _.groupBy(units, u => JSON.stringify(u));
   //console.log(unitGroups);
   return (
@@ -40,27 +41,26 @@ export default function ViewCards({ showPsychic, showFullRules, showPointCosts }
       <div className={style.grid}>
         {Object.values(unitGroups).map((grp: ISelectedUnit[], i) => {
 
-          const u = grp[0];
+          const unit = grp[0];
           const count = grp.length;
-          const equipmentSpecialRules = u
+          const equipmentSpecialRules = unit
             .equipment
             .filter(e => !e.attacks && e.specialRules?.length) // No weapons, and only equipment with special rules
             .reduce((value, e) => value.concat(e.specialRules), []); // Flatten array of special rules arrays
 
-          const specialRules = (u.specialRules || [])
+          const specialRules = (unit.specialRules || [])
             .concat(equipmentSpecialRules.map(DataParsingService.parseRule))
             .filter(r => r.name != "-");
 
-          const equipmentRules = UnitService.getAllUpgradedRules(u);
-          //console.log(equipmentRules);
+          const equipmentRules = UnitService.getAllUpgradedRules(unit);
 
           const rules = specialRules.concat(equipmentRules).filter(r => !!r && r.name != "-");
           const ruleGroups = groupBy(rules, "name");
           const ruleKeys = Object.keys(ruleGroups);
-          const toughness = toughFromUnit(u);
+          const toughness = toughFromUnit(unit);
 
-          const weaponSpecialRules = _.compact(u.equipment.flatMap(e => e.attacks && e.specialRules)).map(r => r.name)
-          const upgradeWeaponsSpecialRules = UnitService.getAllUpgradeWeapons(u).flatMap(w => {
+          const weaponSpecialRules = _.compact(unit.equipment.flatMap(e => e.attacks && e.specialRules)).map(r => r.name)
+          const upgradeWeaponsSpecialRules = UnitService.getAllUpgradeWeapons(unit).flatMap(w => {
             if ((w as IUpgradeGainsMultiWeapon).profiles) return (w as IUpgradeGainsMultiWeapon).profiles.flatMap(w => w.specialRules)
             return (w as IUpgradeGainsWeapon).specialRules
           }).map(r => r.name)
@@ -74,9 +74,9 @@ export default function ViewCards({ showPsychic, showFullRules, showPointCosts }
                 <div className="mb-4">
                   <div className="card-body">
                     <h3 className="is-size-5 my-2" style={{ fontWeight: 500, textAlign: "center" }}>
-                      {count > 1 ? `${count}x ` : ""}{u.customName || u.name}
-                      <span className="" style={{ color: "#666666" }}> [{u.size}]</span>
-                      {showPointCosts && <span className="is-size-6 ml-1" style={{ color: "#666666" }}>- {UpgradeService.calculateUnitTotal(u)}pts</span>}</h3>
+                      {count > 1 ? `${count}x ` : ""}{unit.customName || unit.name}
+                      <span className="" style={{ color: "#666666" }}> [{unit.size}]</span>
+                      {showPointCosts && <span className="is-size-6 ml-1" style={{ color: "#666666" }}>- {UpgradeService.calculateUnitTotal(unit)}pts</span>}</h3>
                     <hr className="my-0" />
 
                     <div className="is-flex" style={{ justifyContent: "center" }}>
@@ -84,13 +84,13 @@ export default function ViewCards({ showPsychic, showFullRules, showPointCosts }
                       <div className={style.profileStat}>
                         <p>Quality</p>
                         <p>
-                          {u.quality}+
+                          {unit.quality}+
                         </p>
                       </div>
                       <div className={style.profileStat}>
                         <p>Defense</p>
                         <p>
-                          {u.defense}+
+                          {unit.defense}+
                         </p>
                       </div>
                       {toughness > 1 && <div className={style.profileStat}>
@@ -101,7 +101,7 @@ export default function ViewCards({ showPsychic, showFullRules, showPointCosts }
                       </div>}
 
                     </div>
-                    <UnitEquipmentTable unit={u} square={true} />
+                    <UnitEquipmentTable unit={unit} square={true} />
                     {/* {specialRules?.length && <Paper square elevation={0}>
                                             <div className="px-4 mb-4">
                                                 <h4 style={{ fontWeight: 600 }}>Special Rules</h4>
