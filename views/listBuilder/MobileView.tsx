@@ -18,22 +18,25 @@ import ValidationErrors from "../ValidationErrors";
 import UndoRemoveUnit from "../components/UndoRemoveUnit";
 import { ISelectedUnit } from "../../data/interfaces";
 import UnitService from "../../services/UnitService";
+import { useRouter } from "next/router";
 
 export default function MobileView() {
   const list = useSelector((state: RootState) => state.list);
   const army = useSelector((state: RootState) => state.army);
 
   const dispatch = useDispatch();
+  const router = useRouter();
+
+  const sheetOpen = (router.query["upgradesOpen"] as string) == "true";
 
   const [slider, setSlider] = useState(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
   const [slideIndex, setSlideIndex] = useState(1);
   const [validationOpen, setValidationOpen] = useState(false);
   const [showUndoRemove, setShowUndoRemove] = useState(false);
 
   // Open bottom sheet when unit is selected
   const onUnitSelected = useCallback((unit: ISelectedUnit) => {
-    setSheetOpen(true);
+    router.push({ query: { ...router.query, upgradesOpen: true } });
   }, []);
 
   const onAddUnit = useCallback((unit: ISelectedUnit) => {
@@ -42,7 +45,8 @@ export default function MobileView() {
 
   // Reset selected unit when sheet is closed
   function onDismissSheet() {
-    setSheetOpen(false);
+    delete router.query.upgradesOpen;
+    router.push({ query: { ...router.query } });
     dispatch(selectUnit(null));
   }
 
