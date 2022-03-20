@@ -45,8 +45,7 @@ export const listSlice = createSlice({
         units: [],
         selectedUnitId: null,
         undoUnitRemove: null,
-        points: 0,
-        competitive: true
+        points: 0
       };
     },
     createList: (state, action: PayloadAction<{ name: string; pointsLimit?: number; creationTime: string; }>) => {

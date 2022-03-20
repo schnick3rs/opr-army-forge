@@ -15,8 +15,6 @@ export default function List() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const [competitive, setCompetitive] = useState(false);
-
   // Load army list file 
   useEffect(() => {
     // Redirect to game selection screen if no army selected
@@ -49,7 +47,7 @@ export default function List() {
         <title>OPR Army Forge</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      {armyState.loaded ? (isBigScreen ? <DesktopView competitive={competitive} setCompetitive={setCompetitive} /> : <MobileView competitive={competitive} setCompetitive={setCompetitive} />) : null}
+      {armyState.loaded ? (isBigScreen ? <DesktopView /> : <MobileView />) : null}
     </>
   );
 }

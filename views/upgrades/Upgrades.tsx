@@ -29,13 +29,14 @@ import { CustomTooltip } from "../components/CustomTooltip";
 import LinkIcon from "@mui/icons-material/Link";
 import { useEffect, useState } from "react";
 
-export function Upgrades({ mobile = false, competitive = true }) {
+export function Upgrades({ mobile = false }) {
   const list = useSelector((state: RootState) => state.list);
   const gameSystem = useSelector((state: RootState) => state.army.gameSystem);
   const army = useSelector((state: RootState) => state.army.data);
   const dispatch = useDispatch();
   const [dummy, setDummy] = useState(false);
 
+  const competitive = true;
   const selectedUnit = UnitService.getSelected(list);
 
   useEffect(() => {
