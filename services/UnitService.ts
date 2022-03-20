@@ -14,7 +14,7 @@ export default class UnitService {
 
   public static getAllEquipment(unit: ISelectedUnit) {
     const items = unit.loadout.filter(e => e.type === "ArmyBookItem")
-    const itemContent = _.flatMap(items, (i: IUpgradeGainsItem) => i.content);
+    const itemContent = items.flatMap((i: IUpgradeGainsItem) => i.content);
     return unit.loadout.concat(itemContent);
   }
 

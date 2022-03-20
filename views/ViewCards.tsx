@@ -1,21 +1,28 @@
 import React from "react";
-import { useSelector } from 'react-redux'
-import { RootState } from '../data/store'
+import { useSelector } from "react-redux";
+import { RootState } from "../data/store";
 import style from "../styles/Cards.module.css";
 import UnitEquipmentTable from "../views/UnitEquipmentTable";
 import { Paper, Card } from "@mui/material";
 import RulesService from "../services/RulesService";
 import DataParsingService from "../services/DataParsingService";
 import { IGameRule } from "../data/armySlice";
-import { groupBy } from "../services/Helpers";
+import { groupBy, makeCopy } from "../services/Helpers";
 import UnitService from "../services/UnitService";
 import UpgradeService from "../services/UpgradeService";
 import _ from "lodash";
-import { ISelectedUnit, IUpgradeGainsMultiWeapon, IUpgradeGainsWeapon } from "../data/interfaces";
+import {
+  ISelectedUnit,
+  IUpgradeGainsMultiWeapon,
+  IUpgradeGainsWeapon,
+} from "../data/interfaces";
 import RuleList from "./components/RuleList";
 
-export default function ViewCards({ showPsychic, showFullRules, showPointCosts }) {
-
+export default function ViewCards({
+  showPsychic,
+  showFullRules,
+  showPointCosts,
+}) {
   const list = useSelector((state: RootState) => state.list);
   const army = useSelector((state: RootState) => state.army);
 
@@ -25,92 +32,101 @@ export default function ViewCards({ showPsychic, showFullRules, showPointCosts }
   const ruleDefinitions: IGameRule[] = gameRules.concat(armyRules);
 
   const units = (list?.units ?? [])
-    .filter(u => u.selectionId !== "dummy");
+    .filter((u) => u.selectionId !== "dummy")
+    .map((u) => makeCopy(u));
   for (let unit of units) {
     delete unit.selectionId;
   }
 
-  let usedRules = []
+  const usedRules = [];
+
+  const unitAsKey = (unit: ISelectedUnit) => {
+    return {
+      id: unit.id,
+      upgrades: unit.selectedUpgrades.map(x => ({
+        sectionId: x.upgrade.id,
+        optionId: x.option.id
+      }))
+    }
+  }
 
   // TODO: This won't work now with instance IDs etc
-  const unitGroups = _.groupBy(units, u => JSON.stringify(u));
+  const unitGroups = _.groupBy(units, (u) => JSON.stringify(unitAsKey(u)));
   //console.log(unitGroups);
   return (
     <>
       <div className={style.grid}>
         {Object.values(unitGroups).map((grp: ISelectedUnit[], i) => {
-
           const unit = grp[0];
           const count = grp.length;
-          const equipmentSpecialRules = unit
-            .equipment
-            .filter(e => !e.attacks && e.specialRules?.length) // No weapons, and only equipment with special rules
-            .reduce((value, e) => value.concat(e.specialRules), []); // Flatten array of special rules arrays
 
-          const specialRules = (unit.specialRules || [])
-            .concat(equipmentSpecialRules.map(DataParsingService.parseRule))
-            .filter(r => r.name != "-");
+          const unitRules = (unit.specialRules || [])
+            .filter((r) => r.name != "-");
 
-          const equipmentRules = UnitService.getAllUpgradedRules(unit);
+          const rulesFromUpgrades = UnitService.getAllUpgradedRules(unit);
+          const weaponRules = UnitService.getAllEquipment(unit)
+            .filter(e => e.attacks > 0)
+            .flatMap(e => e.specialRules);
 
-          const rules = specialRules.concat(equipmentRules).filter(r => !!r && r.name != "-");
+          const rules = unitRules
+            .concat(rulesFromUpgrades)
+            .filter((r) => !!r && r.name != "-");
           const ruleGroups = groupBy(rules, "name");
           const ruleKeys = Object.keys(ruleGroups);
           const toughness = toughFromUnit(unit);
 
-          const weaponSpecialRules = _.compact(unit.equipment.flatMap(e => e.attacks && e.specialRules)).map(r => r.name)
-          const upgradeWeaponsSpecialRules = UnitService.getAllUpgradeWeapons(unit).flatMap(w => {
-            if ((w as IUpgradeGainsMultiWeapon).profiles) return (w as IUpgradeGainsMultiWeapon).profiles.flatMap(w => w.specialRules)
-            return (w as IUpgradeGainsWeapon).specialRules
-          }).map(r => r.name)
-          usedRules = usedRules.concat(ruleKeys).concat(weaponSpecialRules).concat(upgradeWeaponsSpecialRules)
+          usedRules.push(...ruleKeys);
+          usedRules.push(...weaponRules.map(r => r.name))
+
           // Sort rules alphabetically
           ruleKeys.sort((a, b) => a.localeCompare(b));
 
           return (
             <div key={i} className={style.card}>
               <Card elevation={1}>
-                <div className="mb-4">
-                  <div className="card-body">
-                    <h3 className="is-size-5 my-2" style={{ fontWeight: 500, textAlign: "center" }}>
-                      {count > 1 ? `${count}x ` : ""}{unit.customName || unit.name}
-                      <span className="" style={{ color: "#666666" }}> [{unit.size}]</span>
-                      {showPointCosts && <span className="is-size-6 ml-1" style={{ color: "#666666" }}>- {UpgradeService.calculateUnitTotal(unit)}pts</span>}</h3>
-                    <hr className="my-0" />
+                <div className="card-body mb-4">
+                  <h3
+                    className="is-size-5 my-2"
+                    style={{ fontWeight: 500, textAlign: "center" }}
+                  >
+                    {count > 1 ? `${count}x ` : ""}
+                    {unit.customName || unit.name}
+                    <span className="" style={{ color: "#666666" }}>
+                      {" "}
+                      [{unit.size}]
+                    </span>
+                    {showPointCosts && (
+                      <span
+                        className="is-size-6 ml-1"
+                        style={{ color: "#666666" }}
+                      >
+                        - {UpgradeService.calculateUnitTotal(unit)}pts
+                      </span>
+                    )}
+                  </h3>
+                  <hr className="my-0" />
 
-                    <div className="is-flex" style={{ justifyContent: "center" }}>
-
-                      <div className={style.profileStat}>
-                        <p>Quality</p>
-                        <p>
-                          {unit.quality}+
-                        </p>
-                      </div>
-                      <div className={style.profileStat}>
-                        <p>Defense</p>
-                        <p>
-                          {unit.defense}+
-                        </p>
-                      </div>
-                      {toughness > 1 && <div className={style.profileStat}>
-                        <p>Tough</p>
-                        <p>
-                          {toughness}
-                        </p>
-                      </div>}
-
+                  <div className="is-flex" style={{ justifyContent: "center" }}>
+                    <div className={style.profileStat}>
+                      <p>Quality</p>
+                      <p>{unit.quality}+</p>
                     </div>
-                    <UnitEquipmentTable unit={unit} square={true} />
-                    {/* {specialRules?.length && <Paper square elevation={0}>
-                                            <div className="px-4 mb-4">
-                                                <h4 style={{ fontWeight: 600 }}>Special Rules</h4>
-                                                <RuleList specialRules={specialRules} />
-                                            </div>
-                                        </Paper>} */}
-                    {rules?.length > 0 && <Paper square elevation={0}>
+                    <div className={style.profileStat}>
+                      <p>Defense</p>
+                      <p>{unit.defense}+</p>
+                    </div>
+                    {toughness > 1 && (
+                      <div className={style.profileStat}>
+                        <p>Tough</p>
+                        <p>{toughness}</p>
+                      </div>
+                    )}
+                  </div>
+                  <UnitEquipmentTable unit={unit} square />
+                  {rules?.length > 0 && (
+                    <Paper square elevation={0}>
                       <div className="px-2 my-2">
                         {ruleKeys.map((key, index) => {
-
                           const group = ruleGroups[key];
 
                           if (!showFullRules)
@@ -123,71 +139,105 @@ export default function ViewCards({ showPsychic, showFullRules, showPointCosts }
                             );
 
                           const rule = group[0];
-                          const rating = group.reduce((total, next) => next.rating ? total + parseInt(next.rating) : total, 0);
+                          const rating = group.reduce(
+                            (total, next) =>
+                              next.rating
+                                ? total + parseInt(next.rating)
+                                : total,
+                            0
+                          );
 
-                          const ruleDefinition = ruleDefinitions
-                            .filter(r => /(.+?)(?:\(|$)/.exec(r.name)[0] === rule.name)[0];
+                          const ruleDefinition = ruleDefinitions.filter(
+                            (r) => /(.+?)(?:\(|$)/.exec(r.name)[0] === rule.name
+                          )[0];
 
                           return (
                             <p key={index}>
                               <span style={{ fontWeight: 600 }}>
-                                {RulesService.displayName({ ...rule, rating }, count)} -
+                                {RulesService.displayName(
+                                  { ...rule, rating },
+                                  count
+                                )}{" "}
+                                -
                               </span>
                               <span> {ruleDefinition?.description || ""}</span>
                             </p>
                           );
                         })}
                       </div>
-                    </Paper>}
-                  </div>
+                    </Paper>
+                  )}
                 </div>
               </Card>
             </div>
           );
         })}
-        {showPsychic && <div className={style.card} >
+        {showPsychic && (
+          <div className={style.card}>
+            <Card elevation={1}>
+              <div className="mb-4">
+                <div className="card-body">
+                  <h3
+                    className="is-size-4 my-2"
+                    style={{ fontWeight: 500, textAlign: "center" }}
+                  >
+                    Psychic/Spells
+                  </h3>
+                  <hr className="my-0" />
+
+                  <Paper square elevation={0}>
+                    <div className="px-2 my-2">
+                      {spells.map((spell) => (
+                        <p key={spell.id}>
+                          <span style={{ fontWeight: 600 }}>
+                            {spell.name} ({spell.threshold}+):{" "}
+                          </span>
+                          <span>{spell.effect}</span>
+                        </p>
+                      ))}
+                    </div>
+                  </Paper>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
+      </div>
+      {!showFullRules && (
+        <div className={`mx-4 ${style.card}`}>
           <Card elevation={1}>
             <div className="mb-4">
               <div className="card-body">
-                <h3 className="is-size-4 my-2" style={{ fontWeight: 500, textAlign: "center" }}>Psychic/Spells</h3>
+                <h3
+                  className="is-size-4 my-2"
+                  style={{ fontWeight: 500, textAlign: "center" }}
+                >
+                  Special Rules
+                </h3>
                 <hr className="my-0" />
 
                 <Paper square elevation={0}>
-                  <div className="px-2 my-2">
-                    {spells.map(spell => (
-                      <p key={spell.id}>
-                        <span style={{ fontWeight: 600 }}>{spell.name} ({spell.threshold}+): </span>
-                        <span>{spell.effect}</span>
-                      </p>
-                    ))}
+                  <div className={`px-2 my-2 ${style.grid} has-text-left`}>
+                    {_.uniq(usedRules)
+                      .sort()
+                      .map((r, i) => (
+                        <p key={i} style={{ breakInside: "avoid" }}>
+                          <span style={{ fontWeight: 600 }}>{r} - </span>
+                          <span>
+                            {
+                              ruleDefinitions.find((t) => t.name === r)
+                                ?.description
+                            }
+                          </span>
+                        </p>
+                      ))}
                   </div>
                 </Paper>
               </div>
             </div>
           </Card>
-        </div >}
-      </div >
-      {!showFullRules && <div className={`mx-4 ${style.card}`} >
-        <Card elevation={1}>
-          <div className="mb-4">
-            <div className="card-body">
-              <h3 className="is-size-4 my-2" style={{ fontWeight: 500, textAlign: "center" }}>Special Rules</h3>
-              <hr className="my-0" />
-
-              <Paper square elevation={0}>
-                <div className={`px-2 my-2 ${style.grid} has-text-left`}>
-                  {_.uniq(usedRules).sort().map((r, i) => (
-                    <p key={i} style={{breakInside: "avoid"}}>
-                      <span style={{ fontWeight: 600 }}>{r} - </span>
-                      <span>{ruleDefinitions.find(t => t.name === r)?.description}</span>
-                    </p>
-                  ))}
-                </div>
-              </Paper>
-            </div>
-          </div>
-        </Card>
-      </div >}
+        </div>
+      )}
     </>
   );
 }
@@ -202,12 +252,15 @@ function toughFromUnit(unit) {
     return tough;
   }, 0);
 
-  baseTough += UnitService.getAllUpgradedRules(unit).reduce((tough, { name, rating }) => {
-    if (name === "Tough") {
-      tough += parseInt(rating);
-    }
-    return tough;
-  }, 0)
+  baseTough += UnitService.getAllUpgradedRules(unit).reduce(
+    (tough, { name, rating }) => {
+      if (name === "Tough") {
+        tough += parseInt(rating);
+      }
+      return tough;
+    },
+    0
+  );
 
   return baseTough || 1;
 }
