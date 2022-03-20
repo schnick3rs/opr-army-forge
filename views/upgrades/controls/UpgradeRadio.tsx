@@ -1,5 +1,5 @@
 import { Radio } from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   ISelectedUnit,
   IUpgrade,
@@ -8,7 +8,6 @@ import {
 import { applyUpgrade, removeUpgrade } from "../../../data/listSlice";
 import UpgradeService from "../../../services/UpgradeService";
 import hash from "object-hash";
-import { RootState } from "../../../data/store";
 
 export default function UpgradeRadio({
   selectedUnit,
@@ -22,7 +21,6 @@ export default function UpgradeRadio({
   isValid: boolean;
 }) {
   const dispatch = useDispatch();
-  const army = useSelector((state: RootState) => state.army.data);
 
   const isApplied = (option) =>
     option
@@ -50,7 +48,7 @@ export default function UpgradeRadio({
       if (option)
         // Apply the selected upgrade
         dispatch(
-          applyUpgrade({ unitId: selectedUnit.selectionId, upgrade, option, army })
+          applyUpgrade({ unitId: selectedUnit.selectionId, upgrade, option })
         );
     }
   };

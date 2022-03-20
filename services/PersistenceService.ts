@@ -71,7 +71,8 @@ export default class PersistenceService {
         selectionId: u.selectionId,
         selectedUpgrades: u.selectedUpgrades,
         combined: u.combined,
-        joinToUnit: u.joinToUnit
+        joinToUnit: u.joinToUnit,
+        loadout: u.loadout
       }))
     };
   }
@@ -123,15 +124,7 @@ export default class PersistenceService {
           equipment: unitDefinition.equipment.map(e => ({
             ...e,
             count: u.equipment.find(ue => ue.id === e.id)?.count ?? e.count
-          })),
-          selectedUpgrades: u.selectedUpgrades.map(upg => {
-            const originalUpgrade = allOptions.find(opt => opt.id === upg.id);
-
-            // TODO! Dep on schnickers api???
-            return ({
-              ...upg,
-            });
-          })
+          }))
         });
       })
     };

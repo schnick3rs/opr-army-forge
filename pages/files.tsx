@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../data/store";
-import { IArmyData, loadArmyData, loadChildArmyData } from "../data/armySlice";
+import {
+  getArmyBookData,
+  getArmyBooks,
+  IArmyData,
+  loadArmyData,
+} from "../data/armySlice";
 import { useRouter } from "next/router";
 import {
   Card,
@@ -21,101 +26,71 @@ import RightIcon from "@mui/icons-material/KeyboardArrowRight";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import { resetList } from "../data/listSlice";
-import ListConfigurationDialog from "../views/ListConfigurationDialog";
 import ArmyImage from "../views/components/ArmyImage";
 import _ from "lodash";
 import WebappApiService from "../services/WebappApiService";
 
-interface IFaction {
-  official: boolean;
-  name: string;
-  isLive: boolean;
-  factionName: string;
-  factionRelation: string;
-}
-
 export default function Files() {
-  const army = useSelector((state: RootState) => state.army);
-
-  const [customArmies, setCustomArmies]: [(IArmyData | IFaction)[], any] =
-    useState(null);
-  const [newArmyDialogOpen, setNewArmyDialogOpen] = useState(false);
-  const [showSnackbar, setShowSnackbar] = useState(false);
-  const [searchText, setSearchText] = useState("");
+  const armyState = useSelector((state: RootState) => state.army);
   const dispatch = useDispatch();
   const router = useRouter();
-  const gameSystem = army.gameSystem;
 
-  const filtered = (armies) =>
-    armies &&
-    armies.filter((a) => {
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [searchText, setSearchText] = useState("");
+
+  const search = (armies) =>
+    armies?.filter((a) => {
       return (
         a.name.toLowerCase().includes(searchText.toLowerCase()) ||
         a.username?.toLowerCase().includes(searchText.toLowerCase())
       );
     });
 
-  const filteredArmies = customArmies ? filtered(customArmies) : [];
-
+  const gameSystem = armyState.gameSystem;
+  const allArmyBooks = armyState.armyBooks ?? [];
+  const armyBooks = search(allArmyBooks);
   const isLive =
     typeof window !== "undefined"
       ? window.location.host === "opr-army-forge.vercel.app" ||
         window.location.host === "army-forge.onepagerules.com"
       : true;
 
-  useEffect(() => {
-    async function load() {
-      // Redirect to game selection screen if no army selected
-      if (!army.gameSystem) {
-        router.push({ pathname: "gameSystem/", query: router.query }, null, {
-          shallow: true,
-        });
-        return;
-      }
-
-      // Clear any existing units?
-      dispatch(resetList());
-
-      // AF to Web Companion game type mapping
-      const slug = (() => {
-        switch (army.gameSystem) {
-          case "gf":
-            return "grimdark-future";
-          case "gff":
-            return "grimdark-future-firefight";
-          case "aof":
-            return "age-of-fantasy";
-          case "aofs":
-            return "age-of-fantasy-skirmish";
-          case "aofr":
-            return "age-of-fantasy-regiments";
-        }
-      })();
-
-      const armyBooks = await WebappApiService.getArmyBooks(slug);
-      setCustomArmies(armyBooks);
+  async function loadApiArmyBooks() {
+    // Redirect to game selection screen if no army selected
+    if (!armyState.gameSystem) {
+      router.push({ pathname: "gameSystem/", query: router.query }, null, {
+        shallow: true,
+      });
+      return;
     }
-    load();
-  }, [army.gameSystem]);
+
+    // Clear any existing units?
+    dispatch(resetList());
+
+    dispatch(getArmyBooks(armyState.gameSystem));
+  }
 
   useEffect(() => {
-    if (customArmies && router.query) {
+    loadApiArmyBooks();
+  }, [armyState.gameSystem]);
+
+  // TODO: Might not need this...
+  useEffect(() => {
+    if (allArmyBooks && router.query) {
       let armyId = router.query.armyId as string;
-      let army = customArmies.find((t: IArmyData) => t.uid == armyId);
+      let army = allArmyBooks.find((t: IArmyData) => t.uid == armyId);
       if (army) {
         chooseArmy(army);
       }
     }
-  }, [customArmies]);
+  }, [allArmyBooks]);
 
-  const officialFactions = !customArmies
-    ? []
-    : _.groupBy(
-        filteredArmies.filter((ca) => ca.official && ca.factionName),
-        (a) => a.factionName
-      );
+  const officialFactions = _.groupBy(
+    armyBooks?.filter((ca) => ca.official && ca.factionName) ?? [],
+    (a) => a.factionName
+  );
 
-  const officialArmies = filteredArmies
+  const officialArmies = armyBooks
     ?.filter((ca) => ca.official && !ca.factionName)
     .concat(
       Object.keys(officialFactions).map((key) => ({
@@ -134,47 +109,22 @@ export default function Files() {
   const officialActiveArmies = officialArmies?.filter((ca) => ca.isLive);
   const officialInactiveArmies = officialArmies?.filter((ca) => !ca.isLive);
 
-  const chooseArmy = (army) => {
+  const customArmies = armyBooks?.filter((a) => a.official === false);
+
+  const chooseArmy = async (army) => {
     const uid = army.uid;
-    router.replace({ query: { ...router.query, armyId: uid } }, null, {
-      shallow: true,
-    });
-    selectCustomList({
-      ...army,
-      uid: uid,
-    });
+    const navigateToConfig = () => {
+      router.push({
+        pathname: "/listConfiguration",
+        query: { ...router.query, armyId: uid, faction: army.factionName },
+      });
+    };
+
+    dispatch(loadArmyData(null));
+    navigateToConfig();
   };
 
-  const selectCustomList = async (customArmy) => {
-    if (customArmy.factionName) {
-      if (customArmies) {
-        const factionArmy = { ...customArmy, name: customArmy.factionName };
-        const related = customArmies.filter(
-          (a) =>
-            a.factionName === customArmy.factionName &&
-            (a.official === true || !customArmy.official)
-        );
-
-        console.log(factionArmy);
-        dispatch(loadArmyData(factionArmy));
-        dispatch(loadChildArmyData(related as IArmyData[]));
-        setNewArmyDialogOpen(!!related);
-      }
-    } else {
-      dispatch(loadChildArmyData(null));
-      const armyBookData: any = await WebappApiService.getArmyBookData(
-        customArmy.uid,
-        gameSystem
-      );
-      dispatch(loadArmyData(armyBookData));
-      setNewArmyDialogOpen(!!armyBookData);
-      // console.error(`Failed to get Army data: ${err}`);
-      // setNewArmyDialogOpen(false);
-      // setShowSnackbar(true);
-    }
-  };
-
-  const gfSection = (armies, enabled) =>
+  const section = (armies, enabled) =>
     armies.map((army, index) => (
       <Tile
         key={index}
@@ -231,8 +181,6 @@ export default function Files() {
     />
   );
 
-  const webAppMode = true; //army.gameSystem === "gf" || army.gameSystem === "aof";
-
   const activeArmies = isLive
     ? officialActiveArmies
     : officialActiveArmies.concat(officialInactiveArmies);
@@ -264,104 +212,69 @@ export default function Files() {
           <div className="mb-4 has-text-centered is-clearfix">
             <h3 className="is-size-4 pt-4">Choose your army</h3>
           </div>
-          {webAppMode && (
+          {!(armyBooks?.length > 0) && (
+            <div className="column is-flex is-flex-direction-column is-align-items-center	">
+              <CircularProgress />
+              <p>Loading armies...</p>
+            </div>
+          )}
+          <div className="columns is-mobile is-multiline">
+            {section(
+              _.sortBy(activeArmies, (a) => a.name),
+              true
+            )}
+          </div>
+          {(!isLive || router.query.dataSourceUrl) && customArmies?.length > 0 && (
             <>
-              {!officialArmies && (
-                <div className="column is-flex is-flex-direction-column is-align-items-center	">
-                  <CircularProgress />
-                  <p>Loading armies...</p>
-                </div>
-              )}
-              {
-                <>
-                  <div className="columns is-mobile is-multiline">
-                    {gfSection(
-                      _.sortBy(activeArmies, (a) => a.name),
-                      true
-                    )}
-                  </div>
-                  {officialInactiveArmies.length > 0 && (
-                    <>
-                      <h3 className="is-size-4 has-text-centered mb-4 pt-4">
-                        Coming Soon...
-                      </h3>
-                      <div className="columns is-mobile is-multiline">
-                        {gfSection(officialInactiveArmies, false)}
+              <h3>Custom Armies</h3>
+              <div className="columns is-multiline">
+                {customArmies.map((customArmy: IArmyData, i) => (
+                  <div key={i} className="column is-half">
+                    <Card
+                      elevation={1}
+                      className="interactable"
+                      style={{
+                        backgroundColor: customArmy.official ? "#F9FDFF" : null,
+                        borderLeft: customArmy.official
+                          ? "2px solid #0F71B4"
+                          : null,
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        chooseArmy(customArmy);
+                      }}
+                    >
+                      <div className="is-flex is-flex-grow-1 is-align-items-center p-4">
+                        <ArmyImage
+                          className="mr-2"
+                          size="32px"
+                          name={customArmy.name}
+                          armyData={customArmy}
+                        />
+                        <div className="is-flex-grow-1">
+                          <p className="mb-1" style={{ fontWeight: 600 }}>
+                            {customArmy.name}
+                          </p>
+                          <div
+                            className="is-flex"
+                            style={{ fontSize: "14px", color: "#666" }}
+                          >
+                            {customArmy.versionString} by {customArmy.username}
+                          </div>
+                        </div>
+                        <IconButton color="primary">
+                          <RightIcon />
+                        </IconButton>
                       </div>
-                    </>
-                  )}
-                </>
-              }
+                    </Card>
+                  </div>
+                ))}
+              </div>
             </>
           )}
-          {(!isLive || router.query.dataSourceUrl) &&
-            (customArmies ? (
-              <>
-                <h3>Custom Armies</h3>
-                <div className="columns is-multiline">
-                  {filteredArmies
-                    .filter((a) => a.official === false)
-                    .map((customArmy: IArmyData, i) => (
-                      <div key={i} className="column is-half">
-                        <Card
-                          elevation={1}
-                          className="interactable"
-                          style={{
-                            backgroundColor: customArmy.official
-                              ? "#F9FDFF"
-                              : null,
-                            borderLeft: customArmy.official
-                              ? "2px solid #0F71B4"
-                              : null,
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            chooseArmy(customArmy);
-                          }}
-                        >
-                          <div className="is-flex is-flex-grow-1 is-align-items-center p-4">
-                            <ArmyImage
-                              className="mr-2"
-                              size="32px"
-                              name={customArmy.name}
-                              armyData={customArmy}
-                            />
-                            <div className="is-flex-grow-1">
-                              <p className="mb-1" style={{ fontWeight: 600 }}>
-                                {customArmy.name}
-                              </p>
-                              <div
-                                className="is-flex"
-                                style={{ fontSize: "14px", color: "#666" }}
-                              >
-                                {customArmy.versionString} by{" "}
-                                {customArmy.username}
-                              </div>
-                            </div>
-                            {/* <p className="mr-2">{u.cost}pts</p> */}
-                            <IconButton color="primary">
-                              <RightIcon />
-                            </IconButton>
-                          </div>
-                        </Card>
-                      </div>
-                    ))}
-                </div>
-              </>
-            ) : (
-              <div className="is-flex is-flex-direction-column is-align-items-center	">
-                <CircularProgress />
-                <p>Loading custom armies...</p>
-              </div>
-            ))}
         </div>
       </div>
-      <ListConfigurationDialog
-        isEdit={false}
-        open={newArmyDialogOpen}
-        setOpen={setNewArmyDialogOpen}
-        customArmies={customArmies}
-      />
+
       <Snackbar
         autoHideDuration={4000}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}

@@ -1,7 +1,7 @@
 import { IconButton } from "@mui/material";
 import DownIcon from "@mui/icons-material/KeyboardArrowDown";
 import UpIcon from "@mui/icons-material/KeyboardArrowUp";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   ISelectedUnit,
   IUpgrade,
@@ -9,7 +9,6 @@ import {
 } from "../../../data/interfaces";
 import { applyUpgrade, removeUpgrade } from "../../../data/listSlice";
 import UpgradeService from "../../../services/UpgradeService";
-import { RootState } from "../../../data/store";
 
 export default function UpgradeUpDown({
   selectedUnit,
@@ -21,14 +20,13 @@ export default function UpgradeUpDown({
   option: IUpgradeOption;
 }) {
   const dispatch = useDispatch();
-  const army = useSelector((state: RootState) => state.army.data);
 
   const incrementUpgrade = (
     unit: ISelectedUnit,
     upgrade: IUpgrade,
     option: IUpgradeOption
   ) => {
-    dispatch(applyUpgrade({ unitId: unit.selectionId, upgrade, option, army }));
+    dispatch(applyUpgrade({ unitId: unit.selectionId, upgrade, option }));
   };
   const decrementUpgrade = (
     unit: ISelectedUnit,

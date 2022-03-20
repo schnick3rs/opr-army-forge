@@ -30,19 +30,19 @@ export default function UnitEquipmentTable({
   const isWeapon = (e) => e.attacks;
 
   const weaponsFromItems = _.flatMap(
-    unit.equipment.filter((e) => e.type === "ArmyBookItem"),
+    unit.loadout.filter((e) => e.type === "ArmyBookItem"),
     (e) =>
       (e as IUpgradeGainsItem).content.filter(
         (item) => item.type === "ArmyBookWeapon"
       )
   );
-  const weapons = unit.equipment
+  const weapons = unit.loadout
     .filter((e) => isWeapon(e))
     .concat(
       weaponsFromItems.map((item) => ({ ...item, count: item.count ?? 1 }))
     );
   console.log("Weapons", JSON.parse(JSON.stringify(weapons)));
-  const equipment = unit.equipment.filter((e) => !isWeapon(e));
+  const equipment = unit.loadout.filter((e) => !isWeapon(e));
   const combinedEquipment = equipment.map((e) => {
     if (e.type === "ArmyBookItem")
       return {

@@ -6,6 +6,8 @@ import { nanoid } from "nanoid";
 import _ from "lodash";
 import UnitService from "./UnitService";
 import { IArmyData } from "../data/armySlice";
+import { getContainerUtilityClass } from "@mui/material";
+import { logState, makeCopy } from "./Helpers";
 
 export default class UpgradeService {
 
@@ -17,23 +19,21 @@ export default class UpgradeService {
       .reduce((value, current) => value + UpgradeService.calculateUnitTotal(current), 0);
   }
 
-  public static buildUpgrades(upgradePackages: IUpgradePackage[], unit: ISelectedUnit) {
+  public static buildUpgrades(unit: ISelectedUnit) {
 
     if (!unit)
       return null;
 
-    const sections: IUpgrade[] = _.flatMap(upgradePackages, (pkg: IUpgradePackage) => pkg.sections);
-
-    const copyUnit: ISelectedUnit = JSON.parse(JSON.stringify(unit));
+    unit.loadout = JSON.parse(JSON.stringify(unit.equipment));
 
     for (let upgrade of unit.selectedUpgrades) {
       this.applyUpgrade(
-        copyUnit,
-        sections.find(s => s.id === upgrade.parentSectionId),
-        JSON.parse(JSON.stringify(upgrade)));
+        unit,
+        upgrade.upgrade,
+        upgrade.option);
     }
 
-    return copyUnit;
+    return unit;
   }
 
   private static applyUpgrade(unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption) {
@@ -50,12 +50,6 @@ export default class UpgradeService {
       .gains
       .filter(item => item.type === "ArmyBookItem" || item.type === "ArmyBookWeapon");
 
-    const gainRules = option
-      .gains
-      .filter(item => item.type === "ArmyBookRule" || item.type === "ArmyBookDefense");
-
-    //unit.specialRules = unit.specialRules.concat(gainRules as any);
-
     if (upgrade.type === "upgradeRule") {
       // TODO: Refactor this - shouldn't be using display name func to compare probably!
       const existingRuleIndex = unit
@@ -70,7 +64,7 @@ export default class UpgradeService {
     }
     else if (upgrade.type === "upgrade") {
 
-      unit.equipment = unit.equipment
+      unit.loadout = unit.loadout
         .concat(gainEquipment);
 
     }
@@ -94,7 +88,7 @@ export default class UpgradeService {
         toReplace.count -= removeCount * (countMatch ? parseInt(countMatch[1]) : 1);
       }
 
-      unit.equipment = unit.equipment
+      unit.loadout = unit.loadout
         .concat(gainEquipment.map(g => ({
           ...g,
           // "Replace all" is replacing each item with "g.count" copies,
@@ -103,8 +97,17 @@ export default class UpgradeService {
         })));
     }
 
-    unit.equipment = unit.equipment.filter(e => e.count > 0);
-    for (let item of unit.equipment.filter(i => i.type === "ArmyBookItem") as IUpgradeGainsItem[]) {
+    // Remove upgrade/attachments that rely on something that is being removed
+    const toRemove = unit.loadout.filter(e => e.count <= 0);
+    for (let item of toRemove) {
+      for (let dep of (item.dependencies ?? []).filter(dep => dep.type === "upgrade" || dep.type === "attachment")) {
+        this.removeById(unit, dep.upgradeInstanceId);
+      }
+    }
+
+    // Remove entires with no count left
+    unit.loadout = unit.loadout.filter(e => e.count > 0);
+    for (let item of unit.loadout.filter(i => i.type === "ArmyBookItem") as IUpgradeGainsItem[]) {
       item.content = item.content
         .filter(c =>
           c.count === undefined // Keep items that don't have a count property at all
@@ -117,7 +120,7 @@ export default class UpgradeService {
     if (!unit) return 0;
     let cost = unit.cost;
 
-    for (const upgrade of unit.selectedUpgrades) {
+    for (const upgrade of unit.selectedUpgrades.map(su => su.option)) {
       if (upgrade.cost) {
         cost += upgrade.cost;
       }
@@ -128,11 +131,11 @@ export default class UpgradeService {
 
   public static isApplied(unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption): boolean {
 
-    return unit.selectedUpgrades.contains(u => u.id === option.id);
+    return unit.selectedUpgrades.map(su => su.option).contains(u => u.id === option.id);
   }
 
   public static countApplied(unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption): number {
-    return unit.selectedUpgrades.filter(u => u.id === option.id).length;
+    return unit.selectedUpgrades.map(su => su.option).filter(u => u.id === option.id).length;
   }
 
   public static getControlType(unit: ISelectedUnit, upgrade: IUpgrade): "check" | "radio" | "updown" {
@@ -251,9 +254,10 @@ export default class UpgradeService {
 
       // if replacing equipment, count number of those equipment available
       if (upgrade.replaceWhat) {
-        for (let what of upgrade.replaceWhat as string[]) {
+        for (let what of upgrade.replaceWhat) {
 
-          available = unit.selectedUpgrades
+          // TODO: Refactor
+          available = unit.selectedUpgrades.map(su => su.option)
             // Take all gains from all selected upgrades
             .reduce((gains, next) => gains.concat(next.gains), [])
             // Add original equipment (for each model)
@@ -287,13 +291,11 @@ export default class UpgradeService {
     return true;
   }
 
+  public static apply(unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption) {
 
-
-  public static apply(unit: ISelectedUnit, upgrade: IUpgrade, option: IUpgradeOption, army: IArmyData) {
-
+    const upgradeInstanceId = nanoid(9);
     const optionToApply = {
       ...option,
-      instanceId: nanoid(9),
       gains: option.gains.map(g => ({
         ...g,
         dependencies: [],
@@ -306,23 +308,11 @@ export default class UpgradeService {
     };
 
     // Add this upgrade to the unit
-    unit.selectedUpgrades.push(optionToApply);
-
-    // TODO: Honestly not a fan of this whole system, needs refactor again!
-    // Check if this upgrade displaced anything 
-    const builtUnit = this.buildUpgrades(army.upgradePackages, unit);
-    for (let equipment of unit.equipment.filter(e => e.dependencies?.length > 0)) {
-      const builtEquipment = builtUnit
-        .equipment
-        .find(e => EquipmentService.compareEquipment(e, equipment.name));
-      // If this piece of equipment that has dependencies is not found in the built
-      // unit's equipment, then something overwrote it and the deps should be removed
-      if (!builtEquipment) {
-        for (let dep of equipment.dependencies.filter(dep => dep.type === "upgrade" || dep.type === "attachment")) {
-          this.removeById(unit, dep.upgradeInstanceId);
-        }
-      }
-    }
+    unit.selectedUpgrades.push({
+      instanceId: upgradeInstanceId,
+      upgrade: { ...upgrade, options: null },
+      option: optionToApply
+    });
 
     // Figure out deps...
     if (upgrade.replaceWhat?.length > 0) {
@@ -356,7 +346,7 @@ export default class UpgradeService {
           const count = Math.min(remainingAvailable, remainingToReplace);
           if (count > 0) {
             item.dependencies.push({
-              upgradeInstanceId: optionToApply.instanceId,
+              upgradeInstanceId,
               count: count,
               type: upgrade.type
             });
@@ -379,14 +369,21 @@ export default class UpgradeService {
             break;
 
           const upgrade = unit.selectedUpgrades[i - 1];
-          const nestedItems = _.flatMap(
-            upgrade.gains.filter(e => e.type === "ArmyBookItem"),
-            (e: IUpgradeGainsItem) => e.content);
-          const allGains = upgrade.gains.concat(nestedItems);
-          applyDependency(allGains);
+
+          applyDependency(this.getAllGains(upgrade.option));
         }
       }
     }
+
+    unit = this.buildUpgrades(unit);
+  }
+
+  public static getAllGains(option: IUpgradeOption) {
+    const nestedItems = _.flatMap(
+      option.gains.filter(e => e.type === "ArmyBookItem"),
+      (e: IUpgradeGainsItem) => e.content);
+
+    return option.gains.concat(nestedItems);
   }
 
 
@@ -395,7 +392,15 @@ export default class UpgradeService {
 
     console.log("Removing option...", JSON.parse(JSON.stringify(option)));
 
-    const removeId = unit.selectedUpgrades.findLast(u => u.id === option.id).instanceId;
+    const removeId = (() => {
+      for (let i = unit.selectedUpgrades.length - 1; i >= 0; i--) {
+        const upgrade = unit.selectedUpgrades[i];
+        if (upgrade.option.id === option.id)
+          return upgrade.instanceId;
+      }
+      return null;
+    })();
+
     this.removeById(unit, removeId);
   }
 
@@ -405,15 +410,15 @@ export default class UpgradeService {
 
     console.log("Removing...", JSON.parse(JSON.stringify(toRemove)));
 
-    for (let gain of toRemove.gains) {
+    for (let gain of toRemove.option.gains) {
       if (gain.type === "ArmyBookItem") {
         for (let nestedItem of (gain as IUpgradeGainsItem).content) {
-          for (let dep of nestedItem.dependencies) {
+          for (let dep of makeCopy(nestedItem.dependencies)) {
             this.removeById(unit, dep.upgradeInstanceId);
           }
         }
       }
-      for (let dep of gain.dependencies) {
+      for (let dep of makeCopy(gain.dependencies)) {
         this.removeById(unit, dep.upgradeInstanceId);
       }
     }
@@ -431,13 +436,12 @@ export default class UpgradeService {
     for (let opt of unit.equipment)
       removeFromDeps(opt.dependencies ?? []);
 
-    for (let opt of _.flatMap(unit.selectedUpgrades, x => x.gains) as IUpgradeGains[]) {
+    const allGainsOfAllUpgrades = unit.selectedUpgrades.map(x => this.getAllGains(x.option));
+    for (let opt of _.flatMap(allGainsOfAllUpgrades, x => x) as IUpgradeGains[]) {
       removeFromDeps(opt.dependencies ?? []);
-      if (opt.type === "ArmyBookItem") {
-        for (let content of (opt as IUpgradeGainsItem).content) {
-          removeFromDeps(content.dependencies ?? []);
-        }
-      }
     }
+
+    // Expensive to put this here but guarantees it'll be up to date!
+    unit = this.buildUpgrades(unit);
   }
 }
