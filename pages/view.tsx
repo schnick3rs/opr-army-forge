@@ -1,5 +1,4 @@
-import Head from "next/head";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSelector } from 'react-redux'
 import { RootState } from '../data/store'
 import { useRouter } from "next/router";
@@ -10,13 +9,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ViewAgendaIcon from '@mui/icons-material/ViewAgenda';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import UpgradeService from "../services/UpgradeService";
 import ClearIcon from "@mui/icons-material/Clear";
 
 export default function View() {
 
   const list = useSelector((state: RootState) => state.list);
-  const army = useSelector((state: RootState) => state.army);
   const router = useRouter();
 
   const [isCardView, setCardView] = useState(true);
@@ -92,7 +89,7 @@ export default function View() {
       <div className="px-4">
         {
           isCardView
-            ? <ViewCards showPsychic={showPsychic} showFullRules={showFullRules} showPointCosts={showPointCosts} />
+            ? <ViewCards showPsychic={showPsychic} showFullRules={showFullRules} showPointCosts={showPointCosts} combineSameUnits={combineSameUnits} />
             : <ViewList showPsychic={showPsychic} showFullRules={showFullRules} showPointCosts={showPointCosts} />
         }
       </div>
