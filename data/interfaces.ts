@@ -15,9 +15,13 @@ export interface ISavedListState extends Omit<ListState, 'units'> {
   units: ISavedUnit[];
 }
 
-export interface ISavedUnit extends IUnitSelectionData {
+export interface ISavedUnit extends Omit<IUnitSelectionData, 'loadout' | 'selectedUpgrades'> {
   id: string;
-  equipment: { id: string, count: number }[];
+  selectedUpgrades: {
+    instanceId: string,
+    upgradeId: string,
+    optionId: string
+  }[]
 }
 
 export interface ISpecialRule {

@@ -5,9 +5,7 @@ import RulesService from "./RulesService";
 import { nanoid } from "nanoid";
 import _ from "lodash";
 import UnitService from "./UnitService";
-import { IArmyData } from "../data/armySlice";
-import { getContainerUtilityClass } from "@mui/material";
-import { logState, makeCopy } from "./Helpers";
+import { makeCopy } from "./Helpers";
 
 export default class UpgradeService {
 

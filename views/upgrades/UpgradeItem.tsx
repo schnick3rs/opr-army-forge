@@ -86,7 +86,7 @@ export default function UpgradeItem({ selectedUnit, upgrade, option }: { selecte
             const e = group[0];
             const count = group.reduce((c, next) => c + (next.count || 1), 0);
 
-            return <UpgradeItemDisplay key={i} eqp={e} count={count} isValid={isValid} />;
+            return <UpgradeItemDisplay key={key} eqp={e} count={count} isValid={isValid} />;
           }) : <span style={{ color: "#000000" }}>None</span>
         }
       </div>
