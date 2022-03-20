@@ -1,12 +1,11 @@
 import { Checkbox } from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   ISelectedUnit,
   IUpgrade,
   IUpgradeOption,
 } from "../../../data/interfaces";
 import { applyUpgrade, removeUpgrade } from "../../../data/listSlice";
-import { RootState } from "../../../data/store";
 import UpgradeService from "../../../services/UpgradeService";
 
 export default function UpgradeCheckbox({
@@ -19,7 +18,6 @@ export default function UpgradeCheckbox({
   option: IUpgradeOption;
 }) {
   const dispatch = useDispatch();
-  const army = useSelector((state: RootState) => state.army.data);
   const isApplied = (option) =>
     UpgradeService.isApplied(selectedUnit, upgrade, option);
   const isValid = UpgradeService.isValid(selectedUnit, upgrade, option);
@@ -30,7 +28,7 @@ export default function UpgradeCheckbox({
     if (!applied) {
       // Apply the selected upgrade
       dispatch(
-        applyUpgrade({ unitId: selectedUnit.selectionId, upgrade, option, army })
+        applyUpgrade({ unitId: selectedUnit.selectionId, upgrade, option })
       );
     } else {
       // Deselecting the already selected option in the group

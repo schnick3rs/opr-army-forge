@@ -59,7 +59,7 @@ function UpgradeItemDisplay({ eqp, count, isValid }) {
           {count > 1 && <span>{count}x </span>}
           <span className={styles.upgradeName} style={{ color: colour }}>{name} </span>
           <span className={styles.upgradeRules} style={{ color: subtextColour }}>
-            ({item.content.map((c, i) => (<>{i === 0 ? "" : ", "}<UpgradeItemDisplay eqp={c} count={count} isValid={isValid} /></>))})
+            ({item.content.map((c, i) => (<>{i === 0 ? "" : ", "}<UpgradeItemDisplay key={c.id} eqp={c} count={count} isValid={isValid} /></>))})
           </span>
         </>
       );

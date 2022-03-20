@@ -45,7 +45,8 @@ export interface IUnit {
 export interface IUnitSelectionData {
   selectionId: string;
   customName?: string;
-  selectedUpgrades: IUpgradeOption[];
+  selectedUpgrades: { instanceId: string, upgrade: IUpgrade, option: IUpgradeOption }[];
+  loadout: IUpgradeGains[];
   combined: boolean;
   joinToUnit?: string;
 }
@@ -68,7 +69,6 @@ export interface IUpgrade {
 }
 
 export interface IUpgradeOption {
-  instanceId: string;
   id: string;
   parentSectionId: string;
   cost: number;

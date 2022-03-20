@@ -7,34 +7,26 @@ import { useMediaQuery } from 'react-responsive';
 import MobileView from "../views/listBuilder/MobileView";
 import DesktopView from "../views/listBuilder/DesktopView";
 import { setGameRules } from "../data/armySlice";
+import { gameSystemToSlug } from "../services/Helpers";
 
 export default function List() {
 
-  const army = useSelector((state: RootState) => state.army);
+  const armyState = useSelector((state: RootState) => state.army);
   const router = useRouter();
   const dispatch = useDispatch();
 
   const [competitive, setCompetitive] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   // Load army list file 
   useEffect(() => {
     // Redirect to game selection screen if no army selected
-    if (!army.loaded) {
-      router.push({pathname: "gameSystem/", query: router.query}, null, { shallow: true });
+    if (!armyState.loaded) {
+      router.push({pathname: "/gameSystem", query: router.query}, null, { shallow: true });
       return;
     }
 
     // AF to Web Companion game type mapping
-    const slug = (() => {
-      switch (army.gameSystem) {
-        case "gf": return "grimdark-future";
-        case "gff": return "grimdark-future-firefight";
-        case "aof": return "age-of-fantasy";
-        case "aofs": return "age-of-fantasy-skirmish";
-        case "aofr": return "age-of-fantasy-regiments";
-      }
-    })();
+    const slug = gameSystemToSlug(armyState.gameSystem);
 
     // Load army rules
     fetch(`https://webapp.onepagerules.com/api/content/game-systems/${slug}/special-rules`)
@@ -57,7 +49,7 @@ export default function List() {
         <title>OPR Army Forge</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      {army.loaded ? (isBigScreen ? <DesktopView competitive={competitive} setCompetitive={setCompetitive} /> : <MobileView competitive={competitive} setCompetitive={setCompetitive} />) : null}
+      {armyState.loaded ? (isBigScreen ? <DesktopView competitive={competitive} setCompetitive={setCompetitive} /> : <MobileView competitive={competitive} setCompetitive={setCompetitive} />) : null}
     </>
   );
 }

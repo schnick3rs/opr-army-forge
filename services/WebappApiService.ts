@@ -18,7 +18,6 @@ export default class WebappApiService {
   public static async getArmyBooks(gameSystemSlug: string) {
     const res = await fetch(this.getUrl() + "/army-books?gameSystemSlug=" + gameSystemSlug);
     const data = await res.json();
-    console.log("Army books", data);
     return data;
   }
 
@@ -65,8 +64,6 @@ export default class WebappApiService {
       })),
       upgradePackages: upgradePackages
     };
-
-    console.log("Army data", transformedData);
 
     return transformedData;
   };

@@ -98,11 +98,9 @@ export function MainList({ onSelected, onUnitRemoved, mobile=false }) {
 function MainListItem({ list, unit, expanded, onSelected, onUnitRemoved }) {
 
   const dispatch = useDispatch();
-  const upgradePackages = useSelector((state: RootState) => state.army.data.upgradePackages);
 
-  const builtUnit = UpgradeService.buildUpgrades(upgradePackages, unit);
-
-  const weaponNames = builtUnit.equipment
+  const weaponNames = unit
+    .loadout
     .map(u => ({ name: u.name, count: u.count }));
 
   const weaponGroups = _.groupBy(weaponNames, x => x.name);

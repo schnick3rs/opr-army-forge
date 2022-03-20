@@ -13,14 +13,15 @@ export default class UnitService {
   }
 
   public static getAllEquipment(unit: ISelectedUnit) {
-    const items = unit.equipment.filter(e => e.type === "ArmyBookItem")
+    const items = unit.loadout.filter(e => e.type === "ArmyBookItem")
     const itemContent = _.flatMap(items, (i: IUpgradeGainsItem) => i.content);
-    return unit.equipment.concat(itemContent);
+    return unit.loadout.concat(itemContent);
   }
 
   public static getAllUpgrades(unit: ISelectedUnit, excludeModels: boolean): IUpgradeGains[] {
     return unit
       .selectedUpgrades
+      .map(x => x.option)
       .filter(u => excludeModels ? !u.isModel : true)
       .reduce((value, option) => value.concat(option.gains), []);
   }
@@ -58,7 +59,11 @@ export default class UnitService {
   }
 
   public static getSize(unit: ISelectedUnit): number {
-    const extraModelCount = unit.selectedUpgrades.filter(u => u.isModel).length;
+    const extraModelCount = unit
+      .selectedUpgrades
+      .map(x => x.option)
+      .filter(u => u.isModel)
+      .length;
     return unit.size + extraModelCount;
   }
 
@@ -72,7 +77,8 @@ export default class UnitService {
       equipment: unit.equipment.map(eqp => ({
         ...eqp,
         count: eqp.count || unit.size // Add count to unit size if not already present
-      }))
+      })),
+      loadout: []
     }
   }
 

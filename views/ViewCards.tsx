@@ -25,8 +25,7 @@ export default function ViewCards({ showPsychic, showFullRules, showPointCosts }
   const ruleDefinitions: IGameRule[] = gameRules.concat(armyRules);
 
   const units = (list?.units ?? [])
-    .filter(u => u.selectionId !== "dummy")
-    .map(u => UpgradeService.buildUpgrades(army.data.upgradePackages, u));
+    .filter(u => u.selectionId !== "dummy");
   for (let unit of units) {
     delete unit.selectionId;
   }

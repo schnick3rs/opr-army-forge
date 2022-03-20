@@ -1,13 +1,10 @@
 import React, { Fragment, useEffect } from "react";
 import { useSelector } from 'react-redux'
 import { RootState } from '../data/store'
-import { useRouter } from "next/router";
 import { Paper, Card } from "@mui/material";
 import RuleList from "../views/components/RuleList";
-import DataParsingService from "../services/DataParsingService";
-import { IGameRule } from "../data/armySlice";
 import UpgradeService from "../services/UpgradeService";
-import { Accordion, AccordionDetails, AccordionSummary, IconButton } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import UnitService from "../services/UnitService";
 import { ISelectedUnit, IUpgradeGains, IUpgradeGainsItem, IUpgradeGainsMultiWeapon, IUpgradeGainsRule, IUpgradeGainsWeapon } from "../data/interfaces";
 import pluralise from "pluralize";
@@ -17,12 +14,10 @@ export default function ViewList({ showPsychic, showFullRules, showPointCosts })
 
   const list = useSelector((state: RootState) => state.list);
   const army = useSelector((state: RootState) => state.army);
-  const router = useRouter();
 
   const gameRules = army.rules;
   const armyRules = army.data?.specialRules;
   const spells = army.data?.spells || [];
-  const ruleDefinitions: IGameRule[] = gameRules.concat(armyRules);
 
   return (
     <div>
@@ -30,7 +25,7 @@ export default function ViewList({ showPsychic, showFullRules, showPointCosts })
         (list?.units || []).map((s: ISelectedUnit, index: number) => {
 
           const upgrades: IUpgradeGains[] = s.equipment
-            .concat(s.selectedUpgrades.reduce((val, next) => val.concat(next.gains), []))
+            .concat(s.selectedUpgrades.map(x => x.option).reduce((val, next) => val.concat(next.gains), []))
             .filter(u => u.count > 0);
 
           const displayUpgrade = (eqp: IUpgradeGains, count) => {
