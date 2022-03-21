@@ -36,7 +36,7 @@ export function Upgrades({ mobile = false }) {
   const dispatch = useDispatch();
   const [dummy, setDummy] = useState(false);
 
-  const competitive = true;
+  const competitive = false;
   const selectedUnit = UnitService.getSelected(list);
 
   useEffect(() => {
