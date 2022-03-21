@@ -15,3 +15,26 @@ export function distinct(arr: any[], property?: string) {
       results.push(item);
   return results;
 };
+
+export function logState(msg: string, state: any) {
+  console.log(msg, makeCopy(state));
+}
+
+export function makeCopy(obj: any) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+export function gameSystemToSlug(gameSystem) {
+  switch (gameSystem) {
+    case "gf":
+      return "grimdark-future";
+    case "gff":
+      return "grimdark-future-firefight";
+    case "aof":
+      return "age-of-fantasy";
+    case "aofs":
+      return "age-of-fantasy-skirmish";
+    case "aofr":
+      return "age-of-fantasy-regiments";
+  }
+}

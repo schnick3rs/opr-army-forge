@@ -1,4 +1,6 @@
 import router from "next/router";
+import { IArmyData } from "../data/armySlice";
+import UnitService from "./UnitService";
 
 export default class WebappApiService {
 
@@ -16,7 +18,6 @@ export default class WebappApiService {
   public static async getArmyBooks(gameSystemSlug: string) {
     const res = await fetch(this.getUrl() + "/army-books?gameSystemSlug=" + gameSystemSlug);
     const data = await res.json();
-    console.log("Army books", data);
     return data;
   }
 
@@ -34,9 +35,36 @@ export default class WebappApiService {
 
     const armyBookRes = await fetch(this.getUrl() + `/army-books/${armyId}~${gameSystemId}?armyForge=true`);
 
-    const data = await armyBookRes.json();
-    console.log("Army data", data);
+    const data: IArmyData = await armyBookRes.json();
 
-    return data;
+    const upgradePackages = data.upgradePackages.map(upgradePackage => ({
+      ...upgradePackage,
+      sections: upgradePackage.sections.map(section => ({
+        ...section,
+        options: section.options.map(option => {
+          const result: any = {
+            ...option,
+            parentSectionId: section.uid
+          };
+          delete result.proposedCost;
+          delete result.proposedCostHint;
+          delete result.proposedVersion;
+          delete result.parentPackageUid;
+          delete result.parentSectionUid;
+          return result;
+        })
+      }))
+    }));
+
+    const transformedData: IArmyData = {
+      ...data,
+      units: data.units.map(unit => ({
+        ...unit,
+        disabledUpgradeSections: UnitService.getDisabledUpgradeSections(unit, upgradePackages)
+      })),
+      upgradePackages: upgradePackages
+    };
+
+    return transformedData;
   };
 }

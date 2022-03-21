@@ -1,11 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { ISelectedUnit, IUpgrade, IUpgradeOption } from './interfaces';
+import { ISelectedUnit, IUnit, IUpgrade, IUpgradeOption } from './interfaces';
 import UpgradeService from '../services/UpgradeService';
 import { debounce } from 'throttle-debounce';
 import { current } from 'immer';
 import PersistenceService from '../services/PersistenceService';
 import { nanoid } from "nanoid";
 import UnitService from '../services/UnitService';
+import { IArmyData } from './armySlice';
 
 export interface ListState {
   creationTime: string;
@@ -44,8 +45,7 @@ export const listSlice = createSlice({
         units: [],
         selectedUnitId: null,
         undoUnitRemove: null,
-        points: 0,
-        competitive: true
+        points: 0
       };
     },
     createList: (state, action: PayloadAction<{ name: string; pointsLimit?: number; creationTime: string; }>) => {
@@ -67,8 +67,9 @@ export const listSlice = createSlice({
     loadSavedList(state, action: PayloadAction<ListState>) {
       return { ...action.payload };
     },
-    addUnit: (state, action: PayloadAction<any>) => {
-      state.units.push(action.payload);
+    addUnit: (state, action: PayloadAction<IUnit>) => {
+      const unit = UpgradeService.buildUpgrades(action.payload as ISelectedUnit)
+      state.units.push(unit);
 
       state.points = UpgradeService.calculateListTotal(state.units);
 
@@ -235,7 +236,6 @@ export const listSlice = createSlice({
     joinUnit: (state, action: PayloadAction<{ unitId: string, joinToUnitId: string }>) => {
       const { unitId, joinToUnitId } = action.payload;
       const unit = state.units.filter(u => u.selectionId === unitId)[0];
-      const joinToUnit = state.units.filter(u => u.selectionId === joinToUnitId)[0];
       
       unit.joinToUnit = joinToUnitId;
 
@@ -265,10 +265,10 @@ export const listSlice = createSlice({
       const { unitId, upgrade, option } = action.payload;
       const unit = state.units.filter(u => u.selectionId === unitId)[0];
 
-      UpgradeService.remove(unit, upgrade, option);
+      UpgradeService.remove(unit, option);
       if (unit.combined && upgrade.affects == "all") {
         const partner = state.units.find(t => (t.selectionId == unit.joinToUnit) || (t.combined && (t.joinToUnit == unit.selectionId)))
-        UpgradeService.remove(partner, upgrade, option);
+        UpgradeService.remove(partner, option);
       }
 
       state.points = UpgradeService.calculateListTotal(state.units);
