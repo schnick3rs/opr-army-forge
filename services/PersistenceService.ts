@@ -1,7 +1,7 @@
 import { ConstructionOutlined } from "@mui/icons-material";
 import { Dispatch } from "react";
 import { ArmyState, IArmyData, loadArmyData, setGameSystem } from "../data/armySlice";
-import { ISaveData, ISavedListState, ISelectedUnit, ISpecialRule, IUnit, IUpgrade, IUpgradeGainsWeapon, IUpgradeOption } from "../data/interfaces";
+import { ISaveData, ISavedListState, ISelectedUnit, ISpecialRule, IUnit, IUpgrade, IUpgradeGains, IUpgradeGainsWeapon, IUpgradeOption } from "../data/interfaces";
 import { ListState, loadSavedList } from "../data/listSlice";
 import { groupBy, makeCopy } from "./Helpers";
 import RulesService from "./RulesService";
@@ -141,7 +141,7 @@ export default class PersistenceService {
           const section = allSections.find(sec => sec.uid === option.parentSectionId);
           UpgradeService.apply(unit, section, option);
         }
-        return unit;
+        return UpgradeService.buildUpgrades(unit);
       })
     };
   }
@@ -169,7 +169,7 @@ export default class PersistenceService {
           const option = section.options.find(opt => opt.id === upg.optionId);
           UpgradeService.apply(unit, section, option);
         }
-        return unit;
+        return UpgradeService.buildUpgrades(unit);
       })
     };
   }
@@ -212,13 +212,22 @@ export default class PersistenceService {
       `++ ${list.name} [${list.points}pts] ++\n`
     ];
 
-    const getWeapons = (unit: ISelectedUnit) => {
-      const equipment = unit.equipment
-        .concat(UnitService.getAllUpgradeWeapons(unit) as IUpgradeGainsWeapon[])
-        .filter(e => e.count > 0);
+    const constructLabel = (item: IUpgradeGainsWeapon) => {
+      const count = item.count > 1 ? `${item.count}x ` : "";
+      const range = item.range ? `${item.range}", ` : "";
+      const attacks = item.attacks ? `A${item.attacks}` : ""
+      const rules = item.specialRules?.map(rule => rule.label).join(", ");
+      
+      if (!range && !attacks && !rules)
+        return `${count}${item.name}`;
 
-      return equipment
-        .map(e => `${e.count > 1 ? `${e.count}x ` : ""}${e.label}`)
+      return `${count}${item.name} (${range}${attacks}${rules?.length > 0 ? (", " + rules) : ""})`;
+    };
+
+    const getWeapons = (unit: ISelectedUnit) => {
+
+      return unit.loadout
+        .map(constructLabel)
         .join(", ");
     };
 
