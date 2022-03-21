@@ -58,8 +58,9 @@ export default class WebappApiService {
 
     const transformedData: IArmyData = {
       ...data,
-      units: data.units.map(unit => ({
+      units: data.units.map((unit, index) => ({
         ...unit,
+        sortId: index,
         disabledUpgradeSections: UnitService.getDisabledUpgradeSections(unit, upgradePackages)
       })),
       upgradePackages: upgradePackages
