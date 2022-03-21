@@ -146,7 +146,7 @@ export default class UnitService {
           continue;
 
         // If neither was found, then disable this section
-        disabledSections.push(section.id);
+        disabledSections.push(section.uid);
       }
     }
 

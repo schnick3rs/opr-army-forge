@@ -160,9 +160,9 @@ export default function Load() {
                             <ArmyImage image={save.coverImagePath} name={save.armyName} armyData={{ gameSystem: save.gameSystem }} size={"32px"} />
                           </ListItemAvatar>
                           <ListItemText
-                            className={"ml-2" + (save.saveVersion === 2 ? "" : " has-text-danger")}
+                            className={"ml-2" + (save.saveVersion >= 2 ? "" : " has-text-danger")}
                             primary={title}
-                            secondary={save.saveVersion === 2 ? ("Modified " + modified.toLocaleDateString() + " " + time) : "Outdated save format!"} />
+                            secondary={save.saveVersion >= 2 ? ("Modified " + modified.toLocaleDateString() + " " + time) : "Outdated save format!"} />
                         </ListItemButton>
                       </ListItem>
                     );

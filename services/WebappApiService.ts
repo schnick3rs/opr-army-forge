@@ -44,7 +44,7 @@ export default class WebappApiService {
         options: section.options.map(option => {
           const result: any = {
             ...option,
-            parentSectionId: section.id
+            parentSectionId: section.uid
           };
           delete result.proposedCost;
           delete result.proposedCostHint;

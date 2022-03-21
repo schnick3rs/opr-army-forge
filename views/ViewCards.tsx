@@ -40,7 +40,7 @@ export default function ViewCards({
     return {
       id: unit.id,
       upgrades: unit.selectedUpgrades.map((x) => ({
-        sectionId: x.upgrade.id,
+        sectionId: x.upgrade.uid,
         optionId: x.option.id,
       })),
     };

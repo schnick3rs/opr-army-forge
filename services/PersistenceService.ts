@@ -67,7 +67,7 @@ export default class PersistenceService {
         selectionId: u.selectionId,
         selectedUpgrades: u.selectedUpgrades.map(x => ({
           instanceId: x.instanceId,
-          upgradeId: x.upgrade.id,
+          upgradeId: x.upgrade.uid,
           optionId: x.option.id
         })),
         combined: u.combined,
@@ -138,7 +138,7 @@ export default class PersistenceService {
         const selectedUpgrades: any = u.selectedUpgrades;
         for (let upg of (selectedUpgrades as { id: string }[])) {
           const option = allOptions.find(opt => opt.id === upg.id);
-          const section = allSections.find(sec => sec.id === option.parentSectionId);
+          const section = allSections.find(sec => sec.uid === option.parentSectionId);
           UpgradeService.apply(unit, section, option);
         }
         return unit;
@@ -163,9 +163,9 @@ export default class PersistenceService {
           selectedUpgrades: [],
           loadout: []
         };
-        
+
         for (let upg of u.selectedUpgrades) {
-          const section = allSections.find(sec => sec.id === upg.upgradeId);
+          const section = allSections.find(sec => sec.uid === upg.upgradeId);
           const option = section.options.find(opt => opt.id === upg.optionId);
           UpgradeService.apply(unit, section, option);
         }
@@ -205,7 +205,7 @@ export default class PersistenceService {
     return !!localStorage[this.getSaveKey(list.creationTime)];
   }
 
-  public static copyAsText(list: ListState) {
+  public static getListAsText(list: ListState) {
 
     const lines = [
       `++ ${list.name} [${list.points}pts] ++\n`
@@ -260,6 +260,14 @@ export default class PersistenceService {
       lines.push(getRules(unit) + "\n");
     }
 
-    navigator.clipboard.writeText(lines.join("\n")).then(() => console.log("Copied to clipboard..."));
+    return lines.join("\n");
+  }
+
+  public static copyAsText(list: ListState) {
+
+    navigator
+      .clipboard
+      .writeText(this.getListAsText(list))
+      .then(() => console.log("Copied to clipboard..."));
   }
 }

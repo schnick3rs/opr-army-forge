@@ -243,7 +243,7 @@ export function Upgrades({ mobile = false }) {
           {pkg.sections
             .filter(
               (section) =>
-                selectedUnit.disabledUpgradeSections.indexOf(section.id) === -1
+                selectedUnit.disabledUpgradeSections.indexOf(section.uid) === -1
             )
             .map((u, i) => (
               <div className={"mt-4"} key={i}>

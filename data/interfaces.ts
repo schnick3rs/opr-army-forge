@@ -60,7 +60,8 @@ export interface ISelectedUnit extends IUnit, IUnitSelectionData { }
 type UpgradeType = "replace" | "upgrade" | "upgradeRule" | "attachment";
 
 export interface IUpgrade {
-  id: string;
+  //id: string;
+  uid: string;
   label?: string;
   type: UpgradeType;
   affects?: "any" | "all" | number;
