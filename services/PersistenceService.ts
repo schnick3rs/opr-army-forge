@@ -185,7 +185,8 @@ export default class PersistenceService {
       dispatch(loadSavedList(list));
     };
 
-    const data = await WebappApiService.getArmyBookData(save.armyId, save.gameSystem);
+    const data = await WebappApiService
+      .getArmyBookData(save.armyId.replace("-skirmish", ""), save.gameSystem);
 
     loaded(data);
     callback(data);
