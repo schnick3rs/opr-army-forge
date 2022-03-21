@@ -55,8 +55,9 @@ export default function ListConfiguration() {
   );
   const factionRelation =
     factionData?.length > 0 ? factionData[0].factionRelation : null;
-  const factionRoot = factionData?.find((x) => !x.factionRelation) ?? factionData?.[0];
-console.log(factionRoot);
+  const factionRoot =
+    factionData?.find((x) => !x.factionRelation) ?? factionData?.[0];
+
   useEffect(() => {
     // Ensure gameSystem is set
     if (!armyState.gameSystem) {
@@ -81,7 +82,8 @@ console.log(factionRoot);
         );
       }
       if (factionName) {
-        const rootArmy = factionData.find((x) => x.factionRelation === null) ?? factionData[0];
+        const rootArmy =
+          factionData.find((x) => x.factionRelation === null) ?? factionData[0];
         setSelectedChild(rootArmy.name);
         if (!armyId) {
           dispatch(
@@ -147,7 +149,11 @@ console.log(factionRoot);
     >
       <ListItemText
         style={{ color: !child.isLive ? "#999" : "" }}
-        primary={child.name === factionRoot.name && !factionRoot.factionRelation ? "None" : child.name}
+        primary={
+          child.name === factionRoot.name && !factionRoot.factionRelation
+            ? "None"
+            : child.name
+        }
       />
       <Radio
         disabled={!child.isLive}

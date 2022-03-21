@@ -34,6 +34,7 @@ export interface ISpecialRule {
 
 export interface IUnit {
   id: string;
+  sortId: number;
   category?: string;
   name: string;
   size: number;
