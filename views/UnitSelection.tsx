@@ -45,14 +45,12 @@ function UnitSelectionForArmy({
   army,
 }) {
   // Access the main army definition state
-  const armyData = useSelector((state: RootState) => state.army);
   const list = useSelector((state: RootState) => state.list);
 
   const [expandedId, setExpandedId] = useState(null);
   const [expandAll, setExpandAll] = useState(true);
 
-  // If army has not been selected yet, show nothing
-  if (!armyData.loaded) return null;
+  if (!army) return null;
 
   // Group army units by category
   const isTough = (u: IUnit, threshold) =>
@@ -139,7 +137,8 @@ function UnitSelectionForArmy({
                   const countInList = list?.units.filter(
                     (listUnit) =>
                       listUnit.selectionId !== "dummy" &&
-                      listUnit.name === u.name
+                      listUnit.name === u.name &&
+                      listUnit.armyId === army.uid
                   ).length;
 
                   return (

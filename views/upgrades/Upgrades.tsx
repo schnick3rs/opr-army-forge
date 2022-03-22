@@ -224,7 +224,7 @@ export function Upgrades({ mobile = false }) {
           </div>
           {isPsychic && (
             <div className="px-4 pt-2">
-              <SpellsTable />
+              <SpellsTable unit={selectedUnit} />
             </div>
           )}
           {/* Rules */}

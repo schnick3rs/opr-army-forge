@@ -1,19 +1,40 @@
-import CSS from 'csstype';
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { useSelector } from 'react-redux';
-import { RootState } from '../data/store';
+import CSS from "csstype";
+import {
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
+import { useSelector } from "react-redux";
+import { RootState } from "../data/store";
 
-export default function SpellsTable() {
-
-  const loadedArmyBooks = useSelector((state: RootState) => state.army.loadedArmyBooks);
-  const army = loadedArmyBooks[0];
+export default function SpellsTable({ unit }, { unit: ISelectedUnit }) {
+  const loadedArmyBooks = useSelector(
+    (state: RootState) => state.army.loadedArmyBooks
+  );
+  const army = loadedArmyBooks.find((book) => book.uid === unit.armyId);
   const spells = army?.spells;
 
-  const cellStyle = { paddingLeft: "8px", paddingRight: "8px", borderBottom: "none" };
-  const headerStyle: CSS.Properties = { ...cellStyle, fontWeight: 600, whiteSpace: "nowrap"};
+  const cellStyle = {
+    paddingLeft: "8px",
+    paddingRight: "8px",
+    borderBottom: "none",
+  };
+  const headerStyle: CSS.Properties = {
+    ...cellStyle,
+    fontWeight: 600,
+    whiteSpace: "nowrap",
+  };
 
   return (
-    <TableContainer component={Paper} elevation={0} style={{ border: "1px solid rgba(0,0,0,.12)" }}>
+    <TableContainer
+      component={Paper}
+      elevation={0}
+      style={{ border: "1px solid rgba(0,0,0,.12)" }}
+    >
       <Table size="small">
         <TableHead>
           <TableRow style={{ backgroundColor: "#EBEBEB", fontWeight: 600 }}>
@@ -22,14 +43,15 @@ export default function SpellsTable() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {
-            spells && spells.map(spell => (
+          {spells &&
+            spells.map((spell) => (
               <TableRow key={spell.name}>
-                <TableCell style={headerStyle}>{spell.name} ({spell.threshold}+)</TableCell>
+                <TableCell style={headerStyle}>
+                  {spell.name} ({spell.threshold}+)
+                </TableCell>
                 <TableCell style={cellStyle}>{spell.effect}</TableCell>
               </TableRow>
-            ))
-          }
+            ))}
         </TableBody>
       </Table>
     </TableContainer>
