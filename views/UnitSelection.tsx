@@ -24,15 +24,19 @@ export function UnitSelection({
 }) {
   const armyData = useSelector((state: RootState) => state.army);
 
-  return armyData.loadedArmyBooks.map((book) => (
-    <UnitSelectionForArmy
-      key={book.uid}
-      onSelected={onSelected}
-      addUnit={addUnit}
-      mobile={mobile}
-      army={book}
-    />
-  ));
+  return (
+    <>
+      {armyData.loadedArmyBooks.map((book) => (
+        <UnitSelectionForArmy
+          key={book.uid}
+          onSelected={onSelected}
+          addUnit={addUnit}
+          mobile={mobile}
+          army={book}
+        />
+      ))}
+    </>
+  );
 }
 function UnitSelectionForArmy({
   onSelected,
@@ -88,7 +92,7 @@ function UnitSelectionForArmy({
   const handleAddClick = (unit: IUnit) => {
     addUnit({
       ...unit,
-      armyId: army.uid
+      armyId: army.uid,
     });
   };
   const handleSelectClick = (unit: IUnit) => {

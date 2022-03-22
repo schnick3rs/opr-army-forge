@@ -28,6 +28,7 @@ export default function MobileView() {
   const router = useRouter();
 
   const sheetOpen = (router.query["upgradesOpen"] as string) == "true";
+  const armyData = army?.loadedArmyBooks?.[0];
 
   const [slider, setSlider] = useState(null);
   const [slideIndex, setSlideIndex] = useState(1);
@@ -84,7 +85,7 @@ export default function MobileView() {
             textColor="inherit"
             indicatorColor="primary"
           >
-            <Tab label={`${army?.data?.name} ${army?.data?.versionString}`} />
+            <Tab label={`${armyData?.name} ${armyData?.versionString}`} />
             <Tab label={`My List - ${list.points}pts`} />
           </Tabs>
         </AppBar>
@@ -119,7 +120,7 @@ export default function MobileView() {
                 style={{
                   height: "160px",
                   width: "100%",
-                  backgroundImage: `url("img/gf_armies/${army?.data?.name}.png")`,
+                  backgroundImage: `url("img/gf_armies/${armyData?.name}.png")`,
                   backgroundPosition: "center",
                   backgroundSize: "contain",
                   backgroundRepeat: "no-repeat",
