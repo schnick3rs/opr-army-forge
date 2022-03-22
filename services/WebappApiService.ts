@@ -1,5 +1,6 @@
 import router from "next/router";
 import { IArmyData } from "../data/armySlice";
+import { gameSystemToEnum } from "./Helpers";
 import UnitService from "./UnitService";
 
 export default class WebappApiService {
@@ -23,15 +24,7 @@ export default class WebappApiService {
 
   public static async getArmyBookData(armyId: string, gameSystem: string) {
 
-    const gameSystemId = (() => {
-      switch (gameSystem) {
-        case "gf": return 2;
-        case "gff": return 3;
-        case "aof": return 4;
-        case "aofs": return 5;
-        case "aofr": return 6;
-      }
-    })();
+    const gameSystemId = gameSystemToEnum(gameSystem);
 
     const armyBookRes = await fetch(this.getUrl() + `/army-books/${armyId}~${gameSystemId}?armyForge=true`);
 

@@ -24,6 +24,7 @@ export interface ArmyState {
 export interface IArmyData {
   uid: string;
   name: string;
+  enabledGameSystems: number[];
   factionName: string;
   factionRelation: string;
   versionString: string;

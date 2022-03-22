@@ -38,3 +38,13 @@ export function gameSystemToSlug(gameSystem) {
       return "age-of-fantasy-regiments";
   }
 }
+
+export function gameSystemToEnum(gameSystem) {
+  switch (gameSystem) {
+    case "gf": return 2;
+    case "gff": return 3;
+    case "aof": return 4;
+    case "aofs": return 5;
+    case "aofr": return 6;
+  }
+}

@@ -12,6 +12,7 @@ import { toggleArmyBookSelectionOpen } from "../../data/appSlice";
 import { getArmyBookData, getArmyBooks, IArmyData } from "../../data/armySlice";
 import { RootState, store } from "../../data/store";
 import AddIcon from "@mui/icons-material/Add";
+import { gameSystemToEnum } from "../../services/Helpers";
 
 export default function ArmyBookSelection() {
   const appState = useSelector((state: RootState) => state.app);
@@ -32,10 +33,18 @@ export default function ArmyBookSelection() {
     });
   };
 
-  const notLoadedBooks = armyState.armyBooks?.filter(
-    (book) =>
-      armyState.loadedArmyBooks.some((lb) => lb.uid === book.uid) === false
-  );
+  const notLoadedBooks = armyState.armyBooks
+    ?.filter(
+      (book) =>
+        armyState.loadedArmyBooks.some((lb) => lb.uid === book.uid) === false
+    )
+    .filter(
+      (book) =>
+        book.official &&
+        book.enabledGameSystems.some(
+          (system) => system === gameSystemToEnum(armyState.gameSystem)
+        )
+    );
 
   return (
     <Dialog
