@@ -90,15 +90,12 @@ function UnitSelectionForArmy({
   }
 
   const handleAddClick = (unit: IUnit) => {
-    addUnit({
-      ...unit,
-      armyId: army.uid,
-    });
+    addUnit({ ...unit, armyId: army.uid });
   };
   const handleSelectClick = (unit: IUnit) => {
     if (expandAll && !mobile) {
       //onSelected({...UnitService.getRealUnit(unit), selectionId: null});
-      addUnit(unit, true);
+      addUnit({ ...unit, armyId: army.uid }, true);
       onSelected({ selectionId: "dummy" });
     } else {
       setExpandedId(expandedId === unit.name ? null : unit.name);
