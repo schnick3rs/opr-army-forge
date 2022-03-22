@@ -21,13 +21,14 @@ export default function UpgradeGroup({
   const firstItem =
     controlType === "radio" ? (
       <UpgradeItem selectedUnit={unit} upgrade={upgrade} option={null} />
-    ) : (
-      upgrade.replaceWhat && (
-        <p className="my-2">
-          {upgrade.replaceWhat?.map(getProfile).join(", ")}
-        </p>
-      )
-    );
+    ) : null;
+    // (
+    //   upgrade.replaceWhat && (
+    //     <p className="my-2">
+    //       {upgrade.replaceWhat?.map(getProfile).join(", ")}
+    //     </p>
+    //   )
+    // );
 
   return (
     <Paper className="px-4 py-2" square elevation={0}>
