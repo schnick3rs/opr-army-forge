@@ -32,6 +32,11 @@ export default function ArmyBookSelection() {
     });
   };
 
+  const notLoadedBooks = armyState.armyBooks?.filter(
+    (book) =>
+      armyState.loadedArmyBooks.some((lb) => lb.uid === book.uid) === false
+  );
+
   return (
     <Dialog
       onClose={() => dispatch(toggleArmyBookSelectionOpen(false))}
@@ -39,7 +44,7 @@ export default function ArmyBookSelection() {
     >
       <DialogTitle>Add Army Book</DialogTitle>
       <List>
-        {armyState.armyBooks?.map((book) => (
+        {notLoadedBooks?.map((book) => (
           <ListItem key={book.uid} divider>
             <ListItemText>{book.name}</ListItemText>
             <IconButton color="primary" onClick={() => addArmy(book)}>
