@@ -4,7 +4,6 @@ import { RootState } from "../data/store";
 import { useRouter } from "next/router";
 import {
   Button,
-  CircularProgress,
   List,
   ListItem,
   ListItemText,
@@ -21,7 +20,7 @@ import {
   Radio,
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
-import { createList, updateListSettings } from "../data/listSlice";
+import { createList, resetList, updateListSettings } from "../data/listSlice";
 import {
   getArmyBookData,
   getArmyBooks,
