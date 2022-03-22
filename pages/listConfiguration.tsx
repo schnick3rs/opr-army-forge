@@ -21,7 +21,7 @@ import {
   Radio,
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
-import { createList, updateListSettings } from "../data/listSlice";
+import { createList, resetList, updateListSettings } from "../data/listSlice";
 import {
   getArmyBookData,
   getArmyBooks,
@@ -69,6 +69,9 @@ export default function ListConfiguration() {
       dispatch(getArmyBooks(armyState.gameSystem));
       return;
     }
+
+    if (!isEdit)
+      dispatch(resetList());
 
     // Ensure army data is loaded
     if (!armyState.data) {
