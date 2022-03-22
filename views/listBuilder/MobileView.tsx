@@ -104,7 +104,6 @@ export default function MobileView() {
             <MainList
               onSelected={onUnitSelected}
               onUnitRemoved={() => setShowUndoRemove(true)}
-              mobile
             />
           ) : (
             <div className="p-4 has-text-centered">

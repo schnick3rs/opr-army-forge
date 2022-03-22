@@ -61,6 +61,7 @@ export function MainList({ onSelected, onUnitRemoved }) {
         const armyBook = loadedArmyBooks.find((book) => book.uid === key);
         return (
           <MainListSection
+            key={key}
             army={armyBook}
             showTitle={unitGroupKeys.length > 1}
             group={unitGroups[key]}

@@ -14,20 +14,23 @@ export default function UpgradeGroup({
   const controlType = UpgradeService.getControlType(unit, upgrade);
 
   const getProfile = (target: string) => {
-    var e = unit.equipment.find(e => EquipmentService.compareEquipment(e, target));
+    var e = unit.equipment.find((e) =>
+      EquipmentService.compareEquipment(e, target)
+    );
     return e.label;
   };
 
   const firstItem =
     controlType === "radio" ? (
       <UpgradeItem selectedUnit={unit} upgrade={upgrade} option={null} />
-    ) : (
-      upgrade.replaceWhat && (
-        <p className="my-2">
-          {upgrade.replaceWhat?.map(getProfile).join(", ")}
-        </p>
-      )
-    );
+    ) : null;
+  // (
+  //   upgrade.replaceWhat && (
+  //     <p className="my-2">
+  //       {upgrade.replaceWhat?.map(getProfile).join(", ")}
+  //     </p>
+  //   )
+  // );
 
   return (
     <Paper className="px-4 py-2" square elevation={0}>
