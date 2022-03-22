@@ -8,6 +8,7 @@ import MobileView from "../views/listBuilder/MobileView";
 import DesktopView from "../views/listBuilder/DesktopView";
 import { setGameRules } from "../data/armySlice";
 import { gameSystemToSlug } from "../services/Helpers";
+import PersistenceService from "../services/PersistenceService";
 
 export default function List() {
 
@@ -19,6 +20,15 @@ export default function List() {
   useEffect(() => {
     // Redirect to game selection screen if no army selected
     if (!armyState.loaded) {
+
+      const listId = router.query["listId"] as string;
+      if (listId) {
+        PersistenceService.loadFromKey(dispatch, listId, armyData => {
+
+        });
+        return;
+      }
+
       router.push({pathname: "/gameSystem", query: router.query}, null, { shallow: true });
       return;
     }
