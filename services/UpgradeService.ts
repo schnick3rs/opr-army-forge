@@ -138,6 +138,8 @@ export default class UpgradeService {
 
   public static countAvailable(unit: ISelectedUnit, upgrade: IUpgrade) {
 
+    const appliedInGroup = upgrade.options
+      .reduce((total, opt) => total + this.countApplied(unit, upgrade, opt), 0);
     const groups = _.groupBy(UnitService.getAllEquipment(unit), e => e.name);
     const requiredCount = typeof (upgrade.affects) === "number"
       ? upgrade.affects
@@ -166,15 +168,18 @@ export default class UpgradeService {
       // if (requiredCountForTarget > toReplaceCount)
       //   return 0;
 
-      // // May only select up to the limit
-      // if (typeof (upgrade.select) === "number") {
-      //   // Any model may replace 1...
-      //   if (upgrade.affects === "any") {
-      //     available = Math.min(available, upgrade.select * unit.size);
-      //   } else {
-      //     available = Math.min(available, upgrade.select as any);
-      //   }
-      // }
+      // May only select up to the limit
+      if (typeof (upgrade.select) === "number") {
+        // Any model may replace 1...
+        if (upgrade.affects === "any") {
+          available = Math.min(available, upgrade.select * unit.size);
+        } else {
+          available = Math.min(available, (upgrade.select as any) - appliedInGroup);
+        }
+      }
+      if (typeof (upgrade.affects) === "number") {
+        available = Math.min(available, (upgrade.affects as any) - appliedInGroup);
+      }
     }
 
     return available;
