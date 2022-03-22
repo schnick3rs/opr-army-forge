@@ -23,17 +23,17 @@ import { DropMenu } from "./components/DropMenu";
 
 export function MainList({ onSelected, onUnitRemoved, mobile = false }) {
   const list = useSelector((state: RootState) => state.list);
+  const loadedArmyBooks = useSelector(
+    (state: RootState) => state.army.loadedArmyBooks
+  );
 
   const [expandAll, setExpandAll] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
 
-  const realUnits = list.units.filter((u) => u.selectionId !== "dummy");
-  const joinedUnitIds = realUnits
-    .filter((u) => u.joinToUnit)
-    .map((u) => u.joinToUnit);
-  //const units = list.units.filter(u => joinedUnitIds.indexOf(u.selectionId) === -1);
+  const units = list.units.filter((u) => u.selectionId !== "dummy");
+
   const rootUnits = _.orderBy(
-    realUnits.filter(
+    units.filter(
       (u) =>
         !(
           u.joinToUnit && list.units.some((t) => t.selectionId === u.joinToUnit)
@@ -41,6 +41,9 @@ export function MainList({ onSelected, onUnitRemoved, mobile = false }) {
     ),
     (x) => x.sortId
   );
+
+  const unitGroups = _.groupBy(rootUnits, (x) => x.armyId);
+  const unitGroupKeys = Object.keys(unitGroups);
 
   return (
     <>
@@ -55,11 +58,43 @@ export function MainList({ onSelected, onUnitRemoved, mobile = false }) {
         expanded={expandAll}
         onToggle={() => setExpandAll(!expandAll)}
       />
+      {unitGroupKeys.map((key) => {
+        const armyBook = loadedArmyBooks.find((book) => book.uid === key);
+        return (
+          <MainListSection
+            army={armyBook}
+            showTitle={unitGroupKeys.length > 1}
+            group={unitGroups[key]}
+            expandAll={expandAll}
+            onSelected={onSelected}
+            onUnitRemoved={onUnitRemoved}
+          />
+        );
+      })}
+    </>
+  );
+}
 
+function MainListSection({
+  group,
+  army,
+  showTitle,
+  expandAll,
+  onSelected,
+  onUnitRemoved,
+}) {
+  const list = useSelector((state: RootState) => state.list);
+  return (
+    <>
+      {showTitle && (
+        <p className="px-4 mt-4" style={{ fontWeight: 600 }}>
+          {army.name}
+        </p>
+      )}
       <ul className="mt-2">
         {
           // For each selected unit
-          rootUnits.map((s: ISelectedUnit, index: number) => {
+          group.map((s: ISelectedUnit, index: number) => {
             const isHero = s.specialRules.some((r) => r.name === "Hero");
 
             const attachedUnits: ISelectedUnit[] = UnitService.getAttachedUnits(
@@ -83,10 +118,6 @@ export function MainList({ onSelected, onUnitRemoved, mobile = false }) {
             }, UpgradeService.calculateUnitTotal(s));
 
             const handleClick = (unit) => {
-              if (!mobile)
-                setExpandedId(
-                  expandedId == unit.selectionId ? null : unit.selectionId
-                );
               onSelected(unit);
             };
 
@@ -125,7 +156,7 @@ export function MainList({ onSelected, onUnitRemoved, mobile = false }) {
                     <MainListItem
                       list={list}
                       unit={h}
-                      expanded={expandAll || expandedId == h.selectionId}
+                      expanded={expandAll}
                       onSelected={handleClick}
                       onUnitRemoved={onUnitRemoved}
                     />
@@ -133,7 +164,7 @@ export function MainList({ onSelected, onUnitRemoved, mobile = false }) {
                   <MainListItem
                     list={list}
                     unit={s}
-                    expanded={expandAll || expandedId == s.selectionId}
+                    expanded={expandAll}
                     onSelected={handleClick}
                     onUnitRemoved={onUnitRemoved}
                   />
@@ -141,7 +172,7 @@ export function MainList({ onSelected, onUnitRemoved, mobile = false }) {
                     <MainListItem
                       list={list}
                       unit={u}
-                      expanded={expandAll || expandedId == u.selectionId}
+                      expanded={expandAll}
                       onSelected={handleClick}
                       onUnitRemoved={onUnitRemoved}
                     />
