@@ -21,14 +21,13 @@ import LinkIcon from "@mui/icons-material/Link";
 import _ from "lodash";
 import { DropMenu } from "./components/DropMenu";
 
-export function MainList({ onSelected, onUnitRemoved, mobile = false }) {
+export function MainList({ onSelected, onUnitRemoved }) {
   const list = useSelector((state: RootState) => state.list);
   const loadedArmyBooks = useSelector(
     (state: RootState) => state.army.loadedArmyBooks
   );
 
   const [expandAll, setExpandAll] = useState(true);
-  const [expandedId, setExpandedId] = useState(null);
 
   const units = list.units.filter((u) => u.selectionId !== "dummy");
 
@@ -95,8 +94,6 @@ function MainListSection({
         {
           // For each selected unit
           group.map((s: ISelectedUnit, index: number) => {
-            const isHero = s.specialRules.some((r) => r.name === "Hero");
-
             const attachedUnits: ISelectedUnit[] = UnitService.getAttachedUnits(
               list,
               s
@@ -108,7 +105,6 @@ function MainListSection({
             const hasJoined = attachedUnits.length > 0;
 
             const hasHeroes = hasJoined && heroes.length > 0;
-            const hasNonHeroesJoined = hasJoined && otherJoined.length > 0;
 
             const unitSize = otherJoined.reduce((size, u) => {
               return size + UnitService.getSize(u);

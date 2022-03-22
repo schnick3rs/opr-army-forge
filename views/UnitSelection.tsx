@@ -111,7 +111,8 @@ function UnitSelectionForArmy({
 
   return (
     <aside className={styles.menu + " menu"} style={{ minHeight: "100%" }}>
-      <div className={isBigScreen ? "sticky" : ""}>
+      {/* <div className={isBigScreen ? "sticky" : ""}> */}
+      <div>
         {isBigScreen && (
           <div className="is-flex is-align-items-center">
             <h3 className="is-size-4 px-4 pt-4 is-flex-grow-1">
