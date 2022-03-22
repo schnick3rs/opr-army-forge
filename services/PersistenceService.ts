@@ -216,8 +216,8 @@ export default class PersistenceService {
       const count = item.count > 1 ? `${item.count}x ` : "";
       const range = item.range ? `${item.range}", ` : "";
       const attacks = item.attacks ? `A${item.attacks}` : ""
-      const rules = item.specialRules?.map(rule => rule.label).join(", ");
-      
+      const rules = item.specialRules?.map(RulesService.displayName).join(", ");
+
       if (!range && !attacks && !rules)
         return `${count}${item.name}`;
 
@@ -225,7 +225,7 @@ export default class PersistenceService {
     };
 
     const getWeapons = (unit: ISelectedUnit) => {
-
+      console.log("Loadout", unit.loadout);
       return unit.loadout
         .map(constructLabel)
         .join(", ");

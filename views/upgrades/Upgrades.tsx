@@ -28,6 +28,7 @@ import SpellsTable from "../SpellsTable";
 import { CustomTooltip } from "../components/CustomTooltip";
 import LinkIcon from "@mui/icons-material/Link";
 import { useEffect, useState } from "react";
+import UpgradeService from "../../services/UpgradeService";
 
 export function Upgrades({ mobile = false }) {
   const list = useSelector((state: RootState) => state.list);
@@ -266,8 +267,7 @@ export function Upgrades({ mobile = false }) {
                       lineHeight: 1.7,
                     }}
                   >
-                    {/* {UpgradeService.displayName(u, selectedUnit)}: */}
-                    {u.label}
+                    {UpgradeService.enrichDisplayLabel(selectedUnit, u)}
                   </p>
                 </div>
                 <UpgradeGroup unit={selectedUnit} upgrade={u} />

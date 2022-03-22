@@ -15,7 +15,7 @@ export function DropMenu({children}) {
       <IconButton
           onClick={(e) => {setOpen(!open); setAnchorEl(e.target); e.stopPropagation()}}
         >
-        <MoreVertIcon />
+        <MoreVertIcon color="primary" />
       </IconButton>
       <Menu
         open={open}

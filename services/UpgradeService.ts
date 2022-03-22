@@ -136,6 +136,58 @@ export default class UpgradeService {
     return unit.selectedUpgrades.map(su => su.option).filter(u => u.id === option.id).length;
   }
 
+  public static countAvailable(unit: ISelectedUnit, upgrade: IUpgrade) {
+
+    const groups = _.groupBy(UnitService.getAllEquipment(unit), e => e.name);
+    const requiredCount = typeof (upgrade.affects) === "number"
+      ? upgrade.affects
+      : 1;
+
+    let available = 999;
+
+    for (let what of upgrade.replaceWhat) {
+
+      const target = what.replace(this.countRegex, "");
+      const countMatch = this.countRegex.exec(what);
+      const requiredCountForTarget = requiredCount * (countMatch ? parseInt(countMatch[1]) : 1);
+
+      const groupKey = Object
+        .keys(groups)
+        .find(k => EquipmentService.compareEquipmentNames(k, target));
+
+      const toReplace: IUpgradeGains[] = groups[groupKey];
+      if (!toReplace)
+        return 0;
+
+      const toReplaceCount = toReplace.reduce((count, gain) => count + gain.count, 0);
+      available = Math.min(toReplaceCount, available);
+
+      // Would not have enough to replace
+      // if (requiredCountForTarget > toReplaceCount)
+      //   return 0;
+
+      // // May only select up to the limit
+      // if (typeof (upgrade.select) === "number") {
+      //   // Any model may replace 1...
+      //   if (upgrade.affects === "any") {
+      //     available = Math.min(available, upgrade.select * unit.size);
+      //   } else {
+      //     available = Math.min(available, upgrade.select as any);
+      //   }
+      // }
+    }
+
+    return available;
+  }
+
+  public static enrichDisplayLabel(unit: ISelectedUnit, upgrade: IUpgrade) {
+    if (upgrade.type === "replace") {
+      return upgrade.label + ` (${this.countAvailable(unit, upgrade)})`
+    }
+
+    return upgrade.label;
+  }
+
   public static getControlType(unit: ISelectedUnit, upgrade: IUpgrade): "check" | "radio" | "updown" {
     const combinedMultiplier = 1 //unit.combined ? 2 : 1;
     const combinedAffects = upgrade.affects //(unit.combined && typeof (upgrade.affects) === "number") ? upgrade.affects * 2 : upgrade.affects;
