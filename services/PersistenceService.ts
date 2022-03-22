@@ -41,7 +41,7 @@ export default class PersistenceService {
     const saveData: ISaveData = {
       gameSystem: army.gameSystem,
       armyId: army.data.uid,
-      armyFile: army.armyFile,
+      armyFaction: army.data.factionName,
       armyName: army.data.name,
       modified: new Date().toJSON(),
       saveVersion: 3,
@@ -135,11 +135,13 @@ export default class PersistenceService {
         };
         console.log("Unit", unit);
         // Cast to convince TS that it is indeed in the old format...
-        const selectedUpgrades: any = u.selectedUpgrades;
+        const selectedUpgrades: any = makeCopy(u.selectedUpgrades);
         for (let upg of (selectedUpgrades as { id: string }[])) {
           const option = allOptions.find(opt => opt.id === upg.id);
-          const section = allSections.find(sec => sec.uid === option.parentSectionId);
-          UpgradeService.apply(unit, section, option);
+          if (option) {
+            const section = allSections.find(sec => sec.uid === option.parentSectionId);
+            UpgradeService.apply(unit, section, option);
+          }
         }
         return UpgradeService.buildUpgrades(unit);
       })
@@ -164,14 +166,21 @@ export default class PersistenceService {
           loadout: []
         };
 
-        for (let upg of u.selectedUpgrades) {
+        for (let upg of makeCopy(u.selectedUpgrades)) {
           const section = allSections.find(sec => sec.uid === upg.upgradeId);
           const option = section.options.find(opt => opt.id === upg.optionId);
-          UpgradeService.apply(unit, section, option);
+          if (option) {
+            UpgradeService.apply(unit, section, option);
+          }
         }
         return UpgradeService.buildUpgrades(unit);
       })
     };
+  }
+
+  public static async loadFromKey(dispatch: Dispatch<any>, key: string, callback: (armyData: any) => void) {
+    const save = JSON.parse(localStorage[this.getSaveKey(key)]);
+    this.load(dispatch, save, callback);
   }
 
   public static async load(dispatch: Dispatch<any>, save: ISaveData, callback: (armyData: any) => void) {

@@ -2,7 +2,7 @@ import { ListState } from "./listSlice";
 
 export interface ISaveData {
   armyId?: string;
-  armyFile?: string;
+  armyFaction?: string;
   gameSystem: string;
   armyName: string;
   modified: string;

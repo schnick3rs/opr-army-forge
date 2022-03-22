@@ -118,7 +118,7 @@ export default function ListConfiguration() {
       })
     );
 
-    router.push("/list");
+    router.push({ pathname: "/list", query: { listId: creationTime } });
   };
 
   const update = () => {
