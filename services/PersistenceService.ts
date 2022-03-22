@@ -1,4 +1,3 @@
-import { ConstructionOutlined } from "@mui/icons-material";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import { Dispatch } from "react";
 import { ArmyState, getArmyBookData, IArmyData, setGameSystem } from "../data/armySlice";
@@ -138,6 +137,7 @@ export default class PersistenceService {
         const unit: ISelectedUnit = {
           ...unitDefinition,
           ...u,
+          armyId: armyData.uid,
           equipment: makeCopy(unitDefinition.equipment),
           selectedUpgrades: [],
           loadout: []
@@ -161,7 +161,7 @@ export default class PersistenceService {
 
     const allSections = armyBooks.flatMap(book => book.upgradePackages)
       .reduce<IUpgrade[]>((current, pkg) => current.concat(pkg.sections), []);
-    const units = armyBooks.flatMap(book => book.units);
+    const units = armyBooks.flatMap(book => book.units.map(u => ({ ...u, armyId: book.uid })));
     console.log(units);
     return {
       ...savedList,
