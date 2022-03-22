@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { useCallback } from 'react';
 import { gameSystemToSlug } from '../services/Helpers';
 import WebappApiService from '../services/WebappApiService';
 import { IUnit, IUpgradePackage } from './interfaces';
@@ -14,9 +15,10 @@ export interface ArmyState {
   loadingArmyData: boolean;
   gameSystem: string;
   armyFile: string;
-  data: IArmyData;
+  //data: IArmyData;
   rules: IGameRule[];
   armyBooks: IArmyData[];
+  loadedArmyBooks: IArmyData[];
 }
 
 export interface IArmyData {
@@ -41,9 +43,10 @@ const initialState: ArmyState = {
   loadingArmyData: false,
   armyFile: null,
   gameSystem: null,
-  data: null,
+  //data: null,
   rules: [],
-  armyBooks: []
+  armyBooks: [],
+  loadedArmyBooks: []
 }
 
 export const getArmyBooks = createAsyncThunk("army/getArmyBooks", async (gameSystem: string) => {
@@ -60,6 +63,7 @@ export const getArmyBookData = createAsyncThunk("army/getArmyBookData", async (p
     payload.gameSystem
   );
   console.log("Loaded army data", armyBookData);
+  //payload.callback(armyBookData);
   return armyBookData;
 });
 
@@ -67,12 +71,8 @@ export const armySlice = createSlice({
   name: 'army',
   initialState: initialState,
   reducers: {
-    loadArmyData: (state, action: PayloadAction<IArmyData>) => {
-      return {
-        ...state,
-        data: action.payload,
-        loaded: true
-      };
+    resetLoadedBooks(state) {
+      state.loadedArmyBooks = [];
     },
     setGameSystem: (state, action: PayloadAction<string>) => {
       return {
@@ -100,13 +100,21 @@ export const armySlice = createSlice({
     builder.addCase(getArmyBookData.pending, (state, action) => {
       return { ...state, loadingArmyData: true };
     });
-    builder.addCase(getArmyBookData.fulfilled, (state, action) => {
-      return { ...state, loadingArmyData: false, data: action.payload, loaded: true };
+    builder.addCase(getArmyBookData.fulfilled, (state, action: PayloadAction<IArmyData>) => {
+      const armyData: IArmyData = action.payload;
+      const existingIndex = state.loadedArmyBooks.findIndex(book => book.uid === armyData.uid);
+      const alreadyExists = existingIndex >= 0;
+      if (alreadyExists) {
+        state.loadedArmyBooks.splice(existingIndex, 1);
+      }
+      state.loadedArmyBooks.push(armyData);
+      state.loadingArmyData = false;
+      state.loaded = true;
     });
   },
 })
 
 // Action creators are generated for each case reducer function
-export const { loadArmyData, setGameSystem, setArmyFile, setGameRules } = armySlice.actions;
+export const { resetLoadedBooks, setGameSystem, setArmyFile, setGameRules } = armySlice.actions;
 
 export default armySlice.reducer;

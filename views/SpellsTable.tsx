@@ -5,7 +5,8 @@ import { RootState } from '../data/store';
 
 export default function SpellsTable() {
 
-  const army = useSelector((state: RootState) => state.army.data);
+  const loadedArmyBooks = useSelector((state: RootState) => state.army.loadedArmyBooks);
+  const army = loadedArmyBooks[0];
   const spells = army?.spells;
 
   const cellStyle = { paddingLeft: "8px", paddingRight: "8px", borderBottom: "none" };

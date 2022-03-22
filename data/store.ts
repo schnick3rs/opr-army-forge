@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 import armyReducer from './armySlice';
 import listReducer from './listSlice';
+import appReducer from './appSlice';
 
 export const store = configureStore({
   reducer: {
       army: armyReducer,
-      list: listReducer
+      list: listReducer,
+      app: appReducer
   },
 });
 

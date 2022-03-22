@@ -33,12 +33,13 @@ import UpgradeService from "../../services/UpgradeService";
 export function Upgrades({ mobile = false }) {
   const list = useSelector((state: RootState) => state.list);
   const gameSystem = useSelector((state: RootState) => state.army.gameSystem);
-  const army = useSelector((state: RootState) => state.army.data);
+  const loadedArmyBooks = useSelector((state: RootState) => state.army.loadedArmyBooks);
   const dispatch = useDispatch();
   const [dummy, setDummy] = useState(false);
 
   const competitive = false;
   const selectedUnit = UnitService.getSelected(list);
+  const army = selectedUnit && loadedArmyBooks?.find(book => book.uid === selectedUnit.armyId);
 
   useEffect(() => {
     setDummy(selectedUnit?.selectionId === "dummy");

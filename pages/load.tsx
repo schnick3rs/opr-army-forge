@@ -19,13 +19,14 @@ import {
 import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import _ from "lodash";
-import { Delete, MobiledataOffOutlined } from "@mui/icons-material";
+import { Delete } from "@mui/icons-material";
 import PersistenceService from "../services/PersistenceService";
 import { ISaveData } from "../data/interfaces";
 import ArmyImage from "../views/components/ArmyImage";
+import { store } from "../data/store";
 
 export default function Load() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<typeof store.dispatch>();
   const router = useRouter();
   const [localSaves, setLocalSaves] = useState([]);
   const [forceLoad, setForceLoad] = useState(1);

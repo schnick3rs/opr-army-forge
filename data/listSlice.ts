@@ -26,7 +26,7 @@ const initialState: ListState = {
   selectedUnitId: null,
   undoUnitRemove: null,
   points: 0,
-}
+};
 
 const debounceSave = debounce(1500, (state: ListState) => {
   PersistenceService.updateSave(state);
@@ -37,16 +37,7 @@ export const listSlice = createSlice({
   initialState,
   reducers: {
     resetList: (state) => {
-      return {
-        creationTime: null,
-        name: "New Army",
-        pointsLimit: 0,
-        initialised: false,
-        units: [],
-        selectedUnitId: null,
-        undoUnitRemove: null,
-        points: 0
-      };
+      return initialState;
     },
     createList: (state, action: PayloadAction<{ name: string; pointsLimit?: number; creationTime: string; }>) => {
       const { name, pointsLimit, creationTime } = action.payload;

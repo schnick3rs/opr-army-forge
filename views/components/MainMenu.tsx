@@ -26,6 +26,7 @@ import { updateCreationTime } from "../../data/listSlice";
 import ValidationErrors from "../ValidationErrors";
 import ValidationService from "../../services/ValidationService";
 import { useMediaQuery } from "react-responsive";
+import { toggleArmyBookSelectionOpen } from "../../data/appSlice";
 
 export default function MainMenu() {
   const army = useSelector((state: RootState) => state.army);
@@ -174,6 +175,7 @@ export default function MainMenu() {
             onClose={(_) => setMenuAnchorElement(null)}
           >
             <MenuItem onClick={navigateToListConfig}>Edit Details</MenuItem>
+            <MenuItem onClick={() => dispatch(toggleArmyBookSelectionOpen(true))}>Add Army Book</MenuItem>
             <MenuItem onClick={() => router.push("/view")}>View</MenuItem>
             {!list.creationTime && (
               <MenuItem onClick={handleSave}>Save</MenuItem>

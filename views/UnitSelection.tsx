@@ -22,10 +22,27 @@ export function UnitSelection({
   addUnit = (unit: IUnit, dummy = false) => {},
   mobile = false,
 }) {
+  const armyData = useSelector((state: RootState) => state.army);
+
+  return armyData.loadedArmyBooks.map((book) => (
+    <UnitSelectionForArmy
+      key={book.uid}
+      onSelected={onSelected}
+      addUnit={addUnit}
+      mobile={mobile}
+      army={book}
+    />
+  ));
+}
+function UnitSelectionForArmy({
+  onSelected,
+  addUnit = (unit: IUnit, dummy = false) => {},
+  mobile = false,
+  army,
+}) {
   // Access the main army definition state
   const armyData = useSelector((state: RootState) => state.army);
   const list = useSelector((state: RootState) => state.list);
-  const army = armyData.data;
 
   const [expandedId, setExpandedId] = useState(null);
   const [expandAll, setExpandAll] = useState(true);
@@ -69,7 +86,10 @@ export function UnitSelection({
   }
 
   const handleAddClick = (unit: IUnit) => {
-    addUnit(unit);
+    addUnit({
+      ...unit,
+      armyId: army.uid
+    });
   };
   const handleSelectClick = (unit: IUnit) => {
     if (expandAll && !mobile) {

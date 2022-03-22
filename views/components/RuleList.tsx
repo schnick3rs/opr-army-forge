@@ -10,7 +10,7 @@ import { groupBy } from "../../services/Helpers";
 export default function RuleList({ specialRules }: { specialRules: ISpecialRule[] }) {
   const army = useSelector((state: RootState) => state.army);
   const gameRules = army.rules;
-  const armyRules = army.data.specialRules;
+  const armyRules = army.loadedArmyBooks.flatMap(x => x.specialRules);
   const ruleDefinitions: IGameRule[] = gameRules.concat(armyRules);
 
   const rules = specialRules?.filter(r => !!r && r.name != "-") ?? [];

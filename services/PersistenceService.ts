@@ -1,13 +1,15 @@
 import { ConstructionOutlined } from "@mui/icons-material";
+import { ThunkDispatch } from "@reduxjs/toolkit";
 import { Dispatch } from "react";
-import { ArmyState, IArmyData, loadArmyData, setGameSystem } from "../data/armySlice";
-import { ISaveData, ISavedListState, ISelectedUnit, ISpecialRule, IUnit, IUpgrade, IUpgradeGains, IUpgradeGainsWeapon, IUpgradeOption } from "../data/interfaces";
+import { ArmyState, getArmyBookData, IArmyData, setGameSystem } from "../data/armySlice";
+import { ISaveData, ISavedListState, ISelectedUnit, ISpecialRule, IUnit, IUpgrade, IUpgradeGainsWeapon, IUpgradeOption } from "../data/interfaces";
 import { ListState, loadSavedList } from "../data/listSlice";
+import { RootState } from "../data/store";
 import { groupBy, makeCopy } from "./Helpers";
 import RulesService from "./RulesService";
 import UnitService from "./UnitService";
 import UpgradeService from "./UpgradeService";
-import WebappApiService from "./WebappApiService";
+import _ from "lodash";
 
 export default class PersistenceService {
 
@@ -38,11 +40,13 @@ export default class PersistenceService {
         undoUnitRemove: null
       };
 
+    const armyData = army.loadedArmyBooks[0];
     const saveData: ISaveData = {
       gameSystem: army.gameSystem,
-      armyId: army.data.uid,
-      armyFaction: army.data.factionName,
-      armyName: army.data.name,
+      armyId: armyData.uid,
+      armyIds: [armyData.uid],
+      armyFaction: armyData.factionName,
+      armyName: armyData.name,
       modified: new Date().toJSON(),
       saveVersion: 3,
       listPoints: 0,
@@ -63,6 +67,7 @@ export default class PersistenceService {
       ...list,
       units: list.units.map(u => ({
         id: u.id,
+        armyId: u.armyId,
         customName: u.customName,
         selectionId: u.selectionId,
         selectedUpgrades: u.selectedUpgrades.map(x => ({
@@ -83,11 +88,14 @@ export default class PersistenceService {
     if (!localSave)
       return;
 
+    const armyIds = _.uniq(list.units.map(u => u.armyId));
+
     const existingSave: ISaveData = JSON.parse(localSave);
     const points: number = UpgradeService.calculateListTotal(list.units);
 
     const saveData: ISaveData = {
       ...existingSave,
+      armyIds: armyIds,
       modified: new Date().toJSON(),
       listPoints: points,
       list: this.getDataForSave(list)
@@ -105,17 +113,18 @@ export default class PersistenceService {
     delete localStorage[key];
   }
 
-  public static buildListFromSave(save: ISaveData, armyData: IArmyData): ListState {
+  public static buildListFromSave(save: ISaveData, armyBooks: IArmyData[]): ListState {
 
     return save.saveVersion === 3
-      ? this.buildListFromSave_v3(save.list, armyData)
+      ? this.buildListFromSave_v3(save.list, armyBooks)
       : save.saveVersion === 2
-        ? this.buildListFromSave_v2(save.list, armyData)
+        ? this.buildListFromSave_v2(save.list, armyBooks)
         : null;
   }
 
-  public static buildListFromSave_v2(savedList: ISavedListState, armyData: IArmyData): ListState {
+  public static buildListFromSave_v2(savedList: ISavedListState, armyBooks: IArmyData[]): ListState {
 
+    const armyData = armyBooks[0];
     const allSections = armyData
       .upgradePackages
       .reduce<IUpgrade[]>((current, pkg) => current.concat(pkg.sections), []);
@@ -148,16 +157,16 @@ export default class PersistenceService {
     };
   }
 
-  public static buildListFromSave_v3(savedList: ISavedListState, armyData: IArmyData): ListState {
+  public static buildListFromSave_v3(savedList: ISavedListState, armyBooks: IArmyData[]): ListState {
 
-    const allSections = armyData
-      .upgradePackages
+    const allSections = armyBooks.flatMap(book => book.upgradePackages)
       .reduce<IUpgrade[]>((current, pkg) => current.concat(pkg.sections), []);
-
+    const units = armyBooks.flatMap(book => book.units);
+    console.log(units);
     return {
       ...savedList,
       units: savedList.units.map(u => {
-        const unitDefinition: IUnit = armyData.units.find(unit => unit.id === u.id);
+        const unitDefinition: IUnit = units.find(unit => unit.id === u.id);
         const unit: ISelectedUnit = {
           ...unitDefinition,
           ...u,
@@ -183,22 +192,24 @@ export default class PersistenceService {
     this.load(dispatch, save, callback);
   }
 
-  public static async load(dispatch: Dispatch<any>, save: ISaveData, callback: (armyData: any) => void) {
+  public static async load(dispatch: ThunkDispatch<RootState, any, any>, save: ISaveData, callback: (armyBooks: IArmyData[]) => void) {
 
     console.log("Loading save...", save);
 
-    const loaded = data => {
-      dispatch(setGameSystem(save.gameSystem));
-      dispatch(loadArmyData(data));
-      const list: ListState = this.buildListFromSave(save, data);
+    dispatch(setGameSystem(save.gameSystem));
+
+    const armyIds = save.armyIds || [save.armyId];
+
+    const promises = armyIds.map(id => dispatch(getArmyBookData({
+      armyUid: id, gameSystem: save.gameSystem
+    })));
+
+    Promise.all(promises).then(results => {
+      const armyBooks = results.map(res => res.payload) as IArmyData[];
+      const list: ListState = this.buildListFromSave(save, armyBooks);
       dispatch(loadSavedList(list));
-    };
-
-    const data = await WebappApiService
-      .getArmyBookData(save.armyId.replace("-skirmish", ""), save.gameSystem);
-
-    loaded(data);
-    callback(data);
+      callback(armyBooks);
+    });
   }
 
   public static download(list: ListState) {

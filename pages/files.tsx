@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../data/store";
 import {
-  getArmyBookData,
   getArmyBooks,
   IArmyData,
-  loadArmyData,
+  resetLoadedBooks,
 } from "../data/armySlice";
 import { useRouter } from "next/router";
 import {
@@ -120,7 +119,7 @@ export default function Files() {
       });
     };
 
-    dispatch(loadArmyData(null));
+    dispatch(resetLoadedBooks());
     navigateToConfig();
   };
 

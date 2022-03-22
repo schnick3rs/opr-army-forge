@@ -25,7 +25,6 @@ import { createList, updateListSettings } from "../data/listSlice";
 import {
   getArmyBookData,
   getArmyBooks,
-  loadArmyData,
   setGameSystem,
 } from "../data/armySlice";
 import ArmyImage from "../views/components/ArmyImage";
@@ -58,6 +57,8 @@ export default function ListConfiguration() {
   const factionRoot =
     factionData?.find((x) => !x.factionRelation) ?? factionData?.[0];
 
+  const armyData = armyState.loadedArmyBooks?.[0];
+
   useEffect(() => {
     // Ensure gameSystem is set
     if (!armyState.gameSystem) {
@@ -70,8 +71,10 @@ export default function ListConfiguration() {
       return;
     }
 
+    if (!isEdit) dispatch(resetList());
+
     // Ensure army data is loaded
-    if (!armyState.data) {
+    if (armyState.loadedArmyBooks.length < 1) {
       console.log("No army data");
       if (armyId) {
         dispatch(
@@ -97,8 +100,8 @@ export default function ListConfiguration() {
       return;
     }
 
-    setArmyName(armyState.data.name);
-  }, [armyState.gameSystem, armyState.armyBooks, armyState.data]);
+    setArmyName(armyState.loadedArmyBooks[0].name);
+  }, [armyState.gameSystem, armyState.armyBooks, armyState.loadedArmyBooks]);
 
   const create = async () => {
     if (factionData?.length > 0 && !selectedChild)
@@ -187,7 +190,7 @@ export default function ListConfiguration() {
           label="Auto Save List"
         />
       </FormGroup>
-      {armyState.data && factionData?.length > 0 && (
+      {armyData && factionData?.length > 0 && (
         <>
           <h3 className="mt-4 mb-0" style={{ fontWeight: 600 }}>
             {factionRelation}
@@ -228,16 +231,16 @@ export default function ListConfiguration() {
             <ClearIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            {armyState.data?.name || "New Army"}
+            {armyData?.name || "New Army"}
           </Typography>
         </Toolbar>
       </AppBar>
-      {armyState.data && (
+      {armyData && (
         <div className="mx-auto" style={{ maxWidth: "480px" }}>
           <div className="is-flex is-flex-direction-column p-4 mx-auto">
             <div className="mb-6">
               <ArmyImage
-                name={factionRoot?.name ?? armyState.data?.name}
+                name={factionRoot?.name ?? armyData?.name}
                 armyData={armyState}
               />
             </div>

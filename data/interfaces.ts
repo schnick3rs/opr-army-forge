@@ -2,6 +2,7 @@ import { ListState } from "./listSlice";
 
 export interface ISaveData {
   armyId?: string;
+  armyIds: string[];
   armyFaction?: string;
   gameSystem: string;
   armyName: string;
@@ -34,6 +35,7 @@ export interface ISpecialRule {
 
 export interface IUnit {
   id: string;
+  armyId: string;
   sortId: number;
   category?: string;
   name: string;
