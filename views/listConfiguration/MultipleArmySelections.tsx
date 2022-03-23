@@ -14,18 +14,27 @@ import { Fragment } from "react";
 import { RootState } from "../../data/store";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
-import { getArmyBookData, unloadArmyBook, unloadFaction } from "../../data/armySlice";
+import {
+  getArmyBookData,
+  unloadArmyBook,
+  unloadFaction,
+} from "../../data/armySlice";
 import _ from "lodash";
 
 export default function MultipleArmySelections() {
-  const dispatch = useDispatch();
   const router = useRouter();
   const armyState = useSelector((state: RootState) => state.army);
   const factions = armyState.selectedFactions;
   const loadedArmyBooks = armyState.loadedArmyBooks;
 
+  const isEdit = !!router.query["edit"];
+
   const allowRemove =
-    _.uniq(loadedArmyBooks.map((x) => x.factionName)).length > 1;
+    _.uniq(
+      loadedArmyBooks
+        .map((x) => x.factionName)
+        .concat(armyState.selectedFactions)
+    ).length > 1;
 
   function addAnotherBook() {
     router.push({
@@ -78,6 +87,15 @@ export default function MultipleArmySelections() {
 function ArmyBookSelection({ army, allowRemove }) {
   const dispatch = useDispatch();
 
+  function remove(armyId) {
+    const prompt = confirm(
+      "Removing this army book will remove all associated units. Remove anyway?"
+    );
+    if (prompt) {
+      dispatch(unloadArmyBook(armyId));
+    }
+  }
+
   return (
     <Fragment>
       <ListItem
@@ -87,7 +105,7 @@ function ArmyBookSelection({ army, allowRemove }) {
               edge="end"
               aria-label="comments"
               color="primary"
-              onClick={() => dispatch(unloadArmyBook(army.uid))}
+              onClick={() => remove(army.uid)}
             >
               <CloseIcon />
             </IconButton>
@@ -106,9 +124,29 @@ function FactionArmyBookSelection({ faction, allowRemove }) {
 
   const armyState = useSelector((state: RootState) => state.army);
   const armyBooks = armyState.armyBooks;
-  const loadedArmyBooks = armyState.loadedArmyBooks;
+  const loadedArmyBooks = armyState.loadedArmyBooks.filter(
+    (book) => book.factionName === faction
+  );
   const factionBooks = armyBooks.filter((book) => book.factionName === faction);
   const factionRelation = factionBooks[1].factionRelation;
+
+  function removeFaction(faction) {
+    const prompt = confirm(
+      "Removing this faction will remove all associated units. Remove anyway?"
+    );
+    if (prompt) {
+      dispatch(unloadFaction(faction));
+    }
+  }
+
+  function remove(armyId) {
+    const prompt = confirm(
+      "Removing this army book will remove all associated units. Remove anyway?"
+    );
+    if (prompt) {
+      dispatch(unloadArmyBook(armyId));
+    }
+  }
 
   return (
     <>
@@ -119,14 +157,19 @@ function FactionArmyBookSelection({ faction, allowRemove }) {
               edge="end"
               aria-label="comments"
               color="primary"
-              onClick={() => dispatch(unloadFaction(faction))}
+              onClick={() => removeFaction(faction)}
             >
               <CloseIcon />
             </IconButton>
           )
         }
       >
-        <ListItemText primary={faction + " " + factionRelation} />
+        <ListItemText
+          primary={faction + " " + factionRelation}
+          secondary={
+            loadedArmyBooks.length === 0 ? "Select at least one option" : ""
+          }
+        />
       </ListItem>
       {factionBooks.map((book) => {
         const enabled = loadedArmyBooks.some((x) => x.uid === book.uid);
@@ -140,7 +183,7 @@ function FactionArmyBookSelection({ faction, allowRemove }) {
               })
             );
           } else {
-            dispatch(unloadArmyBook(book.uid));
+            remove(book.uid);
           }
         };
         return (

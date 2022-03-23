@@ -24,7 +24,11 @@ export default function EditView(props: EditViewProps) {
   };
 
   return (
-    <Button className="mt-4" variant="contained" onClick={() => update()}>
+    <Button
+      className="mx-auto px-6"
+      variant="contained"
+      onClick={() => update()}
+    >
       Save Changes
     </Button>
   );

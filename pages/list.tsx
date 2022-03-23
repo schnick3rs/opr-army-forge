@@ -1,5 +1,5 @@
 import Head from "next/head";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../data/store";
 import { useRouter } from "next/router";
@@ -9,7 +9,6 @@ import DesktopView from "../views/listBuilder/DesktopView";
 import { setGameRules } from "../data/armySlice";
 import { gameSystemToSlug } from "../services/Helpers";
 import PersistenceService from "../services/PersistenceService";
-import ArmyBookSelection from "../views/modals/ArmyBookSelectionModal";
 
 export default function List() {
   const armyState = useSelector((state: RootState) => state.army);
@@ -60,7 +59,6 @@ export default function List() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       {armyState.loaded ? isBigScreen ? <DesktopView /> : <MobileView /> : null}
-      <ArmyBookSelection />
     </>
   );
 }

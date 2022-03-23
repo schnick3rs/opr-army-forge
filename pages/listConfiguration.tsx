@@ -10,6 +10,7 @@ import ArmyImage from "../views/components/ArmyImage";
 import { MenuBar } from "../views/components/MenuBar";
 import { CreateView } from "../views/listConfiguration/CreateView";
 import EditView from "../views/listConfiguration/EditView";
+import MultipleArmySelections from "../views/listConfiguration/MultipleArmySelections";
 
 export default function ListConfiguration() {
   const dispatch = useDispatch<typeof store.dispatch>();
@@ -55,7 +56,7 @@ export default function ListConfiguration() {
   return (
     <>
       <MenuBar
-        title={armyData?.name || "New Army"}
+        title={(isEdit ? "List Details" : (armyData?.name || "New Army"))}
         onBackClick={() => router.back()}
         transparent
       />
@@ -88,6 +89,7 @@ export default function ListConfiguration() {
             setPointsLimit(e.target.value ? parseInt(e.target.value) : null)
           }
         />
+        <MultipleArmySelections />
         {isEdit ? (
           <EditView armyName={armyName} pointsLimit={pointsLimit} />
         ) : (
