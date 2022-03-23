@@ -311,12 +311,7 @@ export default class UpgradeService {
       if (upgrade.replaceWhat) {
         for (let what of upgrade.replaceWhat) {
 
-          // TODO: Refactor
-          available = unit.selectedUpgrades.map(su => su.option)
-            // Take all gains from all selected upgrades
-            .reduce((gains, next) => gains.concat(next.gains), [])
-            // Add original equipment (for each model)
-            .concat(unit.equipment)
+          available = unit.loadout
             // Take only the gains that match this dependency
             .filter(g => EquipmentService.compareEquipment(g, what))
             // Count how many we have
