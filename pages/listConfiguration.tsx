@@ -1,14 +1,8 @@
 import { useState, useEffect, Fragment } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "../data/store";
+import { RootState, store } from "../data/store";
 import { useRouter } from "next/router";
-import {
-  Button,
-  List,
-  ListItem,
-  ListItemText,
-  TextField,
-} from "@mui/material";
+import { Button, List, ListItem, ListItemText, TextField } from "@mui/material";
 import {
   AppBar,
   IconButton,
@@ -24,13 +18,14 @@ import { createList, resetList, updateListSettings } from "../data/listSlice";
 import {
   getArmyBookData,
   getArmyBooks,
+  resetLoadedBooks,
   setGameSystem,
 } from "../data/armySlice";
 import ArmyImage from "../views/components/ArmyImage";
 import PersistenceService from "../services/PersistenceService";
 
 export default function ListConfiguration() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<typeof store.dispatch>();
   const router = useRouter();
 
   const isEdit = !!router.query["edit"];
@@ -59,18 +54,11 @@ export default function ListConfiguration() {
   const armyData = armyState.loadedArmyBooks?.[0];
 
   useEffect(() => {
-    // Ensure gameSystem is set
-    if (!armyState.gameSystem) {
-      dispatch(setGameSystem(router.query["gameSystem"] as string));
-      return;
-    }
-    // Load books if not loaded
-    if (armyState.armyBooks?.length <= 0) {
-      dispatch(getArmyBooks(armyState.gameSystem));
-      return;
-    }
-
     if (!isEdit) dispatch(resetList());
+  }, []);
+
+  useEffect(() => {
+    if (armyState.armyBooks?.length < 1) return;
 
     // Ensure army data is loaded
     if (armyState.loadedArmyBooks.length < 1) {
@@ -80,6 +68,7 @@ export default function ListConfiguration() {
           getArmyBookData({
             armyUid: armyId,
             gameSystem: armyState.gameSystem,
+            reset: true,
           })
         );
       }
@@ -92,6 +81,7 @@ export default function ListConfiguration() {
             getArmyBookData({
               armyUid: rootArmy.uid,
               gameSystem: armyState.gameSystem,
+              reset: true,
             })
           );
         }
@@ -100,7 +90,20 @@ export default function ListConfiguration() {
     }
 
     setArmyName(armyState.loadedArmyBooks[0].name);
-  }, [armyState.gameSystem, armyState.armyBooks, armyState.loadedArmyBooks]);
+  }, [armyState.armyBooks]);
+
+  useEffect(() => {
+    // Ensure gameSystem is set
+    if (!armyState.gameSystem) {
+      dispatch(setGameSystem(router.query["gameSystem"] as string));
+      return;
+    }
+    // Load books if not loaded
+    if (armyState.armyBooks?.length <= 0) {
+      dispatch(getArmyBooks(armyState.gameSystem));
+      return;
+    }
+  }, [armyState.gameSystem, armyState.armyBooks]);
 
   const create = async () => {
     if (factionData?.length > 0 && !selectedChild)
@@ -137,7 +140,11 @@ export default function ListConfiguration() {
       shallow: true,
     });
     dispatch(
-      getArmyBookData({ armyUid: child.uid, gameSystem: armyState.gameSystem })
+      getArmyBookData({
+        armyUid: child.uid,
+        gameSystem: armyState.gameSystem,
+        reset: true,
+      })
     );
     setSelectedChild(child.name);
   };
@@ -161,7 +168,6 @@ export default function ListConfiguration() {
         disabled={!child.isLive}
         value={child}
         checked={selectedChild === child.name}
-        onChange={() => (child.isLive ? selectChild(child) : null)}
       />
     </ListItem>
   );
@@ -234,36 +240,36 @@ export default function ListConfiguration() {
           </Typography>
         </Toolbar>
       </AppBar>
-      {armyData && (
-        <div className="mx-auto" style={{ maxWidth: "480px" }}>
-          <div className="is-flex is-flex-direction-column p-4 mx-auto">
-            <div className="mb-6">
+      <div className="mx-auto" style={{ maxWidth: "480px" }}>
+        <div className="is-flex is-flex-direction-column p-4 mx-auto">
+          <div className="mb-6">
+            {armyData && (
               <ArmyImage
                 name={factionRoot?.name ?? armyData?.name}
                 armyData={armyState}
               />
-            </div>
-            <TextField
-              variant="filled"
-              label="List Name"
-              className="mb-4"
-              value={armyName}
-              onChange={(e) => setArmyName(e.target.value)}
-            />
-            <TextField
-              variant="filled"
-              label="Points Limit"
-              type="number"
-              className="mb-4"
-              value={pointsLimit ?? ""}
-              onChange={(e) =>
-                setPointsLimit(e.target.value ? parseInt(e.target.value) : null)
-              }
-            />
-            {isEdit ? editView : createView}
+            )}
           </div>
+          <TextField
+            variant="filled"
+            label="List Name"
+            className="mb-4"
+            value={armyName}
+            onChange={(e) => setArmyName(e.target.value)}
+          />
+          <TextField
+            variant="filled"
+            label="Points Limit"
+            type="number"
+            className="mb-4"
+            value={pointsLimit ?? ""}
+            onChange={(e) =>
+              setPointsLimit(e.target.value ? parseInt(e.target.value) : null)
+            }
+          />
+          {armyData && (isEdit ? editView : createView)}
         </div>
-      )}
+      </div>
     </>
   );
 }

@@ -58,14 +58,14 @@ export const getArmyBooks = createAsyncThunk("army/getArmyBooks", async (gameSys
   return apiArmyBooks;
 });
 
-export const getArmyBookData = createAsyncThunk("army/getArmyBookData", async (payload: { armyUid: string, gameSystem: string }) => {
+export const getArmyBookData = createAsyncThunk("army/getArmyBookData", async (payload: { armyUid: string, gameSystem: string, reset: boolean }) => {
   const armyBookData: IArmyData = await WebappApiService.getArmyBookData(
     payload.armyUid,
     payload.gameSystem
   );
   console.log("Loaded army data", armyBookData);
   //payload.callback(armyBookData);
-  return armyBookData;
+  return { armyBookData, reset: payload.reset };
 });
 
 export const armySlice = createSlice({
@@ -101,16 +101,24 @@ export const armySlice = createSlice({
     builder.addCase(getArmyBookData.pending, (state, action) => {
       return { ...state, loadingArmyData: true };
     });
-    builder.addCase(getArmyBookData.fulfilled, (state, action: PayloadAction<IArmyData>) => {
-      const armyData: IArmyData = action.payload;
-      const existingIndex = state.loadedArmyBooks.findIndex(book => book.uid === armyData.uid);
-      const alreadyExists = existingIndex >= 0;
-      if (alreadyExists) {
-        state.loadedArmyBooks.splice(existingIndex, 1);
-      }
-      state.loadedArmyBooks.push(armyData);
+    builder.addCase(getArmyBookData.fulfilled, (state, action: PayloadAction<{ armyBookData, reset }>) => {
+      const { armyBookData, reset } = action.payload;
+
       state.loadingArmyData = false;
       state.loaded = true;
+
+      if (reset) {
+        state.loadedArmyBooks = [armyBookData];
+        return;
+      }
+      
+      const existingIndex = state.loadedArmyBooks.findIndex(book => book.uid === armyBookData.uid);
+      const alreadyExists = existingIndex >= 0;
+      if (alreadyExists) {
+        state.loadedArmyBooks.splice(existingIndex, 1, armyBookData);
+      } else {
+        state.loadedArmyBooks.push(armyBookData);
+      }
     });
   },
 })

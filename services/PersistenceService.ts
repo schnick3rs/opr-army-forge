@@ -201,7 +201,7 @@ export default class PersistenceService {
     const armyIds = save.armyIds || [save.armyId];
 
     const promises = armyIds.map(id => dispatch(getArmyBookData({
-      armyUid: id, gameSystem: save.gameSystem
+      armyUid: id, gameSystem: save.gameSystem, reset: false
     })));
 
     Promise.all(promises).then(results => {

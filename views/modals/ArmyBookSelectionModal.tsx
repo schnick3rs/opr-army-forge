@@ -27,7 +27,7 @@ export default function ArmyBookSelection() {
 
   const addArmy = (book: IArmyData) => {
     dispatch(
-      getArmyBookData({ armyUid: book.uid, gameSystem: armyState.gameSystem })
+      getArmyBookData({ armyUid: book.uid, gameSystem: armyState.gameSystem, reset: false })
     ).then((_) => {
       dispatch(toggleArmyBookSelectionOpen(false));
     });
