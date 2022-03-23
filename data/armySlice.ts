@@ -19,6 +19,7 @@ export interface ArmyState {
   rules: IGameRule[];
   armyBooks: IArmyData[];
   loadedArmyBooks: IArmyData[];
+  selectedFactions: string[];
 }
 
 export interface IArmyData {
@@ -47,7 +48,8 @@ const initialState: ArmyState = {
   //data: null,
   rules: [],
   armyBooks: [],
-  loadedArmyBooks: []
+  loadedArmyBooks: [],
+  selectedFactions: []
 }
 
 export const getArmyBooks = createAsyncThunk("army/getArmyBooks", async (gameSystem: string) => {
@@ -55,7 +57,7 @@ export const getArmyBooks = createAsyncThunk("army/getArmyBooks", async (gameSys
   const slug = gameSystemToSlug(gameSystem);
   const apiArmyBooks = await WebappApiService.getArmyBooks(slug);
   console.log("Loaded army books", apiArmyBooks);
-  return apiArmyBooks;
+  return apiArmyBooks.filter(book => book.official && book.isLive);
 });
 
 export const getArmyBookData = createAsyncThunk("army/getArmyBookData", async (payload: { armyUid: string, gameSystem: string, reset: boolean }) => {
@@ -92,6 +94,16 @@ export const armySlice = createSlice({
         ...state,
         rules: action.payload
       };
+    },
+    unloadFaction(state, action: PayloadAction<string>) {
+      const factionIndex = state.selectedFactions.findIndex(f => f === action.payload);
+      state.selectedFactions.splice(factionIndex, 1);
+      state.loadedArmyBooks = state.loadedArmyBooks.filter(book => book.factionName !== action.payload);
+    },
+    unloadArmyBook(state, action: PayloadAction<string>) {
+      const uid = action.payload;
+      const index = state.loadedArmyBooks.findIndex(book => book.uid === uid);
+      state.loadedArmyBooks.splice(index, 1);
     }
   },
   extraReducers(builder) {
@@ -107,11 +119,15 @@ export const armySlice = createSlice({
       state.loadingArmyData = false;
       state.loaded = true;
 
+      if (armyBookData.factionName && !state.selectedFactions.some(x => x === armyBookData.factionName)) {
+        state.selectedFactions.push(armyBookData.factionName)
+      }
+
       if (reset) {
         state.loadedArmyBooks = [armyBookData];
         return;
       }
-      
+
       const existingIndex = state.loadedArmyBooks.findIndex(book => book.uid === armyBookData.uid);
       const alreadyExists = existingIndex >= 0;
       if (alreadyExists) {
@@ -124,6 +140,6 @@ export const armySlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { resetLoadedBooks, setGameSystem, setArmyFile, setGameRules } = armySlice.actions;
+export const { resetLoadedBooks, setGameSystem, setArmyFile, setGameRules, unloadFaction, unloadArmyBook } = armySlice.actions;
 
 export default armySlice.reducer;

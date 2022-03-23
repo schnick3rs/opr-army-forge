@@ -1,28 +1,15 @@
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, store } from "../data/store";
 import { useRouter } from "next/router";
-import { Button, List, ListItem, ListItemText, TextField } from "@mui/material";
-import {
-  AppBar,
-  IconButton,
-  Toolbar,
-  Typography,
-  FormGroup,
-  FormControlLabel,
-  Checkbox,
-  Radio,
-} from "@mui/material";
-import ClearIcon from "@mui/icons-material/Clear";
-import { createList, resetList, updateListSettings } from "../data/listSlice";
-import {
-  getArmyBookData,
-  getArmyBooks,
-  resetLoadedBooks,
-  setGameSystem,
-} from "../data/armySlice";
+import { TextField } from "@mui/material";
+
+import { resetList } from "../data/listSlice";
+import { getArmyBooks, setGameSystem } from "../data/armySlice";
 import ArmyImage from "../views/components/ArmyImage";
-import PersistenceService from "../services/PersistenceService";
+import { MenuBar } from "../views/components/MenuBar";
+import { CreateView } from "../views/listConfiguration/CreateView";
+import EditView from "../views/listConfiguration/EditView";
 
 export default function ListConfiguration() {
   const dispatch = useDispatch<typeof store.dispatch>();
@@ -37,60 +24,8 @@ export default function ListConfiguration() {
   const [pointsLimit, setPointsLimit] = useState(
     isEdit ? listState.pointsLimit : null
   );
-  const [autoSave, setAutoSave] = useState(true);
-  const [selectedChild, setSelectedChild] = useState(null);
-
-  const factionName = router.query["faction"] as string;
-  const armyId = router.query["armyId"] as string;
-
-  const factionData = armyState.armyBooks?.filter(
-    (a) => a.factionName === factionName && a.official === true
-  );
-  const factionRelation =
-    factionData?.length > 0 ? factionData[0].factionRelation : null;
-  const factionRoot =
-    factionData?.find((x) => !x.factionRelation) ?? factionData?.[0];
 
   const armyData = armyState.loadedArmyBooks?.[0];
-
-  useEffect(() => {
-    if (!isEdit) dispatch(resetList());
-  }, []);
-
-  useEffect(() => {
-    if (armyState.armyBooks?.length < 1) return;
-
-    // Ensure army data is loaded
-    if (armyState.loadedArmyBooks.length < 1) {
-      console.log("No army data");
-      if (armyId) {
-        dispatch(
-          getArmyBookData({
-            armyUid: armyId,
-            gameSystem: armyState.gameSystem,
-            reset: true,
-          })
-        );
-      }
-      if (factionName) {
-        const rootArmy =
-          factionData.find((x) => x.factionRelation === null) ?? factionData[0];
-        setSelectedChild(rootArmy.name);
-        if (!armyId) {
-          dispatch(
-            getArmyBookData({
-              armyUid: rootArmy.uid,
-              gameSystem: armyState.gameSystem,
-              reset: true,
-            })
-          );
-        }
-      }
-      return;
-    }
-
-    setArmyName(armyState.loadedArmyBooks[0].name);
-  }, [armyState.armyBooks]);
 
   useEffect(() => {
     // Ensure gameSystem is set
@@ -98,177 +33,66 @@ export default function ListConfiguration() {
       dispatch(setGameSystem(router.query["gameSystem"] as string));
       return;
     }
+  }, [armyState.gameSystem]);
+
+  useEffect(() => {
     // Load books if not loaded
-    if (armyState.armyBooks?.length <= 0) {
+    if (armyState.gameSystem && armyState.armyBooks?.length <= 0) {
       dispatch(getArmyBooks(armyState.gameSystem));
-      return;
     }
   }, [armyState.gameSystem, armyState.armyBooks]);
 
-  const create = async () => {
-    if (factionData?.length > 0 && !selectedChild)
-      return alert("Must select a " + factionRelation);
+  // Reset list if not edit mode
+  useEffect(() => {
+    if (!isEdit) dispatch(resetList());
+  }, []);
 
-    const name = armyName || "My List";
-
-    const creationTime = autoSave
-      ? PersistenceService.createSave(armyState, name)
-      : null;
-
-    dispatch(
-      createList({
-        name,
-        pointsLimit: pointsLimit || 0,
-        creationTime: creationTime,
-      })
-    );
-
-    router.push({ pathname: "/list", query: { listId: creationTime } });
-  };
-
-  const update = () => {
-    dispatch(
-      updateListSettings({ name: armyName, pointsLimit: pointsLimit || 0 })
-    );
-
-    router.back();
-  };
-
-  const selectChild = (child) => {
-    console.log("Selecting child", child);
-    router.replace({ query: { ...router.query, armyId: child.uid } }, null, {
-      shallow: true,
-    });
-    dispatch(
-      getArmyBookData({
-        armyUid: child.uid,
-        gameSystem: armyState.gameSystem,
-        reset: true,
-      })
-    );
-    setSelectedChild(child.name);
-  };
-
-  const childItem = (child) => (
-    <ListItem
-      divider
-      className="px-0"
-      style={{ cursor: child.isLive ? "pointer" : "" }}
-      onClick={() => (child.isLive ? selectChild(child) : null)}
-    >
-      <ListItemText
-        style={{ color: !child.isLive ? "#999" : "" }}
-        primary={
-          child.name === factionRoot.name && !factionRoot.factionRelation
-            ? "None"
-            : child.name
-        }
-      />
-      <Radio
-        disabled={!child.isLive}
-        value={child}
-        checked={selectedChild === child.name}
-      />
-    </ListItem>
-  );
-
-  const close = () => {
-    router.back();
-  };
-
-  const editView = (
-    <Button className="mt-4" variant="contained" onClick={() => update()}>
-      Save Changes
-    </Button>
-  );
-
-  const createView = (
-    <>
-      <FormGroup className="mb-0 is-flex-direction-row is-align-items-center">
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={autoSave}
-              onClick={() => setAutoSave(!autoSave)}
-            />
-          }
-          label="Auto Save List"
-        />
-      </FormGroup>
-      {armyData && factionData?.length > 0 && (
-        <>
-          <h3 className="mt-4 mb-0" style={{ fontWeight: 600 }}>
-            {factionRelation}
-          </h3>
-          <List className="pt-0">
-            {childItem(factionRoot)}
-            {factionData
-              .filter((c) => c.name !== factionRoot.name)
-              .map((child, index) => (
-                <Fragment key={index}>{childItem(child)}</Fragment>
-              ))}
-          </List>
-        </>
-      )}
-      <Button
-        className="mt-4"
-        variant="contained"
-        onClick={() => create()}
-        disabled={armyState.loadingArmyData}
-      >
-        Create List
-      </Button>
-    </>
-  );
+  useEffect(() => {
+    // TODO: Be nice to the user and work out if the name was set manually before overriding it? nah
+    setArmyName(armyData?.name ?? "");
+  }, [armyData]);
 
   return (
     <>
-      <AppBar position="static" elevation={0} color="transparent">
-        <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-            onClick={close}
-          >
-            <ClearIcon />
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            {armyData?.name || "New Army"}
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <div className="mx-auto" style={{ maxWidth: "480px" }}>
-        <div className="is-flex is-flex-direction-column p-4 mx-auto">
-          <div className="mb-6">
-            {armyData && (
-              <ArmyImage
-                name={factionRoot?.name ?? armyData?.name}
-                armyData={armyState}
-              />
-            )}
-          </div>
-          <TextField
-            variant="filled"
-            label="List Name"
-            className="mb-4"
-            value={armyName}
-            onChange={(e) => setArmyName(e.target.value)}
-          />
-          <TextField
-            variant="filled"
-            label="Points Limit"
-            type="number"
-            className="mb-4"
-            value={pointsLimit ?? ""}
-            onChange={(e) =>
-              setPointsLimit(e.target.value ? parseInt(e.target.value) : null)
-            }
-          />
-          {armyData && (isEdit ? editView : createView)}
+      <MenuBar
+        title={armyData?.name || "New Army"}
+        onBackClick={() => router.back()}
+        transparent
+      />
+      <div
+        className="is-flex is-flex-direction-column p-4 mx-auto"
+        style={{ maxWidth: "480px" }}
+      >
+        <div className="mb-6">
+          {armyData && (
+            <ArmyImage
+              name={armyData?.factionName ?? armyData?.name}
+              armyData={armyState}
+            />
+          )}
         </div>
+        <TextField
+          variant="filled"
+          label="List Name"
+          className="mb-4"
+          value={armyName}
+          onChange={(e) => setArmyName(e.target.value)}
+        />
+        <TextField
+          variant="filled"
+          label="Points Limit"
+          type="number"
+          className="mb-4"
+          value={pointsLimit ?? ""}
+          onChange={(e) =>
+            setPointsLimit(e.target.value ? parseInt(e.target.value) : null)
+          }
+        />
+        {isEdit ? (
+          <EditView armyName={armyName} pointsLimit={pointsLimit} />
+        ) : (
+          <CreateView armyName={armyName} pointsLimit={pointsLimit} />
+        )}
       </div>
     </>
   );
