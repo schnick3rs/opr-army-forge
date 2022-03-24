@@ -57,6 +57,7 @@ export default function MultipleArmySelections() {
                 key={army.uid}
                 army={army}
                 allowRemove={allowRemove}
+                editMode={isEdit}
               />
             ))}
           {factions.map((faction) => (
@@ -64,6 +65,7 @@ export default function MultipleArmySelections() {
               key={faction}
               faction={faction}
               allowRemove={allowRemove}
+              editMode={isEdit}
             />
           ))}
 
@@ -84,10 +86,14 @@ export default function MultipleArmySelections() {
   );
 }
 
-function ArmyBookSelection({ army, allowRemove }) {
+function ArmyBookSelection({ army, allowRemove, editMode }) {
   const dispatch = useDispatch();
 
   function remove(armyId) {
+    if (editMode){
+      dispatch(unloadArmyBook(armyId));
+      return;
+    }
     const prompt = confirm(
       "Removing this army book will remove all associated units. Remove anyway?"
     );
@@ -119,7 +125,7 @@ function ArmyBookSelection({ army, allowRemove }) {
   );
 }
 
-function FactionArmyBookSelection({ faction, allowRemove }) {
+function FactionArmyBookSelection({ faction, allowRemove, editMode }) {
   const dispatch = useDispatch();
 
   const armyState = useSelector((state: RootState) => state.army);
@@ -131,6 +137,10 @@ function FactionArmyBookSelection({ faction, allowRemove }) {
   const factionRelation = factionBooks[1].factionRelation;
 
   function removeFaction(faction) {
+    if (editMode){
+      dispatch(unloadFaction(faction));
+      return;
+    }
     const prompt = confirm(
       "Removing this faction will remove all associated units. Remove anyway?"
     );
@@ -140,6 +150,10 @@ function FactionArmyBookSelection({ faction, allowRemove }) {
   }
 
   function remove(armyId) {
+    if (editMode){
+      dispatch(unloadArmyBook(armyId));
+      return;
+    }
     const prompt = confirm(
       "Removing this army book will remove all associated units. Remove anyway?"
     );

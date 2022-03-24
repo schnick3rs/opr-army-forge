@@ -2,20 +2,15 @@ import {
   Button,
   Checkbox,
   FormControlLabel,
-  FormGroup,
-  List,
-  ListItem,
-  ListItemText,
-  Radio,
+  FormGroup
 } from "@mui/material";
 import { useRouter } from "next/router";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getArmyBookData } from "../../data/armySlice";
 import { createList } from "../../data/listSlice";
 import { RootState } from "../../data/store";
 import PersistenceService from "../../services/PersistenceService";
-import MultipleArmySelections from "./MultipleArmySelections";
 
 interface CreateViewProps {
   armyName: string;

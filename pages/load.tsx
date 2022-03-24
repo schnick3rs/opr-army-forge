@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import {
   AppBar,
-  Avatar,
   Button,
   IconButton,
   List,
@@ -24,6 +23,8 @@ import PersistenceService from "../services/PersistenceService";
 import { ISaveData } from "../data/interfaces";
 import ArmyImage from "../views/components/ArmyImage";
 import { store } from "../data/store";
+import { MenuBar } from "../views/components/MenuBar";
+import { tryBack } from "../services/Helpers";
 
 export default function Load() {
   const dispatch = useDispatch<typeof store.dispatch>();
@@ -49,7 +50,10 @@ export default function Load() {
   const loadSave = (save: ISaveData) => {
     setLoading(true);
     PersistenceService.load(dispatch, save, (armyData) => {
-      router.push({ pathname: "/list", query: { listId: save.list.creationTime } });
+      router.push({
+        pathname: "/list",
+        query: { listId: save.list.creationTime },
+      });
       setLoading(false);
     });
   };
@@ -101,31 +105,7 @@ export default function Load() {
 
   return (
     <>
-      <Paper elevation={2} color="primary" square>
-        <AppBar position="static" elevation={0}>
-          <Toolbar>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{ mr: 2 }}
-              onClick={() => router.back()}
-            >
-              <BackIcon />
-            </IconButton>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Open A List
-            </Typography>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-            ></IconButton>
-          </Toolbar>
-        </AppBar>
-      </Paper>
+      <MenuBar title="Open a List" onBackClick={() => tryBack(() => router.replace("/"))} />
       <div className="container">
         <input
           type="file"
