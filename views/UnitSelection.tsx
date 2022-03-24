@@ -7,7 +7,9 @@ import {
   AccordionDetails,
   AccordionSummary,
   Card,
+  Divider,
   IconButton,
+  Paper,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EquipmentService from "../services/EquipmentService";
@@ -107,14 +109,22 @@ function UnitSelectionForArmy({
     list.selectedUnitId === "dummy" && UnitService.getSelected(list).name;
 
   return (
-    <Card elevation={2} sx={{backgroundColor:"#FAFAFA",marginBottom:"1rem"}} square>
+    <Card
+      elevation={2}
+      sx={{ backgroundColor: "#FAFAFA", marginBottom: "1rem" }}
+      square
+    >
       <div
         className={`${styles["army-book-section-header"]} px-4 py-2 is-flex is-align-items-center`}
       >
         <h3 className="is-flex-grow-1">
           {army.name} - {army.versionString}
         </h3>
-        <IconButton size="small" onClick={() => setCollapsed((prev) => !prev)} color="primary">
+        <IconButton
+          size="small"
+          onClick={() => setCollapsed((prev) => !prev)}
+          color="primary"
+        >
           {collapsed ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}
         </IconButton>
       </div>
@@ -123,115 +133,98 @@ function UnitSelectionForArmy({
         onToggle={() => setExpandAll(!expandAll)}
       /> */}
 
-      {
-        // For each category
-        !collapsed &&
-          Object.keys(unitGroups).map((key, i) => (
-            <Fragment key={key}>
-              {key !== "undefined" && unitGroups[key].length > 0 && (
-                <p className={"menu-label my-2 px-4 " + (i > 0 ? "pt-3" : "")}>
-                  {key}
-                </p>
-              )}
-              <ul className="menu-list">
-                {
-                  // For each unit in category
-                  unitGroups[key].map((u, index) => {
-                    const countInList = list?.units.filter(
-                      (listUnit) =>
-                        listUnit.selectionId !== "dummy" &&
-                        listUnit.name === u.name &&
-                        listUnit.armyId === army.uid
-                    ).length;
+      {!collapsed &&
+        Object.keys(unitGroups).map((key, i) => (
+          <Fragment key={key}>
+            {key !== "undefined" && unitGroups[key].length > 0 && (
+              <p className={"menu-label my-2 px-4 " + (i > 0 ? "pt-3" : "")}>
+                {key}
+              </p>
+            )}
+            <Divider />
+            {
+              // For each unit in category
+              unitGroups[key].map((u, index) => {
+                const countInList = list?.units.filter(
+                  (listUnit) =>
+                    listUnit.selectionId !== "dummy" &&
+                    listUnit.name === u.name &&
+                    listUnit.armyId === army.uid
+                ).length;
 
-                    return (
-                      <Accordion
-                        key={u.name}
-                        style={{
-                          backgroundColor:
-                            countInList > 0 || selected === u.name
-                              ? "#F9FDFF"
-                              : null,
-                          borderLeft:
-                            countInList > 0 ? "2px solid #0F71B4" : null,
-                          cursor: "pointer",
-                        }}
-                        disableGutters
-                        square
-                        elevation={0}
-                        expanded={expandedId === u.name || expandAll}
-                        onChange={() =>
-                          setExpandedId(expandedId === u.name ? null : u.name)
-                        }
-                        onClick={() => {
-                          handleSelectClick(u);
-                        }}
-                      >
-                        <AccordionSummary>
-                          <div className="is-flex is-flex-grow-1 is-align-items-center">
-                            <div className="is-flex-grow-1">
-                              <p className="mb-1" style={{ fontWeight: 600 }}>
-                                {countInList > 0 && (
-                                  <span style={{ color: "#0F71B4" }}>
-                                    {countInList}x{" "}
-                                  </span>
-                                )}
-                                <span>{u.name} </span>
-                                <span style={{ color: "#656565" }}>
-                                  [{u.size}]
-                                </span>
-                              </p>
-                              <div
-                                className="is-flex"
-                                style={{ fontSize: "14px", color: "#666" }}
-                              >
-                                <p>Qua {u.quality}+</p>
-                                <p className="ml-2">Def {u.defense}+</p>
-                              </div>
-                            </div>
-                            <p>{u.cost}pts</p>
-                            <IconButton
-                              color="primary"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAddClick(u);
-                              }}
-                            >
-                              <AddIcon />
-                            </IconButton>
+                return (
+                  <>
+                    <Paper
+                      key={u.name}
+                      className="p-4"
+                      elevation={0}
+                      style={{
+                        backgroundColor:
+                          countInList > 0 || selected === u.name
+                            ? "#F9FDFF"
+                            : null,
+                        borderLeft:
+                          countInList > 0 ? "2px solid #0F71B4" : null,
+                        cursor: "pointer",
+                      }}
+                      square
+                      onClick={() => {
+                        handleSelectClick(u);
+                      }}
+                    >
+                      <div className="is-flex is-flex-grow-1 is-align-items-center mb-2">
+                        <div className="is-flex-grow-1">
+                          <p className="mb-1">
+                            {countInList > 0 && (
+                              <span style={{ color: "#0F71B4" }}>
+                                {countInList}x{" "}
+                              </span>
+                            )}
+                            <span>{u.name} </span>
+                            <span style={{ color: "#656565" }}>[{u.size}]</span>
+                          </p>
+                          <div
+                            className="is-flex"
+                            style={{
+                              fontSize: "12px",
+                              color: "rgba(0,0,0,0.8)",
+                            }}
+                          >
+                            <p>Qua {u.quality}+</p>
+                            <p className="ml-2">Def {u.defense}+</p>
                           </div>
-                        </AccordionSummary>
-                        <AccordionDetails
-                          className="pt-0"
-                          style={{
-                            flexDirection: "column",
-                            fontSize: "14px",
-                            color: "#666",
-                            lineHeight: 1.4,
+                        </div>
+                        <p>{u.cost}pts</p>
+                        <IconButton
+                          color="primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddClick(u);
                           }}
                         >
-                          <div>
-                            {u.equipment.map((eqp, i) => (
-                              <p key={i}>
-                                {(eqp.count && eqp.count !== 1
-                                  ? `${eqp.count}x `
-                                  : "") +
-                                  EquipmentService.formatString(eqp)}{" "}
-                              </p>
-                            ))}
-                          </div>
-                          <div>
-                            <RuleList specialRules={u.specialRules} />
-                          </div>
-                        </AccordionDetails>
-                      </Accordion>
-                    );
-                  })
-                }
-              </ul>
-            </Fragment>
-          ))
-      }
+                          <AddIcon />
+                        </IconButton>
+                      </div>
+                      <div
+                        style={{ fontSize: "12px", color: "rgba(0,0,0,0.8)" }}
+                      >
+                        {u.equipment.map((eqp, i) => (
+                          <p key={i}>
+                            {(eqp.count && eqp.count !== 1
+                              ? `${eqp.count}x `
+                              : "") + EquipmentService.formatString(eqp)}{" "}
+                          </p>
+                        ))}
+                        <RuleList specialRules={u.specialRules} />
+                      </div>
+                    </Paper>
+                    <Divider />
+                  </>
+                );
+              })
+            }
+          </Fragment>
+        ))}
     </Card>
   );
 }

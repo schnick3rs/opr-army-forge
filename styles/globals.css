@@ -87,3 +87,8 @@ div[role="tooltip"] {
     display:none !important;
   }
 }
+
+hr {
+  height: auto;
+  background-color: transparent;
+}

@@ -10,9 +10,11 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Divider,
   ListItemIcon,
   ListItemText,
   MenuItem,
+  Paper,
 } from "@mui/material";
 import RuleList from "./components/RuleList";
 import UnitService from "../services/UnitService";
@@ -211,31 +213,30 @@ function MainListItem({ list, unit, expanded, onSelected, onUnitRemoved }) {
   const unitSize = UnitService.getSize(unit);
 
   return (
-    <Accordion
-      square
-      disableGutters
-      elevation={1}
-      expanded={expanded}
-      onClick={() => handleSelectUnit(unit)}
-      style={{
-        backgroundColor:
-          list.selectedUnitId === unit.selectionId
-            ? "rgba(249, 253, 255, 1)"
-            : null,
-      }}
-    >
-      <AccordionSummary>
+    <>
+      <Paper
+        square
+        elevation={0}
+        onClick={() => handleSelectUnit(unit)}
+        className="p-4"
+        style={{
+          backgroundColor:
+            list.selectedUnitId === unit.selectionId
+              ? "rgba(249, 253, 255, 1)"
+              : null,
+        }}
+      >
         <div
           id={`Unit${unit.selectionId}`}
-          className="is-flex is-flex-grow-1 is-align-items-center"
+          className="mb-2 is-flex is-flex-grow-1 is-align-items-center"
         >
           <div className="is-flex-grow-1">
-            <p className="mb-1" style={{ fontWeight: 600 }}>
+            <p className="mb-1">
               {unit.customName || unit.name} [{unitSize}]
             </p>
             <div
               className="is-flex"
-              style={{ fontSize: "14px", color: "#666" }}
+              style={{ fontSize: "12px", color: "rgba(0,0,0,0.8)" }}
             >
               <p>Qua {unit.quality}+</p>
               <p className="ml-2">Def {unit.defense}+</p>
@@ -257,9 +258,7 @@ function MainListItem({ list, unit, expanded, onSelected, onUnitRemoved }) {
             </MenuItem>
           </DropMenu>
         </div>
-      </AccordionSummary>
-      <AccordionDetails className="pt-0">
-        <div style={{ fontSize: "14px", color: "#666666" }}>
+        <div style={{ fontSize: "12px", color: "rgba(0,0,0,0.8)" }}>
           <div>
             {Object.values(weaponGroups).map((group: any[], i) => {
               const count = group.reduce((c, next) => c + next.count, 0);
@@ -278,8 +277,9 @@ function MainListItem({ list, unit, expanded, onSelected, onUnitRemoved }) {
             )}
           />
         </div>
-      </AccordionDetails>
-    </Accordion>
+      </Paper>
+      <Divider />
+    </>
   );
 }
 
