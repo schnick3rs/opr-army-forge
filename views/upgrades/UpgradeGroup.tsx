@@ -7,11 +7,12 @@ import UpgradeItem from "./UpgradeItem";
 export default function UpgradeGroup({
   unit,
   upgrade,
+  controlType
 }: {
   unit: ISelectedUnit;
   upgrade: IUpgrade;
+  controlType: string;
 }) {
-  const controlType = UpgradeService.getControlType(unit, upgrade);
 
   const getProfile = (target: string) => {
     var e = unit.equipment.find((e) =>

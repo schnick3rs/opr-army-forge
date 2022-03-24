@@ -33,13 +33,17 @@ import UpgradeService from "../../services/UpgradeService";
 export function Upgrades({ mobile = false }) {
   const list = useSelector((state: RootState) => state.list);
   const gameSystem = useSelector((state: RootState) => state.army.gameSystem);
-  const loadedArmyBooks = useSelector((state: RootState) => state.army.loadedArmyBooks);
+  const loadedArmyBooks = useSelector(
+    (state: RootState) => state.army.loadedArmyBooks
+  );
   const dispatch = useDispatch();
   const [dummy, setDummy] = useState(false);
 
   const competitive = false;
   const selectedUnit = UnitService.getSelected(list);
-  const army = selectedUnit && loadedArmyBooks?.find(book => book.uid === selectedUnit.armyId);
+  const army =
+    selectedUnit &&
+    loadedArmyBooks?.find((book) => book.uid === selectedUnit.armyId);
 
   useEffect(() => {
     setDummy(selectedUnit?.selectionId === "dummy");
@@ -247,33 +251,37 @@ export function Upgrades({ mobile = false }) {
               (section) =>
                 selectedUnit.disabledUpgradeSections.indexOf(section.uid) === -1
             )
-            .map((u, i) => (
-              <div className={"mt-4"} key={i}>
-                <div className="px-4 is-flex is-align-items-center">
-                  {selectedUnit.combined && u.affects === "all" && (
-                    <CustomTooltip
-                      title="This option will be the same on both combined units."
-                      arrow
-                      enterTouchDelay={0}
-                      leaveTouchDelay={5000}
+            .map((u, i) => {
+              const controlType = UpgradeService.getControlType(selectedUnit, u);
+
+              return (
+                <div className={"mt-4"} key={i}>
+                  <div className="px-4 is-flex is-align-items-center">
+                    {selectedUnit.combined && u.affects === "all" && (
+                      <CustomTooltip
+                        title="This option will be the same on both combined units."
+                        arrow
+                        enterTouchDelay={0}
+                        leaveTouchDelay={5000}
+                      >
+                        <LinkIcon sx={{ fontSize: 22 }} className="mr-2" />
+                      </CustomTooltip>
+                    )}
+                    <p
+                      className="pt-0"
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "14px",
+                        lineHeight: 1.7,
+                      }}
                     >
-                      <LinkIcon sx={{ fontSize: 22 }} className="mr-2" />
-                    </CustomTooltip>
-                  )}
-                  <p
-                    className="pt-0"
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "14px",
-                      lineHeight: 1.7,
-                    }}
-                  >
-                    {UpgradeService.enrichDisplayLabel(selectedUnit, u)}
-                  </p>
+                      {UpgradeService.enrichDisplayLabel(selectedUnit, u, controlType)}
+                    </p>
+                  </div>
+                  <UpgradeGroup unit={selectedUnit} upgrade={u} controlType={controlType} />
                 </div>
-                <UpgradeGroup unit={selectedUnit} upgrade={u} />
-              </div>
-            ))}
+              );
+            })}
         </div>
       ))}
     </div>

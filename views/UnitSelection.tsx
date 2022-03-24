@@ -15,9 +15,9 @@ import AddIcon from "@mui/icons-material/Add";
 import EquipmentService from "../services/EquipmentService";
 import RuleList from "./components/RuleList";
 import { IUnit } from "../data/interfaces";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+
 import UnitService from "../services/UnitService";
+import ArmyBookGroupHeader from "./components/ArmyBookGroupHeader";
 
 export function UnitSelection({
   onSelected,
@@ -35,6 +35,7 @@ export function UnitSelection({
           addUnit={addUnit}
           mobile={mobile}
           army={book}
+          showTitle={armyData.loadedArmyBooks.length > 1}
         />
       ))}
     </>
@@ -46,14 +47,12 @@ function UnitSelectionForArmy({
   addUnit = (unit: IUnit, dummy = false) => {},
   mobile = false,
   army,
+  showTitle,
 }) {
   // Access the main army definition state
   const list = useSelector((state: RootState) => state.list);
 
   const [collapsed, setCollapsed] = useState(false);
-  const [expandedId, setExpandedId] = useState(null);
-  //const [expandAll, setExpandAll] = useState(true);
-  const expandAll = true;
 
   if (!army) return null;
 
@@ -96,12 +95,10 @@ function UnitSelectionForArmy({
     addUnit({ ...unit, armyId: army.uid });
   };
   const handleSelectClick = (unit: IUnit) => {
-    if (expandAll && !mobile) {
+    if (!mobile) {
       //onSelected({...UnitService.getRealUnit(unit), selectionId: null});
       addUnit({ ...unit, armyId: army.uid }, true);
       onSelected({ selectionId: "dummy" });
-    } else {
-      setExpandedId(expandedId === unit.name ? null : unit.name);
     }
   };
 
@@ -114,24 +111,13 @@ function UnitSelectionForArmy({
       sx={{ backgroundColor: "#FAFAFA", marginBottom: "1rem" }}
       square
     >
-      <div
-        className={`${styles["army-book-section-header"]} px-4 py-2 is-flex is-align-items-center`}
-      >
-        <h3 className="is-flex-grow-1">
-          {army.name} - {army.versionString}
-        </h3>
-        <IconButton
-          size="small"
-          onClick={() => setCollapsed((prev) => !prev)}
-          color="primary"
-        >
-          {collapsed ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}
-        </IconButton>
-      </div>
-      {/* <FullCompactToggle
-        expanded={expandAll}
-        onToggle={() => setExpandAll(!expandAll)}
-      /> */}
+      {showTitle && (
+        <ArmyBookGroupHeader
+          army={army}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+        />
+      )}
 
       {!collapsed &&
         Object.keys(unitGroups).map((key, i) => (

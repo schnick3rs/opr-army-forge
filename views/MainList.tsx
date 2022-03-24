@@ -7,9 +7,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { selectUnit, removeUnit, addUnits, ListState } from "../data/listSlice";
 import UpgradeService from "../services/UpgradeService";
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
+  Card,
   Divider,
   ListItemIcon,
   ListItemText,
@@ -18,18 +16,16 @@ import {
 } from "@mui/material";
 import RuleList from "./components/RuleList";
 import UnitService from "../services/UnitService";
-import FullCompactToggle from "./components/FullCompactToggle";
 import LinkIcon from "@mui/icons-material/Link";
 import _ from "lodash";
 import { DropMenu } from "./components/DropMenu";
+import ArmyBookGroupHeader from "./components/ArmyBookGroupHeader";
 
 export function MainList({ onSelected, onUnitRemoved }) {
   const list = useSelector((state: RootState) => state.list);
   const loadedArmyBooks = useSelector(
     (state: RootState) => state.army.loadedArmyBooks
   );
-
-  const [expandAll, setExpandAll] = useState(true);
 
   const units = list.units.filter((u) => u.selectionId !== "dummy");
 
@@ -48,26 +44,14 @@ export function MainList({ onSelected, onUnitRemoved }) {
 
   return (
     <>
-      <div className="sticky">
-        <h3 className="px-4 pt-4 is-size-4 is-hidden-mobile">
-          {`My List - ${list.points}` +
-            (list.pointsLimit ? `/${list.pointsLimit}` : "") +
-            "pts"}
-        </h3>
-      </div>
-      <FullCompactToggle
-        expanded={expandAll}
-        onToggle={() => setExpandAll(!expandAll)}
-      />
       {unitGroupKeys.map((key) => {
         const armyBook = loadedArmyBooks.find((book) => book.uid === key);
         return (
           <MainListSection
             key={key}
             army={armyBook}
-            showTitle={unitGroupKeys.length > 1}
+            showTitle={loadedArmyBooks.length > 1}
             group={unitGroups[key]}
-            expandAll={expandAll}
             onSelected={onSelected}
             onUnitRemoved={onUnitRemoved}
           />
@@ -81,22 +65,28 @@ function MainListSection({
   group,
   army,
   showTitle,
-  expandAll,
   onSelected,
   onUnitRemoved,
 }) {
   const list = useSelector((state: RootState) => state.list);
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
-    <>
+    <Card
+      elevation={2}
+      sx={{ backgroundColor: "#FAFAFA", marginBottom: "1rem" }}
+      square
+    >
       {showTitle && (
-        <p className="px-4 mt-4" style={{ fontWeight: 600 }}>
-          {army.name}
-        </p>
+        <ArmyBookGroupHeader
+          army={army}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+        />
       )}
-      <ul className="mt-2">
-        {
-          // For each selected unit
-          group.map((s: ISelectedUnit, index: number) => {
+      {!collapsed && (
+        <>
+          {group.map((s: ISelectedUnit, index: number) => {
             const attachedUnits: ISelectedUnit[] = UnitService.getAttachedUnits(
               list,
               s
@@ -121,7 +111,7 @@ function MainListSection({
             };
 
             return (
-              <li
+              <div
                 key={index}
                 className={hasJoined ? "my-2" : ""}
                 style={{ backgroundColor: hasJoined ? "rgba(0,0,0,.12)" : "" }}
@@ -156,7 +146,6 @@ function MainListSection({
                       key={h.selectionId}
                       list={list}
                       unit={h}
-                      expanded={expandAll}
                       onSelected={handleClick}
                       onUnitRemoved={onUnitRemoved}
                     />
@@ -164,7 +153,6 @@ function MainListSection({
                   <MainListItem
                     list={list}
                     unit={s}
-                    expanded={expandAll}
                     onSelected={handleClick}
                     onUnitRemoved={onUnitRemoved}
                   />
@@ -173,22 +161,21 @@ function MainListSection({
                       key={u.selectionId}
                       list={list}
                       unit={u}
-                      expanded={expandAll}
                       onSelected={handleClick}
                       onUnitRemoved={onUnitRemoved}
                     />
                   ))}
                 </div>
-              </li>
+              </div>
             );
-          })
-        }
-      </ul>
-    </>
+          })}
+        </>
+      )}
+    </Card>
   );
 }
 
-function MainListItem({ list, unit, expanded, onSelected, onUnitRemoved }) {
+function MainListItem({ list, unit, onSelected, onUnitRemoved }) {
   const dispatch = useDispatch();
 
   const weaponNames = unit.loadout.map((u) => ({

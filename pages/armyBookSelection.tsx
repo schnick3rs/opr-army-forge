@@ -46,10 +46,11 @@ export default function ArmyBookSelection() {
         return;
       }
 
-      // Clear any existing units?
-      dispatch(resetList());
-
-      if (!appendMode) dispatch(resetLoadedBooks());
+      if (!appendMode) {
+        dispatch(resetLoadedBooks());
+        // Clear any existing units?
+        dispatch(resetList());
+      }
 
       if (armyState.armyBooks.length < 1)
         dispatch(getArmyBooks(armyState.gameSystem));

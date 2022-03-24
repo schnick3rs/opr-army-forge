@@ -5,7 +5,7 @@ import { UnitSelection } from "../UnitSelection";
 import { MainList } from "../MainList";
 import { Upgrades } from "../upgrades/Upgrades";
 import MainMenu from "../components/MainMenu";
-import { Paper } from "@mui/material";
+import { Card, Paper } from "@mui/material";
 import UpgradePanelHeader from "../components/UpgradePanelHeader";
 import ValidationErrors from "../ValidationErrors";
 import UndoRemoveUnit from "../components/UndoRemoveUnit";
@@ -15,11 +15,13 @@ import UnitService from "../../services/UnitService";
 
 export default function DesktopView() {
   const list = useSelector((state: RootState) => state.list);
+  const loadedArmyBooks = useSelector((state: RootState) => state.army.loadedArmyBooks);
   const [validationOpen, setValidationOpen] = useState(false);
   const [showUndoRemove, setShowUndoRemove] = useState(false);
 
   const dispatch = useDispatch();
 
+  const armyData = loadedArmyBooks?.[0];
   const columnStyle: any = { overflowY: "scroll", maxHeight: "100%" };
 
   const setScrolled = (e) => {
@@ -66,9 +68,21 @@ export default function DesktopView() {
           style={columnStyle}
           onScroll={setScrolled}
         >
+          <Card square elevation={3}>
+            <h3 className="p-4 is-size-4 is-hidden-mobile">
+              {loadedArmyBooks.length > 1 ? "Army Books" : `${armyData.name} - ${armyData.versionString}`}
+            </h3>
+          </Card>
           <UnitSelection onSelected={onSelectUnit} addUnit={onAddUnit} />
         </div>
         <div className="column p-0" style={columnStyle} onScroll={setScrolled}>
+          <Card square elevation={3}>
+            <h3 className="p-4 is-size-4 is-hidden-mobile">
+              {`My List - ${list.points}` +
+                (list.pointsLimit ? `/${list.pointsLimit}` : "") +
+                "pts"}
+            </h3>
+          </Card>
           <MainList
             onSelected={onSelectUnit}
             onUnitRemoved={() => setShowUndoRemove(true)}
@@ -79,13 +93,13 @@ export default function DesktopView() {
           style={columnStyle}
           onScroll={setScrolled}
         >
-          <Paper
+          <Card
             square
+            elevation={1}
             className="px-4 pt-4 pb-2 sticky"
-            sx={{ backgroundColor: "white" }}
           >
             <UpgradePanelHeader />
-          </Paper>
+          </Card>
           <Upgrades />
         </div>
       </div>

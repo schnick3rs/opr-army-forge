@@ -185,8 +185,8 @@ export default class UpgradeService {
     return available;
   }
 
-  public static enrichDisplayLabel(unit: ISelectedUnit, upgrade: IUpgrade) {
-    if (upgrade.type === "replace") {
+  public static enrichDisplayLabel(unit: ISelectedUnit, upgrade: IUpgrade, controlType: string) {
+    if (upgrade.type === "replace" && controlType !== "radio") {
       return upgrade.label + ` (${this.countAvailable(unit, upgrade)})`
     }
 
