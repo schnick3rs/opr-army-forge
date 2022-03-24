@@ -76,6 +76,7 @@ export const armySlice = createSlice({
   reducers: {
     resetLoadedBooks(state) {
       state.loadedArmyBooks = [];
+      state.selectedFactions = [];
     },
     setGameSystem: (state, action: PayloadAction<string>) => {
       return {

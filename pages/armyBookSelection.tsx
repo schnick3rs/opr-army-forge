@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, store } from "../data/store";
-import { getArmyBookData, getArmyBooks, IArmyData } from "../data/armySlice";
+import {
+  getArmyBookData,
+  getArmyBooks,
+  IArmyData,
+  resetLoadedBooks,
+} from "../data/armySlice";
 import { useRouter } from "next/router";
 import { IconButton, Snackbar, InputAdornment, Input } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -43,6 +48,8 @@ export default function ArmyBookSelection() {
 
       // Clear any existing units?
       dispatch(resetList());
+
+      if (!appendMode) dispatch(resetLoadedBooks());
 
       if (armyState.armyBooks.length < 1)
         dispatch(getArmyBooks(armyState.gameSystem));
