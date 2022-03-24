@@ -20,6 +20,7 @@ import {
   unloadFaction,
 } from "../../data/armySlice";
 import _ from "lodash";
+import { removeUnitsForBook } from "../../data/listSlice";
 
 export default function MultipleArmySelections() {
   const router = useRouter();
@@ -92,15 +93,12 @@ function ArmyBookSelection({ army, allowRemove, editMode }) {
   const dispatch = useDispatch();
 
   function remove(armyId) {
-    if (!editMode) {
-      dispatch(unloadArmyBook(armyId));
-      return;
-    }
-    const prompt = confirm(
+    const prompt = !editMode || confirm(
       "Removing this army book will remove all associated units. Remove anyway?"
     );
     if (prompt) {
       dispatch(unloadArmyBook(armyId));
+      dispatch(removeUnitsForBook(armyId));
     }
   }
 
@@ -139,28 +137,26 @@ function FactionArmyBookSelection({ faction, allowRemove, editMode }) {
   const factionRelation = factionBooks[1].factionRelation;
 
   function removeFaction(faction) {
-    if (!editMode) {
-      dispatch(unloadFaction(faction));
-      return;
-    }
-    const prompt = confirm(
+    
+    const prompt = !editMode || confirm(
       "Removing this faction will remove all associated units. Remove anyway?"
     );
     if (prompt) {
+      const booksToRemove = loadedArmyBooks.map(book => book.uid);
       dispatch(unloadFaction(faction));
+      for (let bookId of booksToRemove) {
+        dispatch(removeUnitsForBook(bookId));
+      }
     }
   }
 
   function remove(armyId) {
-    if (!editMode) {
-      dispatch(unloadArmyBook(armyId));
-      return;
-    }
-    const prompt = confirm(
+    const prompt = !editMode || confirm(
       "Removing this army book will remove all associated units. Remove anyway?"
     );
     if (prompt) {
       dispatch(unloadArmyBook(armyId));
+      dispatch(removeUnitsForBook(armyId));
     }
   }
 
