@@ -183,11 +183,13 @@ function FactionArmyBookSelection({ faction, allowRemove, editMode }) {
         <ListItemText
           primary={faction + " " + factionRelation}
           secondary={
-            loadedArmyBooks.length === 0 ? "Select at least one option" : ""
+            <span style={{ color: "#B00020" }}>
+              {loadedArmyBooks.length === 0 ? "Select at least one option" : ""}
+            </span>
           }
         />
       </ListItem>
-      {factionBooks.map((book) => {
+      {factionBooks.map((book, bookIndex) => {
         const enabled = loadedArmyBooks.some((x) => x.uid === book.uid);
         const selectSubfaction = () => {
           if (!enabled) {
@@ -203,14 +205,20 @@ function FactionArmyBookSelection({ faction, allowRemove, editMode }) {
           }
         };
         return (
-          <ListItem
-            key={book.uid}
-            secondaryAction={
-              <Checkbox checked={enabled} onClick={selectSubfaction} />
-            }
-          >
-            <ListItemText primary={book.name} sx={{ textIndent: "12px" }} />
-          </ListItem>
+          <Fragment key={book.uid}>
+            {bookIndex > 0 && <Divider sx={{ marginLeft: "26px" }} />}
+            <ListItem
+              secondaryAction={
+                <Checkbox
+                  sx={{ right: "-12px" }}
+                  checked={enabled}
+                  onClick={selectSubfaction}
+                />
+              }
+            >
+              <ListItemText primary={book.name} sx={{ textIndent: "12px" }} />
+            </ListItem>
+          </Fragment>
         );
       })}
       <Divider />
