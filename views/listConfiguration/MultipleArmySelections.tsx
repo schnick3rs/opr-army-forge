@@ -31,9 +31,11 @@ export default function MultipleArmySelections() {
 
   const allowRemove =
     _.uniq(
-      loadedArmyBooks
-        .map((x) => x.factionName)
-        .concat(armyState.selectedFactions)
+      armyState.selectedFactions.concat(
+        loadedArmyBooks
+          .filter((book) => !book.factionName)
+          .map((book) => book.name)
+      )
     ).length > 1;
 
   function addAnotherBook() {
