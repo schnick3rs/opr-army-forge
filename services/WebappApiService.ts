@@ -53,6 +53,7 @@ export default class WebappApiService {
       ...data,
       units: data.units.map((unit, index) => ({
         ...unit,
+        selectedUpgrades: [],
         sortId: index,
         disabledUpgradeSections: UnitService.getDisabledUpgradeSections(unit, upgradePackages)
       })),

@@ -20,6 +20,7 @@ import LinkIcon from "@mui/icons-material/Link";
 import _ from "lodash";
 import { DropMenu } from "./components/DropMenu";
 import ArmyBookGroupHeader from "./components/ArmyBookGroupHeader";
+import UnitListItem from "./components/UnitListItem";
 
 export function MainList({ onSelected, onUnitRemoved }) {
   const list = useSelector((state: RootState) => state.list);
@@ -87,6 +88,8 @@ function MainListSection({
       {!collapsed && (
         <>
           {group.map((s: ISelectedUnit, index: number) => {
+            // TODO: REFACTOR!
+
             const attachedUnits: ISelectedUnit[] = UnitService.getAttachedUnits(
               list,
               s
@@ -96,7 +99,6 @@ function MainListSection({
                 u.specialRules.some((r) => r.name === "Hero")
               );
             const hasJoined = attachedUnits.length > 0;
-
             const hasHeroes = hasJoined && heroes.length > 0;
 
             const unitSize = otherJoined.reduce((size, u) => {
@@ -178,13 +180,6 @@ function MainListSection({
 function MainListItem({ list, unit, onSelected, onUnitRemoved }) {
   const dispatch = useDispatch();
 
-  const weaponNames = unit.loadout.map((u) => ({
-    name: u.name,
-    count: u.count,
-  }));
-
-  const weaponGroups = _.groupBy(weaponNames, (x) => x.name);
-
   const handleSelectUnit = (unit: ISelectedUnit) => {
     if (list.selectedUnitId !== unit.selectionId) {
       dispatch(selectUnit(unit.selectionId));
@@ -197,76 +192,30 @@ function MainListItem({ list, unit, onSelected, onUnitRemoved }) {
     dispatch(removeUnit(unit.selectionId));
   };
 
-  const unitSize = UnitService.getSize(unit);
-
   return (
-    <>
-      <Paper
-        square
-        elevation={0}
-        onClick={() => handleSelectUnit(unit)}
-        className="p-4"
-        style={{
-          backgroundColor:
-            list.selectedUnitId === unit.selectionId
-              ? "rgba(249, 253, 255, 1)"
-              : null,
-        }}
-      >
-        <div
-          id={`Unit${unit.selectionId}`}
-          className="mb-2 is-flex is-flex-grow-1 is-align-items-center"
-        >
-          <div className="is-flex-grow-1">
-            <p className="mb-1">
-              {unit.customName || unit.name} [{unitSize}]
-            </p>
-            <div
-              className="is-flex"
-              style={{ fontSize: "12px", color: "rgba(0,0,0,0.8)" }}
-            >
-              <p>Qua {unit.quality}+</p>
-              <p className="ml-2">Def {unit.defense}+</p>
-            </div>
-          </div>
-          <p className="mr-2">{UpgradeService.calculateUnitTotal(unit)}pts</p>
-          <DropMenu>
-            <DuplicateButton units={[unit]} list={list} text=" Duplicate" />
-            <MenuItem
-              color="primary"
-              onClick={(e) => {
-                handleRemove(unit);
-              }}
-            >
-              <ListItemIcon>
-                <RemoveIcon />
-              </ListItemIcon>
-              <ListItemText>Remove</ListItemText>
-            </MenuItem>
-          </DropMenu>
-        </div>
-        <div style={{ fontSize: "12px", color: "rgba(0,0,0,0.8)" }}>
-          <div>
-            {Object.values(weaponGroups).map((group: any[], i) => {
-              const count = group.reduce((c, next) => c + next.count, 0);
-              return (
-                <span key={i}>
-                  {i > 0 ? ", " : ""}
-                  {count > 1 ? `${count}x ` : ""}
-                  {group[0].name}
-                </span>
-              );
-            })}
-          </div>
-          <RuleList
-            specialRules={unit.specialRules.concat(
-              UnitService.getAllUpgradedRules(unit)
-            )}
-          />
-        </div>
-      </Paper>
-      <Divider />
-    </>
+    <UnitListItem
+      unit={unit}
+      selected={list.selectedUnitId === unit.selectionId}
+      onClick={() => {
+        handleSelectUnit(unit);
+      }}
+      rightControl={
+        <DropMenu>
+          <DuplicateButton units={[unit]} list={list} text=" Duplicate" />
+          <MenuItem
+            color="primary"
+            onClick={(e) => {
+              handleRemove(unit);
+            }}
+          >
+            <ListItemIcon>
+              <RemoveIcon />
+            </ListItemIcon>
+            <ListItemText>Remove</ListItemText>
+          </MenuItem>
+        </DropMenu>
+      }
+    />
   );
 }
 
