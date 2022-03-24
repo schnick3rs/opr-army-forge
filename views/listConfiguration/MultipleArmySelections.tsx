@@ -90,7 +90,7 @@ function ArmyBookSelection({ army, allowRemove, editMode }) {
   const dispatch = useDispatch();
 
   function remove(armyId) {
-    if (editMode){
+    if (!editMode) {
       dispatch(unloadArmyBook(armyId));
       return;
     }
@@ -137,7 +137,7 @@ function FactionArmyBookSelection({ faction, allowRemove, editMode }) {
   const factionRelation = factionBooks[1].factionRelation;
 
   function removeFaction(faction) {
-    if (editMode){
+    if (!editMode) {
       dispatch(unloadFaction(faction));
       return;
     }
@@ -150,7 +150,7 @@ function FactionArmyBookSelection({ faction, allowRemove, editMode }) {
   }
 
   function remove(armyId) {
-    if (editMode){
+    if (!editMode) {
       dispatch(unloadArmyBook(armyId));
       return;
     }

@@ -151,6 +151,7 @@ function MainListSection({
                 <div className={hasJoined ? "ml-1" : ""}>
                   {heroes.map((h) => (
                     <MainListItem
+                      key={h.selectionId}
                       list={list}
                       unit={h}
                       expanded={expandAll}
@@ -167,6 +168,7 @@ function MainListSection({
                   />
                   {otherJoined.map((u) => (
                     <MainListItem
+                      key={u.selectionId}
                       list={list}
                       unit={u}
                       expanded={expandAll}

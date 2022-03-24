@@ -41,7 +41,7 @@ export default function UnitEquipmentTable({
     .concat(
       weaponsFromItems.map((item) => ({ ...item, count: item.count ?? 1 }))
     );
-  console.log("Weapons", JSON.parse(JSON.stringify(weapons)));
+  
   const equipment = unit.loadout.filter((e) => !isWeapon(e));
   const combinedEquipment = equipment.map((e) => {
     if (e.type === "ArmyBookItem")

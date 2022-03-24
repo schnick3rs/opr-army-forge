@@ -20,12 +20,12 @@ export default function EditView(props: EditViewProps) {
       })
     );
 
-    router.back();
+    router.push({ pathname: "/list", query: { ...router.query } });
   };
 
   return (
     <Button
-      className="mx-auto px-6"
+      className="mt-4 mx-auto px-6"
       variant="contained"
       onClick={() => update()}
     >

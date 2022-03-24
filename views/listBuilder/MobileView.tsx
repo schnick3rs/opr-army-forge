@@ -85,7 +85,7 @@ export default function MobileView() {
             textColor="inherit"
             indicatorColor="primary"
           >
-            <Tab label={`${armyData?.name} ${armyData?.versionString}`} />
+            <Tab label={(army?.loadedArmyBooks.length > 1 ? "Army Books" : `${armyData?.name} ${armyData?.versionString}`)} />
             <Tab label={`My List - ${list.points}pts`} />
           </Tabs>
         </AppBar>
@@ -96,9 +96,7 @@ export default function MobileView() {
         ref={(slider) => setSlider(slider)}
         style={{ maxHeight: "100%" }}
       >
-        <div>
-          <UnitSelection onSelected={() => {}} addUnit={onAddUnit} mobile />
-        </div>
+        <UnitSelection onSelected={() => {}} addUnit={onAddUnit} mobile />
         <div className="">
           {list.units.length > 0 ? (
             <MainList

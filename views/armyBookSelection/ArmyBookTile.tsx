@@ -16,7 +16,7 @@ export default function ArmyBookTile({
 }: ArmyBookTileProps) {
   return (
     <div
-      className="column is-half-mobile is-one-third-tablet is-one-quarter"
+      className="column is-half-mobile is-one-third-tablet is-one-quarter-desktop"
       style={{ filter: enabled ? null : "saturate(0.25)" }}
     >
       <Card

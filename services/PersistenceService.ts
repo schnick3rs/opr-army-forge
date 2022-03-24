@@ -13,6 +13,7 @@ import _ from "lodash";
 export default class PersistenceService {
 
   private static prefix = "AF_Save_";
+  private static currentSaveVersion = 3;
 
   private static getSaveKey(creationTime: string) {
     return this.prefix + creationTime;
@@ -47,7 +48,7 @@ export default class PersistenceService {
       armyFaction: armyData.factionName,
       armyName: armyData.name,
       modified: new Date().toJSON(),
-      saveVersion: 3,
+      saveVersion: this.currentSaveVersion,
       listPoints: 0,
       list: this.getDataForSave(list)
     };
@@ -97,7 +98,8 @@ export default class PersistenceService {
       armyIds: armyIds,
       modified: new Date().toJSON(),
       listPoints: points,
-      list: this.getDataForSave(list)
+      list: this.getDataForSave(list),
+      saveVersion: this.currentSaveVersion
     };
 
     console.log("Updating save...", saveData);
@@ -142,14 +144,14 @@ export default class PersistenceService {
           selectedUpgrades: [],
           loadout: []
         };
-        console.log("Unit", unit);
-        // Cast to convince TS that it is indeed in the old format...
-        const selectedUpgrades: any = makeCopy(u.selectedUpgrades);
-        for (let upg of (selectedUpgrades as { id: string }[])) {
-          const option = allOptions.find(opt => opt.id === upg.id);
+        console.log("Loading unit...", unit);
+        for (let upg of makeCopy(u.selectedUpgrades)) {
+          const option = allOptions.find(opt => opt.id === upg.id || opt.id === upg.optionId);
           if (option) {
             const section = allSections.find(sec => sec.uid === option.parentSectionId);
             UpgradeService.apply(unit, section, option);
+          } else {
+            console.warn("Couldn't find option", upg);
           }
         }
         return UpgradeService.buildUpgrades(unit);
@@ -180,6 +182,8 @@ export default class PersistenceService {
           const option = section.options.find(opt => opt.id === upg.optionId);
           if (option) {
             UpgradeService.apply(unit, section, option);
+          } else {
+            console.warn("Couldn't find option", upg);
           }
         }
         return UpgradeService.buildUpgrades(unit);
@@ -205,7 +209,8 @@ export default class PersistenceService {
     })));
 
     Promise.all(promises).then(results => {
-      const armyBooks = results.map(res => res.payload) as IArmyData[];
+      const armyBooks = results.map(res => (res.payload as any).armyBookData) as IArmyData[];
+      console.log(armyBooks);
       const list: ListState = this.buildListFromSave(save, armyBooks);
       dispatch(loadSavedList(list));
       callback(armyBooks);

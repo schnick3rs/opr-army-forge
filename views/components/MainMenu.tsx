@@ -65,7 +65,7 @@ export default function MainMenu() {
   };
 
   const navigateToListConfig = () => {
-    router.push({ pathname: "/listConfiguration", query: { edit: true } });
+    router.push({ pathname: "/listConfiguration", query: { ...router.query, edit: true } });
   };
 
   const isBigScreen = useMediaQuery({ query: "(min-width: 1024px)" });
