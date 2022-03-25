@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import { RootState } from "../../data/store";
 import { UnitSelection } from "../UnitSelection";
 import { MainList } from "../MainList";
@@ -9,9 +9,6 @@ import { Card, Paper } from "@mui/material";
 import UpgradePanelHeader from "../components/UpgradePanelHeader";
 import ValidationErrors from "../ValidationErrors";
 import UndoRemoveUnit from "../components/UndoRemoveUnit";
-import { selectUnit, addUnit, removeUnit } from "../../data/listSlice";
-import { ISelectedUnit, IUnit } from "../../data/interfaces";
-import UnitService from "../../services/UnitService";
 
 export default function DesktopView() {
   const list = useSelector((state: RootState) => state.list);
@@ -20,8 +17,6 @@ export default function DesktopView() {
   );
   const [validationOpen, setValidationOpen] = useState(false);
   const [showUndoRemove, setShowUndoRemove] = useState(false);
-
-  const dispatch = useDispatch();
 
   const armyData = loadedArmyBooks?.[0];
   const columnStyle: any = { overflowY: "scroll", maxHeight: "100%" };

@@ -27,10 +27,12 @@ export default class ValidationService {
       const nonCombinedUnitsGroupedByName = _.groupBy(units.filter(u => !(u.combined && (!u.joinToUnit))), u => u.name);
       const isOverDuplicateUnitLimit = Object.values(nonCombinedUnitsGroupedByName).some((grp: any[]) => grp.length > duplicateUnitLimit)
 
+      const unitPointThreshold = army.gameSystem === "aof" ? 165 : 200;
+
       if (heroCount > Math.floor(points / 500))
         errors.push(`Max 1 hero per full 500pts.`);
-      if (unitCount > Math.floor(points / 200))
-        errors.push(`Max 1 unit per full 200pts (combined units count as just 1 unit).`);
+      if (unitCount > Math.floor(points / unitPointThreshold))
+        errors.push(`Max 1 unit per full ${unitPointThreshold}pts (combined units count as just 1 unit).`);
       if (units.some(u => u.combined && u.size === 1))
         errors.push(`Cannot combine units of unit size [1].`);
       if (units.some(u => u.size === 1 && joinedIds.includes(u.selectionId)))

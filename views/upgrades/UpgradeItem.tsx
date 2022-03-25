@@ -16,6 +16,7 @@ import { groupBy } from "../../services/Helpers";
 import pluralise from "pluralize";
 import RuleList from "../components/RuleList";
 import { Fragment } from "react";
+import EquipmentService from "../../services/EquipmentService";
 
 function UpgradeItemDisplay({ eqp, count, isValid }) {
   const name =
@@ -108,6 +109,13 @@ export default function UpgradeItem({
     ? UpgradeService.isValid(selectedUnit, upgrade, option)
     : true;
 
+  const getProfile = (target: string) => {
+    var e = selectedUnit.equipment.find((e) =>
+      EquipmentService.compareEquipment(e, target)
+    );
+    return e ? EquipmentService.formatString(e as IUpgradeGainsWeapon) : "";
+  };
+
   return (
     <div className="is-flex is-align-items-center mb-1">
       <div className="is-flex-grow-1 pr-2" style={{ color: "red" }}>
@@ -127,7 +135,9 @@ export default function UpgradeItem({
             );
           })
         ) : (
-          <span style={{ color: "#000000" }}>None</span>
+          <span style={{ color: "rgba(0,0,0,0.8)" }}>
+            Default - {upgrade.replaceWhat?.map(getProfile).join(", ")}
+          </span>
         )}
       </div>
       <div style={{ color: isValid ? null : "rgba(0,0,0,.5)" }}>

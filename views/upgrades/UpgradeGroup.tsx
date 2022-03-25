@@ -1,5 +1,9 @@
 import { Paper } from "@mui/material";
-import { ISelectedUnit, IUpgrade } from "../../data/interfaces";
+import {
+  ISelectedUnit,
+  IUpgrade,
+  IUpgradeGainsWeapon,
+} from "../../data/interfaces";
 import EquipmentService from "../../services/EquipmentService";
 import UpgradeItem from "./UpgradeItem";
 
@@ -15,12 +19,14 @@ export default function UpgradeGroup({
   controlType,
   previewMode,
 }: UpgradeGroupProps) {
+  //;
+
   // TODO: #177
   const getProfile = (target: string) => {
     var e = unit.equipment.find((e) =>
       EquipmentService.compareEquipment(e, target)
     );
-    return e.label;
+    return e ? EquipmentService.formatString(e as IUpgradeGainsWeapon) : "";
   };
 
   const firstItem =
@@ -31,14 +37,16 @@ export default function UpgradeGroup({
         option={null}
         previewMode={previewMode}
       />
-    ) : null;
-  // (
-  //   upgrade.replaceWhat && (
-  //     <p className="my-2">
-  //       {upgrade.replaceWhat?.map(getProfile).join(", ")}
-  //     </p>
-  //   )
-  // );
+    ) : (
+      upgrade.replaceWhat && (
+        <p
+          className="my-1"
+          style={{ fontSize: "12px", color: "rgba(0,0,0,0.8)" }}
+        >
+          Default - {upgrade.replaceWhat?.map(getProfile).join(", ")}
+        </p>
+      )
+    );
 
   return (
     <Paper className="px-4 py-2" square elevation={0}>

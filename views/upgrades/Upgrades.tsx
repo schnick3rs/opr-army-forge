@@ -16,13 +16,7 @@ import UnitEquipmentTable from "../UnitEquipmentTable";
 import RuleList from "../components/RuleList";
 import { ISpecialRule, IUpgradePackage } from "../../data/interfaces";
 import UnitService from "../../services/UnitService";
-import {
-  joinUnit,
-  addCombinedUnit,
-  removeUnit,
-  moveUnit,
-  selectUnit,
-} from "../../data/listSlice";
+import { joinUnit, addCombinedUnit, removeUnit, moveUnit, selectUnit } from "../../data/listSlice";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SpellsTable from "../SpellsTable";
 import { CustomTooltip } from "../components/CustomTooltip";
@@ -32,20 +26,15 @@ import UpgradeService from "../../services/UpgradeService";
 export function Upgrades({ mobile = false }) {
   const list = useSelector((state: RootState) => state.list);
   const gameSystem = useSelector((state: RootState) => state.army.gameSystem);
-  const loadedArmyBooks = useSelector(
-    (state: RootState) => state.army.loadedArmyBooks
-  );
+  const loadedArmyBooks = useSelector((state: RootState) => state.army.loadedArmyBooks);
   const dispatch = useDispatch();
 
   const competitive = false;
   const previewMode = !!list.unitPreview;
   const selectedUnit = list.unitPreview ?? UnitService.getSelected(list);
-  const army =
-    selectedUnit &&
-    loadedArmyBooks?.find((book) => book.uid === selectedUnit.armyId);
+  const army = selectedUnit && loadedArmyBooks?.find((book) => book.uid === selectedUnit.armyId);
 
-  const getUpgradeSet = (id) =>
-    army.upgradePackages.filter((s) => s.uid === id)[0];
+  const getUpgradeSet = (id) => army.upgradePackages.filter((s) => s.uid === id)[0];
 
   const equipmentSpecialRules: ISpecialRule[] =
     selectedUnit &&
@@ -68,9 +57,7 @@ export function Upgrades({ mobile = false }) {
     ? selectedUnit.specialRules.findIndex((sr) => sr.name === "Hero") > -1
     : false;
   const isPsychic =
-    specialRules?.findIndex(
-      (r) => r.name === "Psychic" || r.name === "Wizard"
-    ) > -1;
+    specialRules?.findIndex((r) => r.name === "Psychic" || r.name === "Wizard") > -1;
 
   const joinToUnit = (e) => {
     const joinToUnitId = e.target.value;
@@ -101,9 +88,7 @@ export function Upgrades({ mobile = false }) {
     if (!!joinToUnitId) {
       dispatch(
         moveUnit({
-          from: list.units.findIndex(
-            (t) => t.selectionId == selectedUnit.selectionId
-          ),
+          from: list.units.findIndex((t) => t.selectionId == selectedUnit.selectionId),
           to: list.units.findIndex((t) => t.selectionId == joinToUnitId),
         })
       );
@@ -116,9 +101,7 @@ export function Upgrades({ mobile = false }) {
 
   const upgradeSets = isHero
     ? originalUpgradeSets
-    : [...originalUpgradeSets.splice(1), originalUpgradeSets[0]].filter(
-        (s) => !!s
-      );
+    : [...originalUpgradeSets.splice(1), originalUpgradeSets[0]].filter((s) => !!s);
 
   const toggleCombined = () => {
     if (selectedUnit.combined) {
@@ -142,6 +125,29 @@ export function Upgrades({ mobile = false }) {
     .filter((u) => u.joinToUnit)
     .map((u) => u.joinToUnit);
 
+  const combineUnitControl = !previewMode &&
+    (!competitive || selectedUnit.size > 1) &&
+    !isHero &&
+    !isSkirmish && (
+      <FormGroup className="px-4 pt-2 is-flex-direction-row is-align-items-center">
+        <FormControlLabel
+          control={<Checkbox checked={selectedUnit.combined} onClick={() => toggleCombined()} />}
+          label="Combined Unit"
+          className="mr-2"
+        />
+        <CustomTooltip
+          title={
+            "When preparing your army you may merge units by deploying two copies of the same unit as a single big unit, as long as any upgrades that are applied to all models are bought for both."
+          }
+          arrow
+          enterTouchDelay={0}
+          leaveTouchDelay={5000}
+        >
+          <InfoOutlinedIcon color="primary" />
+        </CustomTooltip>
+      </FormGroup>
+    );
+
   const joinCandidates = list.units
     .filter((u) => (!competitive || u.size > 1) && !u.joinToUnit)
     .filter(
@@ -151,71 +157,34 @@ export function Upgrades({ mobile = false }) {
         u.selectionId == selectedUnit?.joinToUnit
     );
 
+  const joinToUnitControl = !previewMode && !isSkirmish && isHero && (
+    <FormGroup className="px-4 pt-2 pb-3">
+      <FormControl fullWidth>
+        <InputLabel id="demo-simple-select-label" sx={{ zIndex: "unset" }}>
+          Join To Unit
+        </InputLabel>
+        <Select value={selectedUnit?.joinToUnit || ""} label="Join To Unit" onChange={joinToUnit}>
+          <MenuItem value={null}>None</MenuItem>
+          {joinCandidates
+            .filter((t) => t != selectedUnit)
+            .map((u, index) => (
+              <MenuItem key={index} value={u.selectionId}>
+                {u.customName || u.name} [{u.size * (u.combined ? 2 : 1)}]
+              </MenuItem>
+            ))}
+        </Select>
+      </FormControl>
+    </FormGroup>
+  );
+
   return (
-    <div
-      className={
-        mobile ? styles["upgrade-panel-mobile"] : styles["upgrade-panel"]
-      }
-    >
+    <div className={mobile ? styles["upgrade-panel-mobile"] : styles["upgrade-panel"]}>
       {selectedUnit && (
         <Paper square elevation={0}>
           {/* Combine unit */}
-          {!previewMode &&
-            (!competitive || selectedUnit.size > 1) &&
-            !isHero &&
-            !isSkirmish && (
-              <FormGroup className="px-4 pt-2 is-flex-direction-row is-align-items-center">
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={selectedUnit.combined}
-                      onClick={() => toggleCombined()}
-                    />
-                  }
-                  label="Combined Unit"
-                  className="mr-2"
-                />
-                <CustomTooltip
-                  title={
-                    "When preparing your army you may merge units by deploying two copies of the same unit as a single big unit, as long as any upgrades that are applied to all models are bought for both."
-                  }
-                  arrow
-                  enterTouchDelay={0}
-                  leaveTouchDelay={5000}
-                >
-                  <InfoOutlinedIcon color="primary" />
-                </CustomTooltip>
-              </FormGroup>
-            )}
-          {/* Join to unit */}
+          {combineUnitControl}
 
-          {!previewMode && !isSkirmish && isHero && (
-            <FormGroup className="px-4 pt-2 pb-3">
-              <FormControl fullWidth>
-                <InputLabel
-                  id="demo-simple-select-label"
-                  sx={{ zIndex: "unset" }}
-                >
-                  Join To Unit
-                </InputLabel>
-                <Select
-                  value={selectedUnit?.joinToUnit || ""}
-                  label="Join To Unit"
-                  onChange={joinToUnit}
-                >
-                  <MenuItem value={null}>None</MenuItem>
-                  {joinCandidates
-                    .filter((t) => t != selectedUnit)
-                    .map((u, index) => (
-                      <MenuItem key={index} value={u.selectionId}>
-                        {u.customName || u.name} [
-                        {u.size * (u.combined ? 2 : 1)}]
-                      </MenuItem>
-                    ))}
-                </Select>
-              </FormControl>
-            </FormGroup>
-          )}
+          {joinToUnitControl}
 
           {/* Equipment */}
           <div className="px-4 pt-2">
@@ -229,9 +198,7 @@ export function Upgrades({ mobile = false }) {
           {/* Rules */}
           {specialRules?.length > 0 && (
             <div className="p-4 mb-4">
-              <h4 style={{ fontWeight: 600, fontSize: "14px" }}>
-                Special Rules
-              </h4>
+              <h4 style={{ fontWeight: 600, fontSize: "14px" }}>Special Rules</h4>
               <RuleList specialRules={specialRules} />
             </div>
           )}
@@ -240,17 +207,10 @@ export function Upgrades({ mobile = false }) {
 
       {upgradeSets.map((pkg: IUpgradePackage) => (
         <div key={pkg.uid}>
-          {/* <p className="px-2">{set.id}</p> */}
           {pkg.sections
-            .filter(
-              (section) =>
-                selectedUnit.disabledUpgradeSections.indexOf(section.uid) === -1
-            )
+            .filter((section) => selectedUnit.disabledUpgradeSections.indexOf(section.uid) === -1)
             .map((u, i) => {
-              const controlType = UpgradeService.getControlType(
-                selectedUnit,
-                u
-              );
+              const controlType = UpgradeService.getControlType(selectedUnit, u);
 
               return (
                 <div className={"mt-4"} key={i}>
@@ -273,11 +233,7 @@ export function Upgrades({ mobile = false }) {
                         lineHeight: 1.7,
                       }}
                     >
-                      {UpgradeService.enrichDisplayLabel(
-                        selectedUnit,
-                        u,
-                        controlType
-                      )}
+                      {UpgradeService.enrichDisplayLabel(selectedUnit, u, controlType)}
                     </p>
                   </div>
                   <UpgradeGroup
