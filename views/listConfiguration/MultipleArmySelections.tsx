@@ -134,7 +134,7 @@ function FactionArmyBookSelection({ faction, allowRemove, editMode }) {
     (book) => book.factionName === faction
   );
   const factionBooks = armyBooks.filter((book) => book.factionName === faction);
-  const factionRelation = factionBooks[1].factionRelation;
+  const factionRelation = factionBooks.filter(book => book.factionRelation)[0].factionRelation;
 
   function removeFaction(faction) {
     

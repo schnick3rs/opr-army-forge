@@ -74,6 +74,7 @@ export interface IUpgrade {
   attachment?: boolean;
   attachModel?: boolean;
   options?: IUpgradeOption[];
+  isCommandGroup: boolean;
 }
 
 export interface IUpgradeOption {

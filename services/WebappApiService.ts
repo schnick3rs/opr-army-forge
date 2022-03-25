@@ -40,6 +40,8 @@ export default class WebappApiService {
       ...upgradePackage,
       sections: upgradePackage.sections.map(section => ({
         ...section,
+        isCommandGroup: section.options
+          .some(opt => opt.gains.some(g => g.name.toLocaleLowerCase() === "musician")),
         options: section.options.map(option => {
           const result: any = {
             ...option,
