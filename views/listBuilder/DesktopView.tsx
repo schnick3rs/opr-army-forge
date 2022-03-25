@@ -15,7 +15,9 @@ import UnitService from "../../services/UnitService";
 
 export default function DesktopView() {
   const list = useSelector((state: RootState) => state.list);
-  const loadedArmyBooks = useSelector((state: RootState) => state.army.loadedArmyBooks);
+  const loadedArmyBooks = useSelector(
+    (state: RootState) => state.army.loadedArmyBooks
+  );
   const [validationOpen, setValidationOpen] = useState(false);
   const [showUndoRemove, setShowUndoRemove] = useState(false);
 
@@ -46,7 +48,9 @@ export default function DesktopView() {
         >
           <Card square elevation={3}>
             <h3 className="p-4 is-size-4 is-hidden-mobile">
-              {loadedArmyBooks.length > 1 ? "Army Books" : `${armyData.name} - ${armyData.versionString}`}
+              {loadedArmyBooks.length > 1
+                ? "Army Books"
+                : `${armyData.name} - ${armyData.versionString}`}
             </h3>
           </Card>
           <UnitSelection />
@@ -60,7 +64,7 @@ export default function DesktopView() {
             </h3>
           </Card>
           <MainList
-            onSelected={(unit) => dispatch(selectUnit(unit))}
+            onSelected={() => {}}
             onUnitRemoved={() => setShowUndoRemove(true)}
           />
         </div>
@@ -69,11 +73,7 @@ export default function DesktopView() {
           style={columnStyle}
           onScroll={setScrolled}
         >
-          <Card
-            square
-            elevation={1}
-            className="px-4 pt-4 pb-2 sticky"
-          >
+          <Card square elevation={1} className="px-4 pt-4 pb-2 sticky">
             <UpgradePanelHeader />
           </Card>
           <Upgrades />
