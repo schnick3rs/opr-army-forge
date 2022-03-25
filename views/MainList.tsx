@@ -8,13 +8,10 @@ import { selectUnit, removeUnit, addUnits, ListState } from "../data/listSlice";
 import UpgradeService from "../services/UpgradeService";
 import {
   Card,
-  Divider,
   ListItemIcon,
   ListItemText,
   MenuItem,
-  Paper,
 } from "@mui/material";
-import RuleList from "./components/RuleList";
 import UnitService from "../services/UnitService";
 import LinkIcon from "@mui/icons-material/Link";
 import _ from "lodash";
@@ -28,10 +25,8 @@ export function MainList({ onSelected, onUnitRemoved }) {
     (state: RootState) => state.army.loadedArmyBooks
   );
 
-  const units = list.units.filter((u) => u.selectionId !== "dummy");
-
   const rootUnits = _.orderBy(
-    units.filter(
+    list.units.filter(
       (u) =>
         !(
           u.joinToUnit && list.units.some((t) => t.selectionId === u.joinToUnit)

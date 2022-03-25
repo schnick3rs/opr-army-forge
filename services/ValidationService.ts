@@ -15,9 +15,9 @@ export default class ValidationService {
 
     const points = list.pointsLimit || list.points;
 
-    if (army.gameSystem === "gf") {
+    if (army.gameSystem === "gf" || army.gameSystem === "aof") {
 
-      const units = list.units.filter(u => u.selectionId !== "dummy")
+      const units = list.units;
       const unitCount = units.filter(u => !u.joinToUnit).length;
       const heroes = units.filter(u => u.specialRules.some(rule => rule.name === "Hero"))
       const heroCount = heroes.length;
@@ -40,7 +40,7 @@ export default class ValidationService {
       if (isOverDuplicateUnitLimit)
         errors.push(`Cannot have more than ${duplicateUnitLimit} copies of a particular unit.`); // combined units still count as one
     }
-    
+
     return errors;
   }
 }

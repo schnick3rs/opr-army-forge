@@ -67,18 +67,21 @@ export default function ArmyBookSelection() {
   const officialArmies = armyBooks
     ?.filter((ca) => ca.official && !ca.factionName)
     .concat(
-      Object.keys(officialFactions).map((key) => ({
-        uid: officialFactions[key][0].uid,
-        name: key,
-        factionName: key,
-        factionRelation: officialFactions[key][0].factionRelation,
-        official: true,
-        // Live if any are live
-        isLive: officialFactions[key].reduce(
-          (live, next) => live || next.isLive,
-          false
-        ),
-      }))
+      Object.keys(officialFactions).map((key) => {
+        const rootArmy = officialFactions[key].find(x => !x.factionRelation) || officialFactions[key][0];
+        return {
+          uid: rootArmy.uid,
+          name: key,
+          factionName: key,
+          //factionRelation: officialFactions[key][0].factionRelation,
+          official: true,
+          // Live if any are live
+          isLive: officialFactions[key].reduce(
+            (live, next) => live || next.isLive,
+            false
+          ),
+        };
+      })
     );
 
   const officialActiveArmies = officialArmies?.filter((ca) => ca.isLive);

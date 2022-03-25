@@ -27,7 +27,6 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SpellsTable from "../SpellsTable";
 import { CustomTooltip } from "../components/CustomTooltip";
 import LinkIcon from "@mui/icons-material/Link";
-import { useEffect, useState } from "react";
 import UpgradeService from "../../services/UpgradeService";
 
 export function Upgrades({ mobile = false }) {
@@ -37,17 +36,13 @@ export function Upgrades({ mobile = false }) {
     (state: RootState) => state.army.loadedArmyBooks
   );
   const dispatch = useDispatch();
-  const [dummy, setDummy] = useState(false);
 
   const competitive = false;
-  const selectedUnit = UnitService.getSelected(list);
+  const previewMode = !!list.unitPreview;
+  const selectedUnit = list.unitPreview ?? UnitService.getSelected(list);
   const army =
     selectedUnit &&
     loadedArmyBooks?.find((book) => book.uid === selectedUnit.armyId);
-
-  useEffect(() => {
-    setDummy(selectedUnit?.selectionId === "dummy");
-  }, [list.selectedUnitId]);
 
   const getUpgradeSet = (id) =>
     army.upgradePackages.filter((s) => s.uid === id)[0];
@@ -165,7 +160,7 @@ export function Upgrades({ mobile = false }) {
       {selectedUnit && (
         <Paper square elevation={0}>
           {/* Combine unit */}
-          {!dummy &&
+          {!previewMode &&
             (!competitive || selectedUnit.size > 1) &&
             !isHero &&
             !isSkirmish && (
@@ -194,7 +189,7 @@ export function Upgrades({ mobile = false }) {
             )}
           {/* Join to unit */}
 
-          {!dummy && !isSkirmish && isHero && (
+          {!previewMode && !isSkirmish && isHero && (
             <FormGroup className="px-4 pt-2 pb-3">
               <FormControl fullWidth>
                 <InputLabel
@@ -252,7 +247,10 @@ export function Upgrades({ mobile = false }) {
                 selectedUnit.disabledUpgradeSections.indexOf(section.uid) === -1
             )
             .map((u, i) => {
-              const controlType = UpgradeService.getControlType(selectedUnit, u);
+              const controlType = UpgradeService.getControlType(
+                selectedUnit,
+                u
+              );
 
               return (
                 <div className={"mt-4"} key={i}>
@@ -275,10 +273,18 @@ export function Upgrades({ mobile = false }) {
                         lineHeight: 1.7,
                       }}
                     >
-                      {UpgradeService.enrichDisplayLabel(selectedUnit, u, controlType)}
+                      {UpgradeService.enrichDisplayLabel(
+                        selectedUnit,
+                        u,
+                        controlType
+                      )}
                     </p>
                   </div>
-                  <UpgradeGroup unit={selectedUnit} upgrade={u} controlType={controlType} />
+                  <UpgradeGroup
+                    unit={selectedUnit}
+                    upgrade={u}
+                    controlType={controlType}
+                  />
                 </div>
               );
             })}

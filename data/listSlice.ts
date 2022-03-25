@@ -5,6 +5,8 @@ import { debounce } from 'throttle-debounce';
 import { current } from 'immer';
 import PersistenceService from '../services/PersistenceService';
 import { nanoid } from "nanoid";
+import UnitService from '../services/UnitService';
+import { makeCopy } from '../services/Helpers';
 
 export interface ListState {
   creationTime: string;
@@ -14,6 +16,7 @@ export interface ListState {
   undoUnitRemove?: ISelectedUnit[];
   selectedUnitId?: string;
   points: number;
+  unitPreview?: ISelectedUnit;
 }
 
 const initialState: ListState = {
@@ -24,6 +27,7 @@ const initialState: ListState = {
   selectedUnitId: null,
   undoUnitRemove: null,
   points: 0,
+  unitPreview: null
 };
 
 const debounceSave = debounce(1500, (state: ListState) => {
@@ -57,17 +61,11 @@ export const listSlice = createSlice({
       return { ...action.payload };
     },
     addUnit: (state, action: PayloadAction<IUnit>) => {
-      const unit = UpgradeService.buildUpgrades(action.payload as ISelectedUnit)
+      const selectedUnit = UnitService.createUnitFromDefinition(action.payload);
+      const unit = UpgradeService.buildUpgrades(selectedUnit)
       state.units.push(unit);
-
-      state.points = UpgradeService.calculateListTotal(state.units);
-
-      debounceSave(current(state));
-    },
-    makeReal: (state) => {
-      const unit = state.units.find(u => u.selectionId === "dummy")
-      state.selectedUnitId = unit.selectionId = nanoid(5)
-
+      state.selectedUnitId = unit.selectionId;
+      state.unitPreview = null;
       state.points = UpgradeService.calculateListTotal(state.units);
 
       debounceSave(current(state));
@@ -125,6 +123,7 @@ export const listSlice = createSlice({
     },
     selectUnit: (state, action: PayloadAction<string>) => {
       state.selectedUnitId = action.payload;
+      state.unitPreview = null
     },
     removeUnit: (state, action: PayloadAction<string>) => {
       const unitId = action.payload
@@ -158,20 +157,14 @@ export const listSlice = createSlice({
         }
 
       } else {
-        if (unit.selectionId === "dummy") {
-          state.units.splice(removeIndex, 1);
-        } else {
-          state.undoUnitRemove = state.units.splice(removeIndex, 1);
-        }
+        state.undoUnitRemove = state.units.splice(removeIndex, 1);
       }
 
       state.points = UpgradeService.calculateListTotal(state.units);
-      console.log(state.undoUnitRemove)
+      
       debounceSave(current(state));
     },
     undoRemoveUnit: (state) => {
-      console.log(`restoring unit: `)
-      console.log(state.undoUnitRemove)
       state.units = state.units.concat(state.undoUnitRemove);
 
       state.undoUnitRemove = null;
@@ -267,6 +260,15 @@ export const listSlice = createSlice({
     removeUnitsForBook(state, action: PayloadAction<string>) {
       const armyBookId = action.payload;
       state.units = state.units.filter(unit => unit.armyId !== armyBookId);
+    },
+    previewUnit(state, action: PayloadAction<ISelectedUnit>) {
+      const unit: ISelectedUnit = makeCopy(action.payload);
+      unit.selectedUpgrades = [];
+      state.unitPreview = UpgradeService.buildUpgrades(unit);
+      state.selectedUnitId = null;
+    },
+    clearPreview(state) {
+      state.unitPreview = null;
     }
   },
 })
@@ -278,7 +280,6 @@ export const {
   addUnit,
   applyUpgrade,
   removeUpgrade,
-  makeReal,
   addCombinedUnit,
   addUnits,
   selectUnit,
@@ -292,7 +293,9 @@ export const {
   updateListSettings,
   updateCreationTime,
   undoRemoveUnit,
-  removeUnitsForBook
+  removeUnitsForBook,
+  previewUnit,
+  clearPreview
 } = listSlice.actions
 
 export default listSlice.reducer

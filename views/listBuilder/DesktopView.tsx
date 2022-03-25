@@ -33,30 +33,6 @@ export default function DesktopView() {
     }
   };
 
-  const onAddUnit = useCallback(
-    (unit: IUnit, dummy = false) => {
-      if (dummy) {
-        if (list.units.some((u) => u.selectionId === "dummy")) {
-          dispatch(removeUnit("dummy"));
-        }
-      }
-      dispatch(addUnit(UnitService.getRealUnit(unit, dummy)));
-    },
-    [list]
-  );
-
-  const onSelectUnit = useCallback(
-    (unit: ISelectedUnit) => {
-      if (list.selectedUnitId !== unit.selectionId) {
-        if (list.selectedUnitId === "dummy") {
-          dispatch(removeUnit("dummy"));
-        }
-        dispatch(selectUnit(unit.selectionId));
-      }
-    },
-    [list]
-  );
-
   return (
     <>
       <Paper elevation={1} color="primary" square>
@@ -73,7 +49,7 @@ export default function DesktopView() {
               {loadedArmyBooks.length > 1 ? "Army Books" : `${armyData.name} - ${armyData.versionString}`}
             </h3>
           </Card>
-          <UnitSelection onSelected={onSelectUnit} addUnit={onAddUnit} />
+          <UnitSelection />
         </div>
         <div className="column p-0" style={columnStyle} onScroll={setScrolled}>
           <Card square elevation={3}>
@@ -84,7 +60,7 @@ export default function DesktopView() {
             </h3>
           </Card>
           <MainList
-            onSelected={onSelectUnit}
+            onSelected={(unit) => dispatch(selectUnit(unit))}
             onUnitRemoved={() => setShowUndoRemove(true)}
           />
         </div>

@@ -8,7 +8,12 @@ import { IUnit } from "../data/interfaces";
 import UnitService from "../services/UnitService";
 import ArmyBookGroupHeader from "./components/ArmyBookGroupHeader";
 import UnitListItem from "./components/UnitListItem";
-import { addUnit, removeUnit, selectUnit } from "../data/listSlice";
+import {
+  addUnit,
+  previewUnit,
+  removeUnit,
+  selectUnit,
+} from "../data/listSlice";
 import { useRouter } from "next/router";
 
 export function UnitSelection() {
@@ -36,36 +41,15 @@ function UnitSelectionForArmy({ army, showTitle }) {
   const list = useSelector((state: RootState) => state.list);
   const [collapsed, setCollapsed] = useState(false);
 
-  function onAddUnit(unit: IUnit, dummy = false) {
-    if (dummy) {
-      if (list.units.some((u) => u.selectionId === "dummy")) {
-        dispatch(removeUnit("dummy"));
-      }
-    }
-    dispatch(addUnit(UnitService.getRealUnit(unit, dummy)));
-  }
-
-  function onSelected(unit: { selectionId: string }) {
-    if (list.selectedUnitId !== unit.selectionId) {
-      if (list.selectedUnitId === "dummy") {
-        dispatch(removeUnit("dummy"));
-      }
-      dispatch(selectUnit(unit.selectionId));
-    }
-  }
-
   const handleAddClick = (unit: IUnit) => {
-    onAddUnit({ ...unit, armyId: army.uid });
+    dispatch(addUnit({ ...unit, armyId: army.uid }));
   };
   const handleSelectClick = (unit: IUnit) => {
-    onAddUnit({ ...unit, armyId: army.uid }, true);
-    onSelected({ selectionId: "dummy" });
+    dispatch(previewUnit({ ...unit, armyId: army.uid } as any));
     router.push({ query: { ...router.query, upgradesOpen: true } });
   };
 
   const unitGroups = getUnitCategories(army.units);
-  const selectedUnitName =
-    list.selectedUnitId === "dummy" && UnitService.getSelected(list).name;
 
   return (
     <Card
@@ -93,9 +77,7 @@ function UnitSelectionForArmy({ army, showTitle }) {
             {unitGroups[key].map((u, index) => {
               const countInList = list?.units.filter(
                 (listUnit) =>
-                  listUnit.selectionId !== "dummy" &&
-                  listUnit.name === u.name &&
-                  listUnit.armyId === army.uid
+                  listUnit.name === u.name && listUnit.armyId === army.uid
               ).length;
 
               return (
@@ -103,7 +85,7 @@ function UnitSelectionForArmy({ army, showTitle }) {
                   key={u.id}
                   unit={u}
                   countInList={countInList}
-                  selected={countInList > 0 || selectedUnitName === u.name}
+                  selected={countInList > 0 || list.unitPreview?.id === u.id}
                   onClick={() => {
                     handleSelectClick(u);
                   }}

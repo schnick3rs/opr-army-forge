@@ -1,5 +1,5 @@
 import { nanoid } from "@reduxjs/toolkit";
-import { IUnit, ISelectedUnit, IUpgradeGains, IUpgradeGainsItem, IUpgradeGainsMultiWeapon, IUpgradeGainsRule, IUpgradeGainsWeapon, IUpgradePackage, IUpgrade, IUpgradeOption } from "../data/interfaces";
+import { IUnit, ISelectedUnit, IUpgradeGains, IUpgradeGainsItem, IUpgradeGainsRule, IUpgradeGainsWeapon, IUpgradePackage, IUpgrade, IUpgradeOption } from "../data/interfaces";
 import { ListState } from "../data/listSlice";
 import _ from "lodash";
 import EquipmentService from "./EquipmentService";
@@ -37,9 +37,9 @@ export default class UnitService {
     return rules.concat(rulesFromitems) as IUpgradeGainsRule[];
   }
 
-  public static getAllUpgradeWeapons(unit: ISelectedUnit): (IUpgradeGainsWeapon | IUpgradeGainsMultiWeapon)[] {
+  public static getAllUpgradeWeapons(unit: ISelectedUnit): IUpgradeGainsWeapon[] {
 
-    const isWeapon = u => u.type === "ArmyBookWeapon" || u.type === "ArmyBookMultiWeapon";
+    const isWeapon = u => u.type === "ArmyBookWeapon";
     const itemWeapons = this
       .getAllUpgradeItems(unit)
       .reduce((value, i) => value.concat(i.content.filter(isWeapon)), []);
@@ -47,7 +47,7 @@ export default class UnitService {
     const all = this
       .getAllUpgrades(unit, false)
       .filter(isWeapon)
-      .concat(itemWeapons) as (IUpgradeGainsWeapon | IUpgradeGainsMultiWeapon)[];
+      .concat(itemWeapons) as IUpgradeGainsWeapon[];
 
     return all;
   }
@@ -67,10 +67,10 @@ export default class UnitService {
     return unit.size + extraModelCount;
   }
 
-  public static getRealUnit(unit: IUnit, dummy = false): ISelectedUnit {
+  public static createUnitFromDefinition(unit: IUnit): ISelectedUnit {
     return {
       ...unit,
-      selectionId: dummy ? "dummy" : nanoid(5),
+      selectionId: nanoid(5),
       selectedUpgrades: [],
       combined: false,
       joinToUnit: null,

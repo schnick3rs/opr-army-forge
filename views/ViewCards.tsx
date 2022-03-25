@@ -26,9 +26,7 @@ export default function ViewCards({
   const armyRules = army.loadedArmyBooks.flatMap((x) => x.specialRules);
   const ruleDefinitions: IGameRule[] = gameRules.concat(armyRules);
 
-  const units = (list?.units ?? [])
-    .filter((u) => u.selectionId !== "dummy")
-    .map((u) => makeCopy(u));
+  const units = (list?.units ?? []).map((u) => makeCopy(u));
   for (let unit of units) {
     delete unit.selectionId;
   }

@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import {
   ISelectedUnit,
+  IUpgradeGains,
   IUpgradeGainsItem,
   IUpgradeGainsRule,
   IUpgradeGainsWeapon,
@@ -97,35 +98,10 @@ export default function UnitEquipmentTable({
             </TableHead>
             <TableBody>
               {Object.keys(weaponGroups).map((key) => {
-                const group = weaponGroups[key];
+                const group: IUpgradeGainsWeapon[] = weaponGroups[key];
                 const upgrade = group[0];
                 const count = group.reduce((c, next) => c + next.count, 0);
                 const e = { ...upgrade, count };
-
-                // Upgrade may have been replaced
-                //if (!e.count) return null;
-
-                if (upgrade.type === "ArmyBookMultiWeapon") {
-                  console.log(upgrade.profiles);
-                  return (
-                    <Fragment key={key}>
-                      <TableRow>
-                        <TableCell
-                          style={{
-                            border: "none",
-                            borderTop: "1px solid rgb(224, 224, 224)",
-                          }}
-                          colSpan={5}
-                        >
-                          {upgrade.name}
-                        </TableCell>
-                      </TableRow>
-                      {upgrade.profiles.map((profile, i) => (
-                        <WeaponRow key={i} weapon={profile} isProfile={true} />
-                      ))}
-                    </Fragment>
-                  );
-                }
 
                 return <WeaponRow key={key} weapon={e} isProfile={false} />;
               })}

@@ -1,4 +1,4 @@
-import { IUpgradeGains, IUpgradeGainsItem, IUpgradeGainsMultiWeapon, IUpgradeGainsRule, IUpgradeGainsWeapon } from "../data/interfaces";
+import { IUpgradeGains, IUpgradeGainsItem, IUpgradeGainsRule, IUpgradeGainsWeapon } from "../data/interfaces";
 import pluralise from "pluralize";
 import RulesService from "./RulesService";
 
