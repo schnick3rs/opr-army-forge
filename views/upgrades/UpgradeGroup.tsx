@@ -1,19 +1,21 @@
 import { Paper } from "@mui/material";
 import { ISelectedUnit, IUpgrade } from "../../data/interfaces";
 import EquipmentService from "../../services/EquipmentService";
-import UpgradeService from "../../services/UpgradeService";
 import UpgradeItem from "./UpgradeItem";
 
-export default function UpgradeGroup({
-  unit,
-  upgrade,
-  controlType
-}: {
+interface UpgradeGroupProps {
   unit: ISelectedUnit;
   upgrade: IUpgrade;
   controlType: string;
-}) {
-
+  previewMode: boolean;
+}
+export default function UpgradeGroup({
+  unit,
+  upgrade,
+  controlType,
+  previewMode,
+}: UpgradeGroupProps) {
+  // TODO: #177
   const getProfile = (target: string) => {
     var e = unit.equipment.find((e) =>
       EquipmentService.compareEquipment(e, target)
@@ -23,7 +25,12 @@ export default function UpgradeGroup({
 
   const firstItem =
     controlType === "radio" ? (
-      <UpgradeItem selectedUnit={unit} upgrade={upgrade} option={null} />
+      <UpgradeItem
+        selectedUnit={unit}
+        upgrade={upgrade}
+        option={null}
+        previewMode={previewMode}
+      />
     ) : null;
   // (
   //   upgrade.replaceWhat && (
@@ -45,6 +52,7 @@ export default function UpgradeGroup({
           selectedUnit={unit}
           upgrade={upgrade}
           option={opt}
+          previewMode={previewMode}
         />
       ))}
     </Paper>

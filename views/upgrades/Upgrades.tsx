@@ -284,6 +284,7 @@ export function Upgrades({ mobile = false }) {
                     unit={selectedUnit}
                     upgrade={u}
                     controlType={controlType}
+                    previewMode={previewMode}
                   />
                 </div>
               );
