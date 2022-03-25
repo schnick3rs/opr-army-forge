@@ -22,6 +22,12 @@ export default class WebappApiService {
     return data;
   }
 
+  public static async getGameRules(gameSystemSlug: string) {
+    const res = await fetch(this.getUrl() + `/game-systems/${gameSystemSlug}/special-rules`);
+    const data = await res.json();
+    return data;
+  }
+
   public static async getArmyBookData(armyId: string, gameSystem: string) {
 
     const gameSystemId = gameSystemToEnum(gameSystem);

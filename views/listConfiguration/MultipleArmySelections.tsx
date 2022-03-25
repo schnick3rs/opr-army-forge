@@ -40,7 +40,7 @@ export default function MultipleArmySelections() {
     ).length > 1;
 
   function addAnotherBook() {
-    router.push({
+    router.replace({
       pathname: "/armyBookSelection",
       query: { ...router.query, append: true },
     });

@@ -70,6 +70,16 @@ export const getArmyBookData = createAsyncThunk("army/getArmyBookData", async (p
   return { armyBookData, reset: payload.reset };
 });
 
+export const getGameRules = createAsyncThunk("army/getGameRules", async (gameSystem: string) => {
+  // AF to Web Companion game type mapping
+  const slug = gameSystemToSlug(gameSystem);
+  const rules = await WebappApiService.getGameRules(slug);
+  return rules.map((rule) => ({
+    name: rule.name,
+    description: rule.description,
+  }));;
+});
+
 export const armySlice = createSlice({
   name: 'army',
   initialState: initialState,
@@ -90,12 +100,6 @@ export const armySlice = createSlice({
         armyFile: action.payload
       };
     },
-    setGameRules: (state, action: PayloadAction<IGameRule[]>) => {
-      return {
-        ...state,
-        rules: action.payload
-      };
-    },
     unloadFaction(state, action: PayloadAction<string>) {
       const factionIndex = state.selectedFactions.findIndex(f => f === action.payload);
       state.selectedFactions.splice(factionIndex, 1);
@@ -110,6 +114,9 @@ export const armySlice = createSlice({
   extraReducers(builder) {
     builder.addCase(getArmyBooks.fulfilled, (state, action) => {
       return { ...state, armyBooks: action.payload };
+    });
+    builder.addCase(getGameRules.fulfilled, (state, action) => {
+      return { ...state, rules: action.payload };
     });
     builder.addCase(getArmyBookData.pending, (state, action) => {
       return { ...state, loadingArmyData: true };
@@ -141,6 +148,6 @@ export const armySlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { resetLoadedBooks, setGameSystem, setArmyFile, setGameRules, unloadFaction, unloadArmyBook } = armySlice.actions;
+export const { resetLoadedBooks, setGameSystem, setArmyFile, unloadFaction, unloadArmyBook } = armySlice.actions;
 
 export default armySlice.reducer;

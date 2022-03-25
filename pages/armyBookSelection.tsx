@@ -1,14 +1,9 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, store } from "../data/store";
-import {
-  getArmyBookData,
-  getArmyBooks,
-  IArmyData,
-  resetLoadedBooks,
-} from "../data/armySlice";
+import { getArmyBookData, getArmyBooks, IArmyData, resetLoadedBooks } from "../data/armySlice";
 import { useRouter } from "next/router";
-import { IconButton, Snackbar, InputAdornment, Input } from "@mui/material";
+import { IconButton, InputAdornment, Input } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import { resetList } from "../data/listSlice";
@@ -52,8 +47,7 @@ export default function ArmyBookSelection() {
         dispatch(resetList());
       }
 
-      if (armyState.armyBooks.length < 1)
-        dispatch(getArmyBooks(armyState.gameSystem));
+      if (armyState.armyBooks.length < 1) dispatch(getArmyBooks(armyState.gameSystem));
     }
 
     loadApiArmyBooks();
@@ -68,7 +62,8 @@ export default function ArmyBookSelection() {
     ?.filter((ca) => ca.official && !ca.factionName)
     .concat(
       Object.keys(officialFactions).map((key) => {
-        const rootArmy = officialFactions[key].find(x => !x.factionRelation) || officialFactions[key][0];
+        const rootArmy =
+          officialFactions[key].find((x) => !x.factionRelation) || officialFactions[key][0];
         return {
           uid: rootArmy.uid,
           name: key,
@@ -76,10 +71,7 @@ export default function ArmyBookSelection() {
           //factionRelation: officialFactions[key][0].factionRelation,
           official: true,
           // Live if any are live
-          isLive: officialFactions[key].reduce(
-            (live, next) => live || next.isLive,
-            false
-          ),
+          isLive: officialFactions[key].reduce((live, next) => live || next.isLive, false),
         };
       })
     );
@@ -89,10 +81,15 @@ export default function ArmyBookSelection() {
   async function selectArmy(army: IArmyData) {
     const uid = army.uid;
     const navigateToConfig = () => {
-      router.push({
+      const target = {
         pathname: "/listConfiguration",
         query: { ...router.query },
-      });
+      };
+      if (appendMode) {
+        router.replace(target);
+      } else {
+        router.push(target);
+      }
     };
 
     dispatch(
@@ -111,22 +108,15 @@ export default function ArmyBookSelection() {
       <MenuBar
         title="Create a new list"
         onBackClick={() => router.push("/gameSystem")}
-        right={
-          <SearchBox searchText={searchText} setSearchText={setSearchText} />
-        }
+        right={<SearchBox searchText={searchText} setSearchText={setSearchText} />}
       />
 
       <div className="container">
         <div className="mx-auto p-4">
           <div className="mb-4 has-text-centered is-clearfix">
-            <h3 className="is-size-4 pt-4">
-              Choose {appendMode ? "another" : "an"} Army Book
-            </h3>
+            <h3 className="is-size-4 pt-4">Choose {appendMode ? "another" : "an"} Army Book</h3>
           </div>
-          <ArmyBookList
-            armyBooks={officialActiveArmies}
-            onSelect={selectArmy}
-          />
+          <ArmyBookList armyBooks={officialActiveArmies} onSelect={selectArmy} />
         </div>
       </div>
     </>
@@ -161,9 +151,7 @@ function SearchBox({ searchText, setSearchText }) {
               size="small"
               onClick={() => {
                 setSearchText(
-                  ((
-                    document.getElementById("searchfield") as HTMLInputElement
-                  ).value = "")
+                  ((document.getElementById("searchfield") as HTMLInputElement).value = "")
                 );
               }}
             >
