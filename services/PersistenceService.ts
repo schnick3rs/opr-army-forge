@@ -9,6 +9,7 @@ import RulesService from "./RulesService";
 import UnitService from "./UnitService";
 import UpgradeService from "./UpgradeService";
 import _ from "lodash";
+import { IViewPreferences } from "../pages/view";
 
 export default class PersistenceService {
 
@@ -304,5 +305,16 @@ export default class PersistenceService {
       .clipboard
       .writeText(this.getListAsText(list))
       .then(() => console.log("Copied to clipboard..."));
+  }
+
+  public static saveViewPreferences(prefs: IViewPreferences) {
+    localStorage["view_prefs"] = JSON.stringify(prefs);
+  }
+
+  public static getViewPreferences() {
+    const prefs = localStorage["view_prefs"];
+    if (!prefs)
+      return null;
+    return JSON.parse(prefs) as IViewPreferences;
   }
 }

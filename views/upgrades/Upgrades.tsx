@@ -125,7 +125,8 @@ export function Upgrades({ mobile = false }) {
     .filter((u) => u.joinToUnit)
     .map((u) => u.joinToUnit);
 
-  const combineUnitControl = !previewMode &&
+  const combineUnitControl = () =>
+    !previewMode &&
     (!competitive || selectedUnit.size > 1) &&
     !isHero &&
     !isSkirmish && (
@@ -157,34 +158,35 @@ export function Upgrades({ mobile = false }) {
         u.selectionId == selectedUnit?.joinToUnit
     );
 
-  const joinToUnitControl = !previewMode && !isSkirmish && isHero && (
-    <FormGroup className="px-4 pt-2 pb-3">
-      <FormControl fullWidth>
-        <InputLabel id="demo-simple-select-label" sx={{ zIndex: "unset" }}>
-          Join To Unit
-        </InputLabel>
-        <Select value={selectedUnit?.joinToUnit || ""} label="Join To Unit" onChange={joinToUnit}>
-          <MenuItem value={null}>None</MenuItem>
-          {joinCandidates
-            .filter((t) => t != selectedUnit)
-            .map((u, index) => (
-              <MenuItem key={index} value={u.selectionId}>
-                {u.customName || u.name} [{u.size * (u.combined ? 2 : 1)}]
-              </MenuItem>
-            ))}
-        </Select>
-      </FormControl>
-    </FormGroup>
-  );
+  const joinToUnitControl = () =>
+    !previewMode &&
+    !isSkirmish &&
+    isHero && (
+      <FormGroup className="px-4 pt-2 pb-3">
+        <FormControl fullWidth>
+          <InputLabel id="demo-simple-select-label" sx={{ zIndex: "unset" }}>
+            Join To Unit
+          </InputLabel>
+          <Select value={selectedUnit?.joinToUnit || ""} label="Join To Unit" onChange={joinToUnit}>
+            <MenuItem value={null}>None</MenuItem>
+            {joinCandidates
+              .filter((t) => t != selectedUnit)
+              .map((u, index) => (
+                <MenuItem key={index} value={u.selectionId}>
+                  {u.customName || u.name} [{u.size * (u.combined ? 2 : 1)}]
+                </MenuItem>
+              ))}
+          </Select>
+        </FormControl>
+      </FormGroup>
+    );
 
   return (
     <div className={mobile ? styles["upgrade-panel-mobile"] : styles["upgrade-panel"]}>
       {selectedUnit && (
         <Paper square elevation={0}>
-          {/* Combine unit */}
-          {combineUnitControl}
-
-          {joinToUnitControl}
+          {combineUnitControl()}
+          {joinToUnitControl()}
 
           {/* Equipment */}
           <div className="px-4 pt-2">
