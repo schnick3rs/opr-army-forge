@@ -22,7 +22,6 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import ViewAgendaIcon from "@mui/icons-material/ViewAgenda";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ClearIcon from "@mui/icons-material/Clear";
-import { PreviewRounded } from "@mui/icons-material";
 import PersistenceService from "../services/PersistenceService";
 
 export interface IViewPreferences {
