@@ -70,7 +70,7 @@ export default function MainMenu() {
 
   const goBack = () => {
     const confirmMsg = "Going back will lose unsaved changed. Continue?";
-    if (list.creationTime || prompt(confirmMsg)) {
+    if (list.creationTime || confirm(confirmMsg)) {
       router.back();
     }
   };

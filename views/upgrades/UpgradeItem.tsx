@@ -152,7 +152,7 @@ function UpgradeItemWeapon(props: UpgradeItemWeaponProps) {
     <>
       {props.count > 1 && <span>{props.count}x </span>}
       <span className={styles.upgradeName} style={{ color: props.colour }}>
-        {name}{" "}
+        {props.name}{" "}
       </span>
       <span className={styles.upgradeRules} style={{ color: props.subtextColour }}>
         ({[range, attacks].filter((r) => r).join(", ") + (weaponRules?.length > 0 ? ", " : "")}
