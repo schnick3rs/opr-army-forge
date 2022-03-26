@@ -89,34 +89,33 @@ export const listSlice = createSlice({
 
       debounceSave(current(state));
     },
-    addUnits: (state, action: PayloadAction<any>) => {
-      let units = action.payload.units.map(u => {
-        return {
-          ...u,
-          selectionId: nanoid(5)
-        }
-      })
+    addUnits: (state, action: PayloadAction<ISelectedUnit[]>) => {
+      const units = action.payload;
+      let unitsMapped = units.map(u => ({
+        ...u,
+        selectionId: nanoid(5)
+      }));
 
-      action.payload.units.forEach((u, i) => {
+      units.forEach((u, i) => {
         if (u.joinToUnit) {
           //console.log(action.payload.units)
           //console.log(`${u.name} is joined to unit ${u.joinToUnit}...`)
-          let joinedIndex = action.payload.units.findIndex((t) => { return t.selectionId === u.joinToUnit })
+          let joinedIndex = units.findIndex((t) => { return t.selectionId === u.joinToUnit })
           //console.log(`unit ${u.joinToUnit} found at index ${joinedIndex}...`)
           if (joinedIndex >= 0) {
-            units[i].joinToUnit = units[joinedIndex].selectionId
+            unitsMapped[i].joinToUnit = unitsMapped[joinedIndex].selectionId
           } else {
-            units[i].joinToUnit = null
-            units[i].combined = false
+            unitsMapped[i].joinToUnit = null
+            unitsMapped[i].combined = false
           }
         }
         if (u.combined) {
-          units[i].combined = action.payload.units.some((t) => { return (t.selectionId === u.joinToUnit) || (t.joinToUnit === u.selectionId) })
+          unitsMapped[i].combined = units.some((t) => { return (t.selectionId === u.joinToUnit) || (t.joinToUnit === u.selectionId) })
         }
       })
 
-      state.units.splice(action.payload.index ?? -1, 0, ...units)
-
+      //state.units.splice(index ?? -1, 0, ...unitsMapped)
+      state.units.push(...unitsMapped);
       state.points = UpgradeService.calculateListTotal(state.units);
 
       debounceSave(current(state));
@@ -161,7 +160,7 @@ export const listSlice = createSlice({
       }
 
       state.points = UpgradeService.calculateListTotal(state.units);
-      
+
       debounceSave(current(state));
     },
     undoRemoveUnit: (state) => {
