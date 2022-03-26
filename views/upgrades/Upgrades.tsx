@@ -20,7 +20,6 @@ import { joinUnit, addCombinedUnit, removeUnit, moveUnit, selectUnit } from "../
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SpellsTable from "../SpellsTable";
 import { CustomTooltip } from "../components/CustomTooltip";
-import LinkIcon from "@mui/icons-material/Link";
 import UpgradeService from "../../services/UpgradeService";
 
 export function Upgrades({ mobile = false }) {
@@ -211,42 +210,9 @@ export function Upgrades({ mobile = false }) {
         <div key={pkg.uid}>
           {pkg.sections
             .filter((section) => selectedUnit.disabledUpgradeSections.indexOf(section.uid) === -1)
-            .map((u, i) => {
-              const controlType = UpgradeService.getControlType(selectedUnit, u);
-
-              return (
-                <div className={"mt-4"} key={i}>
-                  <div className="px-4 is-flex is-align-items-center">
-                    {selectedUnit.combined && u.affects === "all" && (
-                      <CustomTooltip
-                        title="This option will be the same on both combined units."
-                        arrow
-                        enterTouchDelay={0}
-                        leaveTouchDelay={5000}
-                      >
-                        <LinkIcon sx={{ fontSize: 22 }} className="mr-2" />
-                      </CustomTooltip>
-                    )}
-                    <p
-                      className="pt-0"
-                      style={{
-                        fontWeight: "bold",
-                        fontSize: "14px",
-                        lineHeight: 1.7,
-                      }}
-                    >
-                      {UpgradeService.enrichDisplayLabel(selectedUnit, u, controlType)}
-                    </p>
-                  </div>
-                  <UpgradeGroup
-                    unit={selectedUnit}
-                    upgrade={u}
-                    controlType={controlType}
-                    previewMode={previewMode}
-                  />
-                </div>
-              );
-            })}
+            .map((u, i) => (
+              <UpgradeGroup key={u.uid} unit={selectedUnit} upgrade={u} previewMode={previewMode} />
+            ))}
         </div>
       ))}
     </div>

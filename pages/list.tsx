@@ -16,14 +16,11 @@ export default function List() {
 
   // Load army list file
   useEffect(() => {
-
-    dispatch(getGameRules(armyState.gameSystem));
-
     // Redirect to game selection screen if no army selected
     if (!armyState.loaded) {
       const listId = router.query["listId"] as string;
       if (listId) {
-        PersistenceService.loadFromKey(dispatch, listId, (armyData) => {});
+        PersistenceService.loadFromKey(dispatch, listId, (_) => {});
         return;
       }
 
@@ -31,6 +28,8 @@ export default function List() {
         shallow: true,
       });
       return;
+    } else {
+      dispatch(getGameRules(armyState.gameSystem));
     }
   }, []);
 

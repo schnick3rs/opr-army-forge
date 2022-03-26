@@ -70,13 +70,22 @@ export default class EquipmentService {
     return ap ? parseInt(ap.rating) : null;
   }
 
-  static formatString(eqp: IUpgradeGainsWeapon): string {
+  static formatString(eqp: IUpgradeGains): string {
+    const parts = [];
     const name = eqp.count > 1 ? pluralise.plural(eqp.name) : eqp.name;
-    const range = eqp.range ? `${eqp.range}"` : null;
     const attacks = eqp.attacks ? `A${eqp.attacks}` : null;
-
-    return `${name} (${[range, attacks || null] // Range, then attacks
-      .concat(eqp.specialRules?.map(r => RulesService.displayName(r)) ?? []) // then special rules
+    if (attacks) {
+      const weapon = eqp as IUpgradeGainsWeapon;
+      parts.push(weapon.range ? `${weapon.range}"` : null)
+    }
+    parts.push(attacks);
+    const rules = eqp.specialRules?.map(r => RulesService.displayName(r)) ?? [];
+    parts.push(...rules);
+    if (eqp.type === "ArmyBookItem") {
+      const item = eqp as IUpgradeGainsItem;
+      parts.push(...item.content.map(c => this.formatString(c)));
+    }
+    return `${name} (${parts
       .filter((m) => !!m) // Remove empty/null entries
       .join(", ")})`; // comma separated list
   }

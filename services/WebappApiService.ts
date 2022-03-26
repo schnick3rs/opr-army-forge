@@ -23,7 +23,7 @@ export default class WebappApiService {
   }
 
   public static async getGameRules(gameSystemSlug: string) {
-    const res = await fetch(this.getUrl() + `/game-systems/${gameSystemSlug}/special-rules`);
+    const res = await fetch(this.getUrl() + `/content/game-systems/${gameSystemSlug}/special-rules`);
     const data = await res.json();
     return data;
   }

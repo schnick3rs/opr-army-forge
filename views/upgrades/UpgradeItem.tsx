@@ -19,8 +19,7 @@ import { Fragment } from "react";
 import EquipmentService from "../../services/EquipmentService";
 
 function UpgradeItemDisplay({ eqp, count, isValid }) {
-  const name =
-    count > 1 ? pluralise.plural(eqp.name || eqp.label) : eqp.name || eqp.label;
+  const name = count > 1 ? pluralise.plural(eqp.name || eqp.label) : eqp.name || eqp.label;
   const invalidColour = "rgba(0,0,0,.5)";
   const colour = isValid ? "#000000" : invalidColour;
   const subtextColour = isValid ? "#656565" : invalidColour;
@@ -47,13 +46,8 @@ function UpgradeItemDisplay({ eqp, count, isValid }) {
           <span className={styles.upgradeName} style={{ color: colour }}>
             {name}{" "}
           </span>
-          <span
-            className={styles.upgradeRules}
-            style={{ color: subtextColour }}
-          >
-            (
-            {[range, attacks].filter((r) => r).join(", ") +
-              (weaponRules?.length > 0 ? ", " : "")}
+          <span className={styles.upgradeRules} style={{ color: subtextColour }}>
+            ({[range, attacks].filter((r) => r).join(", ") + (weaponRules?.length > 0 ? ", " : "")}
             <RuleList specialRules={weaponRules} />)
           </span>
         </>
@@ -67,10 +61,7 @@ function UpgradeItemDisplay({ eqp, count, isValid }) {
           <span className={styles.upgradeName} style={{ color: colour }}>
             {name}{" "}
           </span>
-          <span
-            className={styles.upgradeRules}
-            style={{ color: subtextColour }}
-          >
+          <span className={styles.upgradeRules} style={{ color: subtextColour }}>
             (
             {item.content.map((c, i) => (
               <Fragment key={c.id}>
@@ -94,6 +85,8 @@ interface UpgradeItemProps {
   upgrade: IUpgrade;
   option: IUpgradeOption;
   previewMode: boolean;
+  controlType: string;
+  label?: string;
 }
 
 export default function UpgradeItem({
@@ -101,20 +94,30 @@ export default function UpgradeItem({
   upgrade,
   option,
   previewMode,
+  label,
+  controlType,
 }: UpgradeItemProps) {
-  const controlType = UpgradeService.getControlType(selectedUnit, upgrade);
   // Somehow display the count?
   const gainsGroups = option ? groupBy(option.gains, "name") : null;
-  const isValid = option
-    ? UpgradeService.isValid(selectedUnit, upgrade, option)
-    : true;
+  const isValid = option ? UpgradeService.isValid(selectedUnit, upgrade, option) : true;
 
-  const getProfile = (target: string) => {
-    var e = selectedUnit.equipment.find((e) =>
-      EquipmentService.compareEquipment(e, target)
-    );
-    return e ? EquipmentService.formatString(e as IUpgradeGainsWeapon) : "";
-  };
+  const control = (() => {
+    switch (controlType) {
+      case "check":
+        return <UpgradeCheckbox selectedUnit={selectedUnit} upgrade={upgrade} option={option} />;
+      case "radio":
+        return (
+          <UpgradeRadio
+            selectedUnit={selectedUnit}
+            upgrade={upgrade}
+            option={option}
+            isValid={isValid}
+          />
+        );
+      case "updown":
+        return <UpgradeUpDown selectedUnit={selectedUnit} upgrade={upgrade} option={option} />;
+    }
+  })();
 
   return (
     <div className="is-flex is-align-items-center mb-1">
@@ -125,54 +128,16 @@ export default function UpgradeItem({
             const e = group[0];
             const count = group.reduce((c, next) => c + (next.count || 1), 0);
 
-            return (
-              <UpgradeItemDisplay
-                key={key}
-                eqp={e}
-                count={count}
-                isValid={isValid}
-              />
-            );
+            return <UpgradeItemDisplay key={key} eqp={e} count={count} isValid={isValid} />;
           })
         ) : (
-          <span style={{ color: "rgba(0,0,0,0.8)" }}>
-            Default - {upgrade.replaceWhat?.map(getProfile).join(", ")}
-          </span>
+          <span style={{ color: "rgba(0,0,0,0.8)" }}>{label}</span>
         )}
       </div>
       <div style={{ color: isValid ? null : "rgba(0,0,0,.5)" }}>
         {option?.cost ? `${option.cost}pts` : "Free"}&nbsp;
       </div>
-      {!previewMode &&
-        (() => {
-          switch (controlType) {
-            case "check":
-              return (
-                <UpgradeCheckbox
-                  selectedUnit={selectedUnit}
-                  upgrade={upgrade}
-                  option={option}
-                />
-              );
-            case "radio":
-              return (
-                <UpgradeRadio
-                  selectedUnit={selectedUnit}
-                  upgrade={upgrade}
-                  option={option}
-                  isValid={isValid}
-                />
-              );
-            case "updown":
-              return (
-                <UpgradeUpDown
-                  selectedUnit={selectedUnit}
-                  upgrade={upgrade}
-                  option={option}
-                />
-              );
-          }
-        })()}
+      {!previewMode && control}
     </div>
   );
 }
