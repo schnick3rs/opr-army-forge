@@ -51,10 +51,17 @@ function MainListSection({ group, army, showTitle, onSelected, onUnitRemoved }) 
   const list = useSelector((state: RootState) => state.list);
   const [collapsed, setCollapsed] = useState(false);
 
+  const points = group.reduce((total, unit) => total + UpgradeService.calculateUnitTotal(unit), 0);
+
   return (
     <Card elevation={2} sx={{ backgroundColor: "#FAFAFA", marginBottom: "1rem" }} square>
       {showTitle && (
-        <ArmyBookGroupHeader army={army} collapsed={collapsed} setCollapsed={setCollapsed} />
+        <ArmyBookGroupHeader
+          army={army}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          points={points}
+        />
       )}
       {!collapsed && (
         <>

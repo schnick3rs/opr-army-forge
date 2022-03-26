@@ -7,6 +7,7 @@ interface ArmyBookGroupHeaderProps {
   army: IArmyData;
   collapsed: boolean;
   setCollapsed: any;
+  points?: number;
 }
 
 export default function ArmyBookGroupHeader(props: ArmyBookGroupHeaderProps) {
@@ -15,6 +16,7 @@ export default function ArmyBookGroupHeader(props: ArmyBookGroupHeaderProps) {
       <h3 className="is-flex-grow-1">
         {props.army.name} - {props.army.versionString}
       </h3>
+      {props.points && <span>{props.points}pts</span>}
       <IconButton
         size="small"
         onClick={() => props.setCollapsed((prev: boolean) => !prev)}
