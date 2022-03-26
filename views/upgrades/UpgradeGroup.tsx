@@ -35,7 +35,7 @@ export default function UpgradeGroup({ unit, upgrade, previewMode }: UpgradeGrou
     />
   );
 
-  let groupTitle = UpgradeService.enrichDisplayLabel(unit, upgrade, controlType);
+  let groupTitle = upgrade.label;
 
   for (let what of upgrade.replaceWhat ?? []) {
     const profile = getProfile(what);
@@ -63,7 +63,12 @@ export default function UpgradeGroup({ unit, upgrade, previewMode }: UpgradeGrou
             lineHeight: 1.7,
           }}
         >
-          {groupTitle}
+          {groupTitle}{" "}
+          {upgrade.type === "replace" && controlType !== "radio" && (
+            <span style={{ color: "rgba(0,0,0,0.6)" }}>
+              [{UpgradeService.countAvailable(unit, upgrade)}]
+            </span>
+          )}
         </p>
       </div>
       <Paper className="px-4 py-2" square elevation={0}>

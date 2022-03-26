@@ -58,8 +58,12 @@ export default class ValidationService {
     if (heroCount > Math.floor(points / heroPointThresholds[system]))
       errors.push(`Max 1 hero per full ${heroPointThresholds[system]}pts.`);
 
-    if (unitCount > Math.floor(points / unitPointThresholds[system]))
-      errors.push(`Max 1 unit per full ${unitPointThresholds[system]}pts (combined units count as just 1 unit).`);
+    if (unitCount > Math.floor(points / unitPointThresholds[system])) {
+      const combinedMsg = system === "gf" || system === "aof"
+        ? ` (combined units count as just 1 unit)`
+        : "";
+      errors.push(`Max 1 unit per full ${unitPointThresholds[system]}pts${combinedMsg}.`);
+    }
 
     if (unitsOverDuplicateLimit.length > 0)
       errors.push(`Cannot have more than ${duplicateUnitLimit} copies of a particular unit (${unitsOverDuplicateLimit.map(x => x.unitName).join(", ")}).`); // combined units still count as one
