@@ -22,7 +22,7 @@ export default function UpgradeGroup({ unit, upgrade, previewMode }: UpgradeGrou
 
   const defaultItemLabel =
     upgrade.type === "replace"
-      ? `Default - ${upgrade.replaceWhat?.map((what) => getProfile(what) || "...").join(", ")}`
+      ? "Default"// - ${upgrade.replaceWhat?.map((what) => getProfile(what) || "...").join(", ")}`
       : "None";
   const defaultItem = controlType === "radio" && (
     <UpgradeItem
