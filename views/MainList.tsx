@@ -28,6 +28,10 @@ export function MainList({ onSelected, onUnitRemoved }) {
   const unitGroups = _.groupBy(rootUnits, (x) => x.armyId);
   const unitGroupKeys = Object.keys(unitGroups);
 
+  const points = list
+    .units
+    .reduce((total, unit) => total + UpgradeService.calculateUnitTotal(unit), 0);
+
   return (
     <>
       {unitGroupKeys.map((key) => {
@@ -40,6 +44,7 @@ export function MainList({ onSelected, onUnitRemoved }) {
             group={unitGroups[key]}
             onSelected={onSelected}
             onUnitRemoved={onUnitRemoved}
+            points={points}
           />
         );
       })}
@@ -47,11 +52,9 @@ export function MainList({ onSelected, onUnitRemoved }) {
   );
 }
 
-function MainListSection({ group, army, showTitle, onSelected, onUnitRemoved }) {
+function MainListSection({ group, army, showTitle, onSelected, onUnitRemoved, points }) {
   const list = useSelector((state: RootState) => state.list);
   const [collapsed, setCollapsed] = useState(false);
-
-  const points = group.reduce((total, unit) => total + UpgradeService.calculateUnitTotal(unit), 0);
 
   return (
     <Card elevation={2} sx={{ backgroundColor: "#FAFAFA", marginBottom: "1rem" }} square>
