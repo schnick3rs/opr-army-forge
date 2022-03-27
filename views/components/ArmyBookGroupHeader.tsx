@@ -18,7 +18,6 @@ export default function ArmyBookGroupHeader(props: ArmyBookGroupHeaderProps) {
       </h3>
       {props.points && <span>{props.points}pts</span>}
       <IconButton
-        size="small"
         onClick={() => props.setCollapsed((prev: boolean) => !prev)}
         color="primary"
       >
