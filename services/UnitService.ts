@@ -12,6 +12,15 @@ export default class UnitService {
       : list.units.filter(u => u.selectionId === list.selectedUnitId)[0];
   }
 
+  public static getRootUnits(list: ListState) {
+    return _.orderBy(
+      list.units.filter(
+        (u) => !(u.joinToUnit && list.units.some((t) => t.selectionId === u.joinToUnit))
+      ),
+      (x) => x.sortId
+    );
+  }
+
   public static getAllEquipment(unit: ISelectedUnit) {
     const items = unit.loadout.filter(e => e.type === "ArmyBookItem")
     const itemContent = items.flatMap((i: IUpgradeGainsItem) => i.content);

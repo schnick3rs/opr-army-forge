@@ -18,12 +18,7 @@ export function MainList({ onSelected, onUnitRemoved }) {
   const list = useSelector((state: RootState) => state.list);
   const loadedArmyBooks = useSelector((state: RootState) => state.army.loadedArmyBooks);
 
-  const rootUnits = _.orderBy(
-    list.units.filter(
-      (u) => !(u.joinToUnit && list.units.some((t) => t.selectionId === u.joinToUnit))
-    ),
-    (x) => x.sortId
-  );
+  const rootUnits = UnitService.getRootUnits(list);
 
   const unitGroups = _.groupBy(rootUnits, (x) => x.armyId);
   const unitGroupKeys = Object.keys(unitGroups);
