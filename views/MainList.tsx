@@ -28,14 +28,13 @@ export function MainList({ onSelected, onUnitRemoved }) {
   const unitGroups = _.groupBy(rootUnits, (x) => x.armyId);
   const unitGroupKeys = Object.keys(unitGroups);
 
-  const points = list
-    .units
-    .reduce((total, unit) => total + UpgradeService.calculateUnitTotal(unit), 0);
-
   return (
     <>
       {unitGroupKeys.map((key) => {
         const armyBook = loadedArmyBooks.find((book) => book.uid === key);
+        const points = list.units
+          .filter((u) => u.armyId === key)
+          .reduce((total, unit) => total + UpgradeService.calculateUnitTotal(unit), 0);
         return (
           <MainListSection
             key={key}
