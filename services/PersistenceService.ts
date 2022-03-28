@@ -1,17 +1,20 @@
-import { ConstructionOutlined } from "@mui/icons-material";
+import { ThunkDispatch } from "@reduxjs/toolkit";
 import { Dispatch } from "react";
-import { ArmyState, IArmyData, loadArmyData, setGameSystem } from "../data/armySlice";
-import { ISaveData, ISavedListState, ISelectedUnit, ISpecialRule, IUnit, IUpgrade, IUpgradeGains, IUpgradeGainsWeapon, IUpgradeOption } from "../data/interfaces";
+import { ArmyState, getArmyBookData, getGameRules, IArmyData, setGameSystem } from "../data/armySlice";
+import { ISaveData, ISavedListState, ISelectedUnit, ISpecialRule, IUnit, IUpgrade, IUpgradeGainsWeapon, IUpgradeOption } from "../data/interfaces";
 import { ListState, loadSavedList } from "../data/listSlice";
+import { RootState } from "../data/store";
 import { groupBy, makeCopy } from "./Helpers";
 import RulesService from "./RulesService";
 import UnitService from "./UnitService";
 import UpgradeService from "./UpgradeService";
-import WebappApiService from "./WebappApiService";
+import _ from "lodash";
+import { IViewPreferences } from "../pages/view";
 
 export default class PersistenceService {
 
   private static prefix = "AF_Save_";
+  private static currentSaveVersion = 3;
 
   private static getSaveKey(creationTime: string) {
     return this.prefix + creationTime;
@@ -38,13 +41,15 @@ export default class PersistenceService {
         undoUnitRemove: null
       };
 
+    const armyData = army.loadedArmyBooks[0];
     const saveData: ISaveData = {
       gameSystem: army.gameSystem,
-      armyId: army.data.uid,
-      armyFaction: army.data.factionName,
-      armyName: army.data.name,
+      armyId: armyData.uid,
+      armyIds: [armyData.uid],
+      armyFaction: armyData.factionName,
+      armyName: armyData.name,
       modified: new Date().toJSON(),
-      saveVersion: 3,
+      saveVersion: this.currentSaveVersion,
       listPoints: 0,
       list: this.getDataForSave(list)
     };
@@ -63,6 +68,7 @@ export default class PersistenceService {
       ...list,
       units: list.units.map(u => ({
         id: u.id,
+        armyId: u.armyId,
         customName: u.customName,
         selectionId: u.selectionId,
         selectedUpgrades: u.selectedUpgrades.map(x => ({
@@ -83,14 +89,18 @@ export default class PersistenceService {
     if (!localSave)
       return;
 
+    const armyIds = _.uniq(list.units.map(u => u.armyId));
+
     const existingSave: ISaveData = JSON.parse(localSave);
     const points: number = UpgradeService.calculateListTotal(list.units);
 
     const saveData: ISaveData = {
       ...existingSave,
+      armyIds: armyIds,
       modified: new Date().toJSON(),
       listPoints: points,
-      list: this.getDataForSave(list)
+      list: this.getDataForSave(list),
+      saveVersion: this.currentSaveVersion
     };
 
     console.log("Updating save...", saveData);
@@ -105,17 +115,18 @@ export default class PersistenceService {
     delete localStorage[key];
   }
 
-  public static buildListFromSave(save: ISaveData, armyData: IArmyData): ListState {
+  public static buildListFromSave(save: ISaveData, armyBooks: IArmyData[]): ListState {
 
     return save.saveVersion === 3
-      ? this.buildListFromSave_v3(save.list, armyData)
+      ? this.buildListFromSave_v3(save.list, armyBooks)
       : save.saveVersion === 2
-        ? this.buildListFromSave_v2(save.list, armyData)
+        ? this.buildListFromSave_v2(save.list, armyBooks)
         : null;
   }
 
-  public static buildListFromSave_v2(savedList: ISavedListState, armyData: IArmyData): ListState {
+  public static buildListFromSave_v2(savedList: ISavedListState, armyBooks: IArmyData[]): ListState {
 
+    const armyData = armyBooks[0];
     const allSections = armyData
       .upgradePackages
       .reduce<IUpgrade[]>((current, pkg) => current.concat(pkg.sections), []);
@@ -129,18 +140,19 @@ export default class PersistenceService {
         const unit: ISelectedUnit = {
           ...unitDefinition,
           ...u,
+          armyId: armyData.uid,
           equipment: makeCopy(unitDefinition.equipment),
           selectedUpgrades: [],
           loadout: []
         };
-        console.log("Unit", unit);
-        // Cast to convince TS that it is indeed in the old format...
-        const selectedUpgrades: any = makeCopy(u.selectedUpgrades);
-        for (let upg of (selectedUpgrades as { id: string }[])) {
-          const option = allOptions.find(opt => opt.id === upg.id);
+        console.log("Loading unit...", unit);
+        for (let upg of makeCopy(u.selectedUpgrades)) {
+          const option = allOptions.find(opt => opt.id === upg.id || opt.id === upg.optionId);
           if (option) {
             const section = allSections.find(sec => sec.uid === option.parentSectionId);
             UpgradeService.apply(unit, section, option);
+          } else {
+            console.warn("Couldn't find option", upg);
           }
         }
         return UpgradeService.buildUpgrades(unit);
@@ -148,16 +160,16 @@ export default class PersistenceService {
     };
   }
 
-  public static buildListFromSave_v3(savedList: ISavedListState, armyData: IArmyData): ListState {
+  public static buildListFromSave_v3(savedList: ISavedListState, armyBooks: IArmyData[]): ListState {
 
-    const allSections = armyData
-      .upgradePackages
+    const allSections = armyBooks.flatMap(book => book.upgradePackages)
       .reduce<IUpgrade[]>((current, pkg) => current.concat(pkg.sections), []);
-
+    const units = armyBooks.flatMap(book => book.units.map(u => ({ ...u, armyId: book.uid })));
+    console.log(units);
     return {
       ...savedList,
       units: savedList.units.map(u => {
-        const unitDefinition: IUnit = armyData.units.find(unit => unit.id === u.id);
+        const unitDefinition: IUnit = units.find(unit => unit.id === u.id);
         const unit: ISelectedUnit = {
           ...unitDefinition,
           ...u,
@@ -171,6 +183,8 @@ export default class PersistenceService {
           const option = section.options.find(opt => opt.id === upg.optionId);
           if (option) {
             UpgradeService.apply(unit, section, option);
+          } else {
+            console.warn("Couldn't find option", upg);
           }
         }
         return UpgradeService.buildUpgrades(unit);
@@ -183,22 +197,26 @@ export default class PersistenceService {
     this.load(dispatch, save, callback);
   }
 
-  public static async load(dispatch: Dispatch<any>, save: ISaveData, callback: (armyData: any) => void) {
+  public static async load(dispatch: ThunkDispatch<RootState, any, any>, save: ISaveData, callback: (armyBooks: IArmyData[]) => void) {
 
     console.log("Loading save...", save);
 
-    const loaded = data => {
-      dispatch(setGameSystem(save.gameSystem));
-      dispatch(loadArmyData(data));
-      const list: ListState = this.buildListFromSave(save, data);
+    dispatch(setGameSystem(save.gameSystem));
+
+    const armyIds = save.armyIds || [save.armyId];
+
+    const promises = armyIds.map(id => dispatch(getArmyBookData({
+      armyUid: id, gameSystem: save.gameSystem, reset: false
+    })));
+
+    Promise.all(promises).then(results => {
+      const armyBooks = results.map(res => (res.payload as any).armyBookData) as IArmyData[];
+      console.log(armyBooks);
+      const list: ListState = this.buildListFromSave(save, armyBooks);
       dispatch(loadSavedList(list));
-    };
-
-    const data = await WebappApiService
-      .getArmyBookData(save.armyId.replace("-skirmish", ""), save.gameSystem);
-
-    loaded(data);
-    callback(data);
+      dispatch(getGameRules(save.gameSystem));
+      callback(armyBooks);
+    });
   }
 
   public static download(list: ListState) {
@@ -273,7 +291,7 @@ export default class PersistenceService {
     // Fearless
     //
     // ...
-    for (let unit of list.units.filter(u => u.selectionId !== "dummy")) {
+    for (let unit of list.units) {
       lines.push(`${unit.customName ?? unit.name} [${unit.size}] | Qua ${unit.quality}+ Def ${unit.defense}+ | ${UpgradeService.calculateUnitTotal(unit)}pts`);
       lines.push(getWeapons(unit));
       lines.push(getRules(unit) + "\n");
@@ -288,5 +306,16 @@ export default class PersistenceService {
       .clipboard
       .writeText(this.getListAsText(list))
       .then(() => console.log("Copied to clipboard..."));
+  }
+
+  public static saveViewPreferences(prefs: IViewPreferences) {
+    localStorage["view_prefs"] = JSON.stringify(prefs);
+  }
+
+  public static getViewPreferences() {
+    const prefs = localStorage["view_prefs"];
+    if (!prefs)
+      return null;
+    return JSON.parse(prefs) as IViewPreferences;
   }
 }

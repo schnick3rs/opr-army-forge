@@ -1,5 +1,6 @@
 import router from "next/router";
 import { IArmyData } from "../data/armySlice";
+import { gameSystemToEnum } from "./Helpers";
 import UnitService from "./UnitService";
 
 export default class WebappApiService {
@@ -21,17 +22,15 @@ export default class WebappApiService {
     return data;
   }
 
+  public static async getGameRules(gameSystemSlug: string) {
+    const res = await fetch(this.getUrl() + `/content/game-systems/${gameSystemSlug}/special-rules`);
+    const data = await res.json();
+    return data;
+  }
+
   public static async getArmyBookData(armyId: string, gameSystem: string) {
 
-    const gameSystemId = (() => {
-      switch (gameSystem) {
-        case "gf": return 2;
-        case "gff": return 3;
-        case "aof": return 4;
-        case "aofs": return 5;
-        case "aofr": return 6;
-      }
-    })();
+    const gameSystemId = gameSystemToEnum(gameSystem);
 
     const armyBookRes = await fetch(this.getUrl() + `/army-books/${armyId}~${gameSystemId}?armyForge=true`);
 
@@ -41,6 +40,8 @@ export default class WebappApiService {
       ...upgradePackage,
       sections: upgradePackage.sections.map(section => ({
         ...section,
+        isCommandGroup: section.options
+          .some(opt => opt.gains.some(g => g.name.toLocaleLowerCase() === "musician")),
         options: section.options.map(option => {
           const result: any = {
             ...option,
@@ -60,6 +61,7 @@ export default class WebappApiService {
       ...data,
       units: data.units.map((unit, index) => ({
         ...unit,
+        selectedUpgrades: [],
         sortId: index,
         disabledUpgradeSections: UnitService.getDisabledUpgradeSections(unit, upgradePackages)
       })),

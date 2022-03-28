@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../data/store";
 import { UnitSelection } from "../UnitSelection";
@@ -17,7 +17,6 @@ import MainMenu from "../components/MainMenu";
 import ValidationErrors from "../ValidationErrors";
 import UndoRemoveUnit from "../components/UndoRemoveUnit";
 import { ISelectedUnit } from "../../data/interfaces";
-import UnitService from "../../services/UnitService";
 import { useRouter } from "next/router";
 
 export default function MobileView() {
@@ -28,6 +27,7 @@ export default function MobileView() {
   const router = useRouter();
 
   const sheetOpen = (router.query["upgradesOpen"] as string) == "true";
+  const armyData = army?.loadedArmyBooks?.[0];
 
   const [slider, setSlider] = useState(null);
   const [slideIndex, setSlideIndex] = useState(1);
@@ -35,13 +35,9 @@ export default function MobileView() {
   const [showUndoRemove, setShowUndoRemove] = useState(false);
 
   // Open bottom sheet when unit is selected
-  const onUnitSelected = useCallback((unit: ISelectedUnit) => {
+  const onUnitSelected = (unit: ISelectedUnit) => {
     router.push({ query: { ...router.query, upgradesOpen: true } });
-  }, []);
-
-  const onAddUnit = useCallback((unit: ISelectedUnit) => {
-    dispatch(addUnit(UnitService.getRealUnit(unit)));
-  }, []);
+  };
 
   // Reset selected unit when sheet is closed
   function onDismissSheet() {
@@ -84,7 +80,13 @@ export default function MobileView() {
             textColor="inherit"
             indicatorColor="primary"
           >
-            <Tab label={`${army?.data?.name} ${army?.data?.versionString}`} />
+            <Tab
+              label={
+                army?.loadedArmyBooks.length > 1
+                  ? "Army Books"
+                  : `${armyData?.name} ${armyData?.versionString}`
+              }
+            />
             <Tab label={`My List - ${list.points}pts`} />
           </Tabs>
         </AppBar>
@@ -95,42 +97,37 @@ export default function MobileView() {
         ref={(slider) => setSlider(slider)}
         style={{ maxHeight: "100%" }}
       >
-        <div>
-          <UnitSelection onSelected={() => {}} addUnit={onAddUnit} mobile />
-        </div>
-        <div className="">
-          {list.units.length > 0 ? (
-            <MainList
-              onSelected={onUnitSelected}
-              onUnitRemoved={() => setShowUndoRemove(true)}
-              mobile
-            />
-          ) : (
-            <div className="p-4 has-text-centered">
-              <h3 className="is-size-3 mb-4">Your list is empty</h3>
-              <Button
-                variant="outlined"
-                onClick={() => handleSlideChange(null, 0)}
-              >
-                <Add /> Add Units
-              </Button>
-              <div
-                className="is-flex mt-6"
-                style={{
-                  height: "160px",
-                  width: "100%",
-                  backgroundImage: `url("img/gf_armies/${army?.data?.name}.png")`,
-                  backgroundPosition: "center",
-                  backgroundSize: "contain",
-                  backgroundRepeat: "no-repeat",
-                  position: "relative",
-                  zIndex: 1,
-                  opacity: 0.5,
-                }}
-              ></div>
-            </div>
-          )}
-        </div>
+        <UnitSelection />
+        {list.units.length > 0 ? (
+          <MainList
+            onSelected={onUnitSelected}
+            onUnitRemoved={() => setShowUndoRemove(true)}
+          />
+        ) : (
+          <div className="p-4 has-text-centered">
+            <h3 className="is-size-3 mb-4">Your list is empty</h3>
+            <Button
+              variant="outlined"
+              onClick={() => handleSlideChange(null, 0)}
+            >
+              <Add /> Add Units
+            </Button>
+            <div
+              className="is-flex mt-6"
+              style={{
+                height: "160px",
+                width: "100%",
+                backgroundImage: `url("img/gf_armies/${armyData?.name}.png")`,
+                backgroundPosition: "center",
+                backgroundSize: "contain",
+                backgroundRepeat: "no-repeat",
+                position: "relative",
+                zIndex: 1,
+                opacity: 0.5,
+              }}
+            ></div>
+          </div>
+        )}
       </Slider>
 
       <BottomSheet

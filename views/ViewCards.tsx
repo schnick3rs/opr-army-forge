@@ -23,13 +23,10 @@ export default function ViewCards({
   const army = useSelector((state: RootState) => state.army);
 
   const gameRules = army.rules;
-  const armyRules = army.data?.specialRules;
-  const spells = army.data?.spells || [];
+  const armyRules = army.loadedArmyBooks.flatMap((x) => x.specialRules);
   const ruleDefinitions: IGameRule[] = gameRules.concat(armyRules);
 
-  const units = (list?.units ?? [])
-    .filter((u) => u.selectionId !== "dummy")
-    .map((u) => makeCopy(u));
+  const units = (list?.units ?? []).map((u) => makeCopy(u));
   for (let unit of units) {
     delete unit.selectionId;
   }
@@ -76,36 +73,37 @@ export default function ViewCards({
           : units.map((unit, i) => {
               return getUnitCard(unit, 1);
             })}
-        {showPsychic && (
-          <div className={style.card}>
-            <Card elevation={1}>
-              <div className="mb-4">
-                <div className="card-body">
-                  <h3
-                    className="is-size-4 my-2"
-                    style={{ fontWeight: 500, textAlign: "center" }}
-                  >
-                    Psychic/Spells
-                  </h3>
-                  <hr className="my-0" />
+        {showPsychic &&
+          army.loadedArmyBooks.map((book) => (
+            <div key={book.uid} className={style.card}>
+              <Card elevation={1}>
+                <div className="mb-4">
+                  <div className="card-body">
+                    <h3
+                      className="is-size-4 my-2"
+                      style={{ fontWeight: 500, textAlign: "center" }}
+                    >
+                      Psychic/Spells
+                    </h3>
+                    <hr className="my-0" />
 
-                  <Paper square elevation={0}>
-                    <div className="px-2 my-2">
-                      {spells.map((spell) => (
-                        <p key={spell.id}>
-                          <span style={{ fontWeight: 600 }}>
-                            {spell.name} ({spell.threshold}+):{" "}
-                          </span>
-                          <span>{spell.effect}</span>
-                        </p>
-                      ))}
-                    </div>
-                  </Paper>
+                    <Paper square elevation={0}>
+                      <div className="px-2 my-2">
+                        {book.spells.map((spell) => (
+                          <p key={spell.id}>
+                            <span style={{ fontWeight: 600 }}>
+                              {spell.name} ({spell.threshold}+):{" "}
+                            </span>
+                            <span>{spell.effect}</span>
+                          </p>
+                        ))}
+                      </div>
+                    </Paper>
+                  </div>
                 </div>
-              </div>
-            </Card>
-          </div>
-        )}
+              </Card>
+            </div>
+          ))}
       </div>
       {!showFullRules && (
         <div className={`mx-4 ${style.card}`}>

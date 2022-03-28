@@ -1,5 +1,7 @@
 //import _ from "lodash";
 
+import { NextRouter } from "next/router";
+
 export function groupBy(xs, key) {
   return xs.reduce(function (rv, x) {
     (rv[x[key]] = rv[x[key]] || []).push(x);
@@ -36,5 +38,23 @@ export function gameSystemToSlug(gameSystem) {
       return "age-of-fantasy-skirmish";
     case "aofr":
       return "age-of-fantasy-regiments";
+  }
+}
+
+export function gameSystemToEnum(gameSystem) {
+  switch (gameSystem) {
+    case "gf": return 2;
+    case "gff": return 3;
+    case "aof": return 4;
+    case "aofs": return 5;
+    case "aofr": return 6;
+  }
+}
+
+export function tryBack(fallback: () => void) {
+  if (history.length < 2) {
+    fallback();
+  } else {
+    history.back();
   }
 }

@@ -52,18 +52,12 @@ div[role="tooltip"] {
   position: sticky !important;
   top: 0;
   background-color: #FAFAFA;
-  box-shadow: none !important;
+  z-index: 10;
+  overflow: hidden;
+  margin-bottom:0.5rem;
 }
 .sticky.sticky-2 {
   top: 52px;
-}
-.scrolled .sticky {
-  z-index: 10;
-  box-shadow: 0px 3px 5px 0px lightgrey !important;
-  background-color: #FAFAFA !important;
-  overflow: hidden;
-  padding-bottom: 1rem;
-  margin-bottom: -1rem;
 }
 .scrolled .sticky .unitName {
   white-space: nowrap;
@@ -88,4 +82,9 @@ div[role="tooltip"] {
   .no-print {
     display:none !important;
   }
+}
+
+hr {
+  height: auto;
+  background-color: transparent;
 }

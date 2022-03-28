@@ -1,27 +1,59 @@
 import React, { useState } from "react";
-import { useSelector } from 'react-redux'
-import { RootState } from '../data/store'
+import { useSelector } from "react-redux";
+import { RootState } from "../data/store";
 import { useRouter } from "next/router";
 import ViewCards from "../views/ViewCards";
 import ViewList from "../views/ViewList";
-import { AppBar, Button, IconButton, Paper, Toolbar, Typography, Drawer, List, ListItem, ListItemText, Switch } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
-import SettingsIcon from '@mui/icons-material/Settings';
-import ViewAgendaIcon from '@mui/icons-material/ViewAgenda';
-import DashboardIcon from '@mui/icons-material/Dashboard';
+import {
+  AppBar,
+  Button,
+  IconButton,
+  Paper,
+  Toolbar,
+  Typography,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  Switch,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import SettingsIcon from "@mui/icons-material/Settings";
+import ViewAgendaIcon from "@mui/icons-material/ViewAgenda";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import ClearIcon from "@mui/icons-material/Clear";
+import PersistenceService from "../services/PersistenceService";
+
+export interface IViewPreferences {
+  showFullRules: boolean;
+  showPointCosts: boolean;
+  combineSameUnits: boolean;
+}
 
 export default function View() {
-
   const list = useSelector((state: RootState) => state.list);
   const router = useRouter();
 
+  const defaultPrefs = {
+    showFullRules: false,
+    showPointCosts: true,
+    combineSameUnits: true,
+  } as IViewPreferences;
+
+  const [preferences, setPreferenceState] = useState({
+    ...defaultPrefs,
+    ...PersistenceService.getViewPreferences(),
+  });
   const [isCardView, setCardView] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [showPsychic, setShowPsychic] = useState(listContainsPyschic(list));
-  const [showFullRules, setShowFullRules] = useState(false);
-  const [showPointCosts, setShowPointCosts] = useState(true);
-  const [combineSameUnits, setCombineSameUnits] = useState(true);
+
+  function setPreferences(setFunc) {
+    const newPrefs = setFunc(preferences);
+    setPreferenceState(setFunc);
+    PersistenceService.saveViewPreferences(newPrefs);
+  }
+
+  const showPsychic = listContainsPyschic(list);
 
   return (
     <>
@@ -55,27 +87,43 @@ export default function View() {
       </Paper>
       <Drawer anchor="right" open={settingsOpen} onClose={() => setSettingsOpen(false)}>
         <div className="is-flex p-4">
-          <h3 className="is-size-4" style={{ flex: 1 }}>Display Settings</h3>
+          <h3 className="is-size-4" style={{ flex: 1 }}>
+            Display Settings
+          </h3>
           <IconButton onClick={() => setSettingsOpen(false)}>
             <ClearIcon />
           </IconButton>
         </div>
         <List>
           <ListItem>
-            <ListItemText>Show Psychic Spells</ListItemText>
-            <Switch edge="end" checked={showPsychic} onChange={() => setShowPsychic(!showPsychic)} />
-          </ListItem>
-          <ListItem>
             <ListItemText>Show full special rules text</ListItemText>
-            <Switch edge="end" checked={showFullRules} onChange={() => setShowFullRules(!showFullRules)} />
+            <Switch
+              edge="end"
+              checked={preferences.showFullRules}
+              onChange={() =>
+                setPreferences((prefs) => ({ ...prefs, showFullRules: !prefs.showFullRules }))
+              }
+            />
           </ListItem>
           <ListItem>
             <ListItemText>Show point costs</ListItemText>
-            <Switch edge="end" checked={showPointCosts} onChange={() => setShowPointCosts(!showPointCosts)} />
+            <Switch
+              edge="end"
+              checked={preferences.showPointCosts}
+              onChange={() =>
+                setPreferences((prefs) => ({ ...prefs, showPointCosts: !prefs.showPointCosts }))
+              }
+            />
           </ListItem>
           <ListItem>
             <ListItemText>Combine Similar Units</ListItemText>
-            <Switch edge="end" checked={combineSameUnits} onChange={() => setCombineSameUnits(!combineSameUnits)} />
+            <Switch
+              edge="end"
+              checked={preferences.combineSameUnits}
+              onChange={() =>
+                setPreferences((prefs) => ({ ...prefs, combineSameUnits: !prefs.combineSameUnits }))
+              }
+            />
           </ListItem>
         </List>
       </Drawer>
@@ -87,23 +135,33 @@ export default function View() {
         </Button>
       </div>
       <div className="px-4">
-        {
-          isCardView
-            ? <ViewCards showPsychic={showPsychic} showFullRules={showFullRules} showPointCosts={showPointCosts} combineSameUnits={combineSameUnits} />
-            : <ViewList showPsychic={showPsychic} showFullRules={showFullRules} showPointCosts={showPointCosts} />
-        }
+        {isCardView ? (
+          <ViewCards
+            showPsychic={showPsychic}
+            showFullRules={preferences.showFullRules}
+            showPointCosts={preferences.showPointCosts}
+            combineSameUnits={preferences.combineSameUnits}
+          />
+        ) : (
+          <ViewList
+            showPsychic={showPsychic}
+            showFullRules={preferences.showFullRules}
+            showPointCosts={preferences.showPointCosts}
+          />
+        )}
       </div>
     </>
   );
 }
 
-
 // TODO: extract these as global helper functions
 function listContainsPyschic(list) {
   // TODO: get the special rule def from a well known location
-  return listContainsSpecialRule(list, { key: 'psychic', name: 'Psychic', rating: '1' })
+  return listContainsSpecialRule(list, { key: "psychic", name: "Psychic", rating: "1" });
 }
 
 function listContainsSpecialRule(list, specialRule) {
-  return list.units.some(({ specialRules }) => Boolean(specialRules.find(({ name }) => name === specialRule.name)));
+  return list.units.some(({ specialRules }) =>
+    Boolean(specialRules.find(({ name }) => name === specialRule.name))
+  );
 }

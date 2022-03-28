@@ -2,7 +2,27 @@ import { ListState } from "../data/listSlice";
 import _ from "lodash";
 import { ArmyState } from "../data/armySlice";
 
+const unitPointThresholds = {
+  "gf": 200,
+  "gff": 30,
+  "aof": 165,
+  "aofs": 25,
+};
+const heroPointThresholds = {
+  "gf": 500,
+  "gff": 150,
+  "aof": 500,
+  "aofs": 150,
+};
+const duplicateUnitThresholds = {
+  "gf": 1000,
+  "gff": 150,
+  "aof": 1000,
+  "aofs": 150,
+};
+
 export default class ValidationService {
+
   public static getErrors(army: ArmyState, list: ListState): string[] {
 
     if (!army || !list)
@@ -13,34 +33,55 @@ export default class ValidationService {
     if (list.pointsLimit > 0 && list.points > list.pointsLimit)
       errors.push(`Points limit exceeded: ${list.points}/${list.pointsLimit}`)
 
+    const system = army.gameSystem;
     const points = list.pointsLimit || list.points;
 
-    if (army.gameSystem === "gf") {
+    const units = list.units;
+    const unitCount = units.filter(u => !u.joinToUnit).length;
+    const heroes = units.filter(u => u.specialRules.some(rule => rule.name === "Hero"))
+    const heroCount = heroes.length;
+    const joinedHeroes = heroes.filter(u => (u.joinToUnit && units.some(t => t.selectionId === u.joinToUnit)))
+    const joinedIds = joinedHeroes.map(u => u.joinToUnit);
 
-      const units = list.units.filter(u => u.selectionId !== "dummy")
-      const unitCount = units.filter(u => !u.joinToUnit).length;
-      const heroes = units.filter(u => u.specialRules.some(rule => rule.name === "Hero"))
-      const heroCount = heroes.length;
-      const joinedHeroes = heroes.filter(u => (u.joinToUnit && units.some(t => t.selectionId === u.joinToUnit)))
-      const joinedIds = joinedHeroes.map(u => u.joinToUnit);
-      const duplicateUnitLimit = 1 + Math.floor((list.pointsLimit / 1000));
-      const nonCombinedUnitsGroupedByName = _.groupBy(units.filter(u => !(u.combined && (!u.joinToUnit))), u => u.name);
-      const isOverDuplicateUnitLimit = Object.values(nonCombinedUnitsGroupedByName).some((grp: any[]) => grp.length > duplicateUnitLimit)
+    const duplicateUnitLimit = 1 + Math.floor((points / duplicateUnitThresholds[system]));
+    const nonCombinedUnitsGrouped = _.groupBy(units.filter(u => !(u.combined && (!u.joinToUnit))), u => u.id);
+    const unitsOverDuplicateLimit = Object
+      .keys(nonCombinedUnitsGrouped)
+      .map(key => ({
+        unitName: units.find(u => u.id === key).name,
+        count: nonCombinedUnitsGrouped[key].length
+      }))
+      .filter((grp) => grp.count > duplicateUnitLimit);
 
-      if (heroCount > Math.floor(points / 500))
-        errors.push(`Max 1 hero per full 500pts.`);
-      if (unitCount > Math.floor(points / 200))
-        errors.push(`Max 1 unit per full 200pts (combined units count as just 1 unit).`);
+    //#region All Game Systems
+
+    if (heroCount > Math.floor(points / heroPointThresholds[system]))
+      errors.push(`Max 1 hero per full ${heroPointThresholds[system]}pts.`);
+
+    if (unitCount > Math.floor(points / unitPointThresholds[system])) {
+      const combinedMsg = system === "gf" || system === "aof"
+        ? ` (combined units count as just 1 unit)`
+        : "";
+      errors.push(`Max 1 unit per full ${unitPointThresholds[system]}pts${combinedMsg}.`);
+    }
+
+    if (unitsOverDuplicateLimit.length > 0)
+      errors.push(`Cannot have more than ${duplicateUnitLimit} copies of a particular unit (${unitsOverDuplicateLimit.map(x => x.unitName).join(", ")}).`); // combined units still count as one
+
+    //#endregion
+
+    if (army.gameSystem === "gf" || army.gameSystem === "aof") {
+
       if (units.some(u => u.combined && u.size === 1))
         errors.push(`Cannot combine units of unit size [1].`);
+
       if (units.some(u => u.size === 1 && joinedIds.includes(u.selectionId)))
         errors.push(`Heroes cannot join units that only contain a single model.`);
+
       if (new Set(joinedIds).size < joinedIds.length)
         errors.push(`A unit can only have a maximum of one Hero attached.`);
-      if (isOverDuplicateUnitLimit)
-        errors.push(`Cannot have more than ${duplicateUnitLimit} copies of a particular unit.`); // combined units still count as one
     }
-    
+
     return errors;
   }
 }

@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { useCallback } from 'react';
 import { gameSystemToSlug } from '../services/Helpers';
 import WebappApiService from '../services/WebappApiService';
 import { IUnit, IUpgradePackage } from './interfaces';
@@ -14,14 +15,17 @@ export interface ArmyState {
   loadingArmyData: boolean;
   gameSystem: string;
   armyFile: string;
-  data: IArmyData;
+  //data: IArmyData;
   rules: IGameRule[];
   armyBooks: IArmyData[];
+  loadedArmyBooks: IArmyData[];
+  selectedFactions: string[];
 }
 
 export interface IArmyData {
   uid: string;
   name: string;
+  enabledGameSystems: number[];
   factionName: string;
   factionRelation: string;
   versionString: string;
@@ -41,9 +45,11 @@ const initialState: ArmyState = {
   loadingArmyData: false,
   armyFile: null,
   gameSystem: null,
-  data: null,
+  //data: null,
   rules: [],
-  armyBooks: []
+  armyBooks: [],
+  loadedArmyBooks: [],
+  selectedFactions: []
 }
 
 export const getArmyBooks = createAsyncThunk("army/getArmyBooks", async (gameSystem: string) => {
@@ -51,28 +57,36 @@ export const getArmyBooks = createAsyncThunk("army/getArmyBooks", async (gameSys
   const slug = gameSystemToSlug(gameSystem);
   const apiArmyBooks = await WebappApiService.getArmyBooks(slug);
   console.log("Loaded army books", apiArmyBooks);
-  return apiArmyBooks;
+  return apiArmyBooks.filter(book => book.official && book.isLive);
 });
 
-export const getArmyBookData = createAsyncThunk("army/getArmyBookData", async (payload: { armyUid: string, gameSystem: string }) => {
+export const getArmyBookData = createAsyncThunk("army/getArmyBookData", async (payload: { armyUid: string, gameSystem: string, reset: boolean }) => {
   const armyBookData: IArmyData = await WebappApiService.getArmyBookData(
     payload.armyUid,
     payload.gameSystem
   );
   console.log("Loaded army data", armyBookData);
-  return armyBookData;
+  //payload.callback(armyBookData);
+  return { armyBookData, reset: payload.reset };
+});
+
+export const getGameRules = createAsyncThunk("army/getGameRules", async (gameSystem: string) => {
+  // AF to Web Companion game type mapping
+  const slug = gameSystemToSlug(gameSystem);
+  const rules = await WebappApiService.getGameRules(slug);
+  return rules.map((rule) => ({
+    name: rule.name,
+    description: rule.description,
+  }));;
 });
 
 export const armySlice = createSlice({
   name: 'army',
   initialState: initialState,
   reducers: {
-    loadArmyData: (state, action: PayloadAction<IArmyData>) => {
-      return {
-        ...state,
-        data: action.payload,
-        loaded: true
-      };
+    resetLoadedBooks(state) {
+      state.loadedArmyBooks = [];
+      state.selectedFactions = [];
     },
     setGameSystem: (state, action: PayloadAction<string>) => {
       return {
@@ -86,27 +100,54 @@ export const armySlice = createSlice({
         armyFile: action.payload
       };
     },
-    setGameRules: (state, action: PayloadAction<IGameRule[]>) => {
-      return {
-        ...state,
-        rules: action.payload
-      };
+    unloadFaction(state, action: PayloadAction<string>) {
+      const factionIndex = state.selectedFactions.findIndex(f => f === action.payload);
+      state.selectedFactions.splice(factionIndex, 1);
+      state.loadedArmyBooks = state.loadedArmyBooks.filter(book => book.factionName !== action.payload);
+    },
+    unloadArmyBook(state, action: PayloadAction<string>) {
+      const uid = action.payload;
+      const index = state.loadedArmyBooks.findIndex(book => book.uid === uid);
+      state.loadedArmyBooks.splice(index, 1);
     }
   },
   extraReducers(builder) {
     builder.addCase(getArmyBooks.fulfilled, (state, action) => {
       return { ...state, armyBooks: action.payload };
     });
+    builder.addCase(getGameRules.fulfilled, (state, action) => {
+      return { ...state, rules: action.payload };
+    });
     builder.addCase(getArmyBookData.pending, (state, action) => {
       return { ...state, loadingArmyData: true };
     });
-    builder.addCase(getArmyBookData.fulfilled, (state, action) => {
-      return { ...state, loadingArmyData: false, data: action.payload, loaded: true };
+    builder.addCase(getArmyBookData.fulfilled, (state, action: PayloadAction<{ armyBookData, reset }>) => {
+      const { armyBookData, reset } = action.payload;
+
+      state.loadingArmyData = false;
+      state.loaded = true;
+
+      if (armyBookData.factionName && !state.selectedFactions.some(x => x === armyBookData.factionName)) {
+        state.selectedFactions.push(armyBookData.factionName)
+      }
+
+      if (reset) {
+        state.loadedArmyBooks = [armyBookData];
+        return;
+      }
+
+      const existingIndex = state.loadedArmyBooks.findIndex(book => book.uid === armyBookData.uid);
+      const alreadyExists = existingIndex >= 0;
+      if (alreadyExists) {
+        state.loadedArmyBooks.splice(existingIndex, 1, armyBookData);
+      } else {
+        state.loadedArmyBooks.push(armyBookData);
+      }
     });
   },
 })
 
 // Action creators are generated for each case reducer function
-export const { loadArmyData, setGameSystem, setArmyFile, setGameRules } = armySlice.actions;
+export const { resetLoadedBooks, setGameSystem, setArmyFile, unloadFaction, unloadArmyBook } = armySlice.actions;
 
 export default armySlice.reducer;

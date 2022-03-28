@@ -65,7 +65,14 @@ export default function MainMenu() {
   };
 
   const navigateToListConfig = () => {
-    router.push({ pathname: "/listConfiguration", query: { edit: true } });
+    router.push({ pathname: "/listConfiguration", query: { ...router.query, edit: true } });
+  };
+
+  const goBack = () => {
+    const confirmMsg = "Going back will lose unsaved changed. Continue?";
+    if (list.creationTime || confirm(confirmMsg)) {
+      router.back();
+    }
   };
 
   const isBigScreen = useMediaQuery({ query: "(min-width: 1024px)" });
@@ -79,7 +86,7 @@ export default function MainMenu() {
             edge="start"
             color="inherit"
             aria-label="menu"
-            onClick={() => router.back()}
+            onClick={goBack}
             style={{ marginLeft: "0" }}
           >
             <BackIcon />
@@ -94,9 +101,7 @@ export default function MainMenu() {
                 color="inherit"
                 title="Validation warnings"
                 style={{
-                  backgroundColor: Boolean(validationAnchorElement)
-                    ? "#6EAAE7"
-                    : null,
+                  backgroundColor: Boolean(validationAnchorElement) ? "#6EAAE7" : null,
                 }}
                 onClick={(e) => setValidationAnchorElement(e.currentTarget)}
                 className="mr-2 p-2"
@@ -109,16 +114,12 @@ export default function MainMenu() {
                 open={Boolean(validationAnchorElement) && isBigScreen}
                 // onClose={_ => setValidationAnchorElement(null)}
               >
-                <ClickAwayListener
-                  onClickAway={(_) => setValidationAnchorElement(null)}
-                >
+                <ClickAwayListener onClickAway={(_) => setValidationAnchorElement(null)}>
                   <Paper>
                     <List>
                       <ListItem divider>
                         <ListItemText>
-                          <span style={{ fontWeight: 600 }}>
-                            Competitive List Validation
-                          </span>
+                          <span style={{ fontWeight: 600 }}>Competitive List Validation</span>
                         </ListItemText>
                       </ListItem>
                       {errors.map((error, index) => (
@@ -175,9 +176,7 @@ export default function MainMenu() {
           >
             <MenuItem onClick={navigateToListConfig}>Edit Details</MenuItem>
             <MenuItem onClick={() => router.push("/view")}>View</MenuItem>
-            {!list.creationTime && (
-              <MenuItem onClick={handleSave}>Save</MenuItem>
-            )}
+            {!list.creationTime && <MenuItem onClick={handleSave}>Save</MenuItem>}
             <MenuItem onClick={handleShare}>Export as Army Forge File</MenuItem>
             <MenuItem onClick={handleTextExport}>Export as Text</MenuItem>
             <MenuItem onClick={handleLoad}>Load</MenuItem>

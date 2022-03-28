@@ -2,6 +2,7 @@ import { ListState } from "./listSlice";
 
 export interface ISaveData {
   armyId?: string;
+  armyIds: string[];
   armyFaction?: string;
   gameSystem: string;
   armyName: string;
@@ -34,6 +35,7 @@ export interface ISpecialRule {
 
 export interface IUnit {
   id: string;
+  armyId: string;
   sortId: number;
   category?: string;
   name: string;
@@ -72,6 +74,7 @@ export interface IUpgrade {
   attachment?: boolean;
   attachModel?: boolean;
   options?: IUpgradeOption[];
+  isCommandGroup: boolean;
 }
 
 export interface IUpgradeOption {
@@ -91,7 +94,7 @@ export interface IUpgradeGains {
   label: string;
   count: number;
   originalCount: number;
-  type: "ArmyBookRule" | "ArmyBookWeapon" | "ArmyBookItem" | "ArmyBookDefense" | "ArmyBookMultiWeapon"; // TODO: Add these
+  type: "ArmyBookRule" | "ArmyBookWeapon" | "ArmyBookItem" | "ArmyBookDefense"; // TODO: Add these
   dependencies?: IUpgradeDependency[];
   attacks?: number;
   specialRules?: IUpgradeGainsRule[];
@@ -106,11 +109,6 @@ export interface IUpgradeGainsWeapon extends IUpgradeGains {
   attacks: number;
   range: number;
   specialRules: IUpgradeGainsRule[];
-}
-
-export interface IUpgradeGainsMultiWeapon extends IUpgradeGains {
-  type: "ArmyBookMultiWeapon";
-  profiles: IUpgradeGainsWeapon[];
 }
 
 export interface IUpgradeGainsRule extends IUpgradeGains {

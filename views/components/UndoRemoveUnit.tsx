@@ -11,8 +11,6 @@ export default function UndoRemoveUnit({ open, setOpen }) {
   const unit = remove && Array.isArray(remove)
     ? remove[0]
     : null;
-  if (!unit)
-    setOpen(false)
 
   const dispatch = useDispatch();
 

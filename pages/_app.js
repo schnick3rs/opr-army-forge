@@ -3,10 +3,28 @@ import "../styles/globals.css";
 import { store } from "../data/store";
 import { Provider } from "react-redux";
 import pluralise from "pluralize";
+import { ThemeProvider, createTheme } from "@mui/material";
 
 // TODO: Better place for global generic things to go?
 pluralise.addSingularRule(/Fuses$/i, "Fuse"); // Spear-Fuses -> Spear-Fuse
 pluralise.addSingularRule(/Axes$/i, "Axe"); // Axes -> Axe
+
+const theme = createTheme({
+  typography: {
+    fontFamily: 'Source Sans Pro',
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          fontSize: "14px",
+          fontWeight: 600,
+          letterSpacing: "1.25px"
+        }
+      }
+    }
+  }
+});
 
 function MyApp({ Component, pageProps }) {
   return (
@@ -28,7 +46,9 @@ function MyApp({ Component, pageProps }) {
           rel="stylesheet"
         />
       </Head>
-      <Component {...pageProps} />
+      <ThemeProvider theme={theme}>
+        <Component {...pageProps} />
+      </ThemeProvider>
     </Provider>
   );
 }

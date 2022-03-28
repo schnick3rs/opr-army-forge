@@ -6,7 +6,7 @@ import { current } from 'immer';
 import PersistenceService from '../services/PersistenceService';
 import { nanoid } from "nanoid";
 import UnitService from '../services/UnitService';
-import { IArmyData } from './armySlice';
+import { makeCopy } from '../services/Helpers';
 
 export interface ListState {
   creationTime: string;
@@ -16,6 +16,7 @@ export interface ListState {
   undoUnitRemove?: ISelectedUnit[];
   selectedUnitId?: string;
   points: number;
+  unitPreview?: ISelectedUnit;
 }
 
 const initialState: ListState = {
@@ -26,7 +27,8 @@ const initialState: ListState = {
   selectedUnitId: null,
   undoUnitRemove: null,
   points: 0,
-}
+  unitPreview: null
+};
 
 const debounceSave = debounce(1500, (state: ListState) => {
   PersistenceService.updateSave(state);
@@ -37,16 +39,7 @@ export const listSlice = createSlice({
   initialState,
   reducers: {
     resetList: (state) => {
-      return {
-        creationTime: null,
-        name: "New Army",
-        pointsLimit: 0,
-        initialised: false,
-        units: [],
-        selectedUnitId: null,
-        undoUnitRemove: null,
-        points: 0
-      };
+      return initialState;
     },
     createList: (state, action: PayloadAction<{ name: string; pointsLimit?: number; creationTime: string; }>) => {
       const { name, pointsLimit, creationTime } = action.payload;
@@ -58,7 +51,7 @@ export const listSlice = createSlice({
       state.creationTime = action.payload;
       debounceSave(current(state));
     },
-    updateListSettings: (state, action: PayloadAction<{ name: string, pointsLimit?: number}>) => {
+    updateListSettings: (state, action: PayloadAction<{ name: string, pointsLimit?: number }>) => {
       const { name, pointsLimit } = action.payload;
       state.name = name;
       state.pointsLimit = pointsLimit;
@@ -68,17 +61,11 @@ export const listSlice = createSlice({
       return { ...action.payload };
     },
     addUnit: (state, action: PayloadAction<IUnit>) => {
-      const unit = UpgradeService.buildUpgrades(action.payload as ISelectedUnit)
+      const selectedUnit = UnitService.createUnitFromDefinition(action.payload);
+      const unit = UpgradeService.buildUpgrades(selectedUnit)
       state.units.push(unit);
-
-      state.points = UpgradeService.calculateListTotal(state.units);
-
-      debounceSave(current(state));
-    },
-    makeReal: (state) => {
-      const unit = state.units.find(u => u.selectionId === "dummy")
-      state.selectedUnitId = unit.selectionId = nanoid(5)
-
+      state.selectedUnitId = unit.selectionId;
+      state.unitPreview = null;
       state.points = UpgradeService.calculateListTotal(state.units);
 
       debounceSave(current(state));
@@ -102,40 +89,40 @@ export const listSlice = createSlice({
 
       debounceSave(current(state));
     },
-    addUnits: (state, action: PayloadAction<any>) => {
-      let units = action.payload.units.map(u => {
-        return {
-          ...u,
-          selectionId: nanoid(5)
-        }
-      })
+    addUnits: (state, action: PayloadAction<ISelectedUnit[]>) => {
+      const units = action.payload;
+      let unitsMapped = units.map(u => ({
+        ...u,
+        selectionId: nanoid(5)
+      }));
 
-      action.payload.units.forEach((u, i) => {
+      units.forEach((u, i) => {
         if (u.joinToUnit) {
           //console.log(action.payload.units)
           //console.log(`${u.name} is joined to unit ${u.joinToUnit}...`)
-          let joinedIndex = action.payload.units.findIndex((t) => {return t.selectionId === u.joinToUnit})
+          let joinedIndex = units.findIndex((t) => { return t.selectionId === u.joinToUnit })
           //console.log(`unit ${u.joinToUnit} found at index ${joinedIndex}...`)
           if (joinedIndex >= 0) {
-            units[i].joinToUnit = units[joinedIndex].selectionId
+            unitsMapped[i].joinToUnit = unitsMapped[joinedIndex].selectionId
           } else {
-            units[i].joinToUnit = null
-            units[i].combined = false
+            unitsMapped[i].joinToUnit = null
+            unitsMapped[i].combined = false
           }
         }
         if (u.combined) {
-          units[i].combined = action.payload.units.some((t) => {return (t.selectionId === u.joinToUnit) || (t.joinToUnit === u.selectionId)})
+          unitsMapped[i].combined = units.some((t) => { return (t.selectionId === u.joinToUnit) || (t.joinToUnit === u.selectionId) })
         }
       })
 
-      state.units.splice(action.payload.index ?? -1,0,...units)
-
+      //state.units.splice(index ?? -1, 0, ...unitsMapped)
+      state.units.push(...unitsMapped);
       state.points = UpgradeService.calculateListTotal(state.units);
 
       debounceSave(current(state));
     },
     selectUnit: (state, action: PayloadAction<string>) => {
       state.selectedUnitId = action.payload;
+      state.unitPreview = null
     },
     removeUnit: (state, action: PayloadAction<string>) => {
       const unitId = action.payload
@@ -146,7 +133,7 @@ export const listSlice = createSlice({
       if (removeIndex == -1) return null
 
       let unit = state.units[removeIndex]
-      
+
       //console.log(`removing: ${unit.name} - ${unitId}`)
       if (unit.combined) {
         //console.log(`units is combined - clearing up friend...`)
@@ -169,20 +156,14 @@ export const listSlice = createSlice({
         }
 
       } else {
-        if (unit.selectionId === "dummy") {
-          state.units.splice(removeIndex, 1);
-        } else {
-          state.undoUnitRemove = state.units.splice(removeIndex, 1);
-        }
+        state.undoUnitRemove = state.units.splice(removeIndex, 1);
       }
 
       state.points = UpgradeService.calculateListTotal(state.units);
-      console.log(state.undoUnitRemove)
+
       debounceSave(current(state));
     },
     undoRemoveUnit: (state) => {
-      console.log(`restoring unit: `)
-      console.log(state.undoUnitRemove)
       state.units = state.units.concat(state.undoUnitRemove);
 
       state.undoUnitRemove = null;
@@ -236,7 +217,7 @@ export const listSlice = createSlice({
     joinUnit: (state, action: PayloadAction<{ unitId: string, joinToUnitId: string }>) => {
       const { unitId, joinToUnitId } = action.payload;
       const unit = state.units.filter(u => u.selectionId === unitId)[0];
-      
+
       unit.joinToUnit = joinToUnitId;
 
       debounceSave(current(state));
@@ -274,8 +255,20 @@ export const listSlice = createSlice({
       state.points = UpgradeService.calculateListTotal(state.units);
 
       debounceSave(current(state));
+    },
+    removeUnitsForBook(state, action: PayloadAction<string>) {
+      const armyBookId = action.payload;
+      state.units = state.units.filter(unit => unit.armyId !== armyBookId);
+    },
+    previewUnit(state, action: PayloadAction<ISelectedUnit>) {
+      const unit: ISelectedUnit = makeCopy(action.payload);
+      unit.selectedUpgrades = [];
+      state.unitPreview = UpgradeService.buildUpgrades(unit);
+      state.selectedUnitId = null;
+    },
+    clearPreview(state) {
+      state.unitPreview = null;
     }
-
   },
 })
 
@@ -286,7 +279,6 @@ export const {
   addUnit,
   applyUpgrade,
   removeUpgrade,
-  makeReal,
   addCombinedUnit,
   addUnits,
   selectUnit,
@@ -299,7 +291,10 @@ export const {
   loadSavedList,
   updateListSettings,
   updateCreationTime,
-  undoRemoveUnit
+  undoRemoveUnit,
+  removeUnitsForBook,
+  previewUnit,
+  clearPreview
 } = listSlice.actions
 
 export default listSlice.reducer

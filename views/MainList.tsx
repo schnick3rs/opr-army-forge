@@ -6,74 +6,78 @@ import RemoveIcon from "@mui/icons-material/Clear";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { selectUnit, removeUnit, addUnits, ListState } from "../data/listSlice";
 import UpgradeService from "../services/UpgradeService";
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  ListItemIcon,
-  ListItemText,
-  MenuItem,
-} from "@mui/material";
-import RuleList from "./components/RuleList";
+import { Card, ListItemIcon, ListItemText, MenuItem } from "@mui/material";
 import UnitService from "../services/UnitService";
-import FullCompactToggle from "./components/FullCompactToggle";
 import LinkIcon from "@mui/icons-material/Link";
 import _ from "lodash";
 import { DropMenu } from "./components/DropMenu";
+import ArmyBookGroupHeader from "./components/ArmyBookGroupHeader";
+import UnitListItem from "./components/UnitListItem";
 
-export function MainList({ onSelected, onUnitRemoved, mobile = false }) {
+export function MainList({ onSelected, onUnitRemoved }) {
   const list = useSelector((state: RootState) => state.list);
+  const loadedArmyBooks = useSelector((state: RootState) => state.army.loadedArmyBooks);
 
-  const [expandAll, setExpandAll] = useState(true);
-  const [expandedId, setExpandedId] = useState(null);
-
-  const realUnits = list.units.filter((u) => u.selectionId !== "dummy");
-  const joinedUnitIds = realUnits
-    .filter((u) => u.joinToUnit)
-    .map((u) => u.joinToUnit);
-  //const units = list.units.filter(u => joinedUnitIds.indexOf(u.selectionId) === -1);
   const rootUnits = _.orderBy(
-    realUnits.filter(
-      (u) =>
-        !(
-          u.joinToUnit && list.units.some((t) => t.selectionId === u.joinToUnit)
-        )
+    list.units.filter(
+      (u) => !(u.joinToUnit && list.units.some((t) => t.selectionId === u.joinToUnit))
     ),
     (x) => x.sortId
   );
 
+  const unitGroups = _.groupBy(rootUnits, (x) => x.armyId);
+  const unitGroupKeys = Object.keys(unitGroups);
+
+  const points = list
+    .units
+    .reduce((total, unit) => total + UpgradeService.calculateUnitTotal(unit), 0);
+
   return (
     <>
-      <div className="sticky">
-        <h3 className="px-4 pt-4 is-size-4 is-hidden-mobile">
-          {`My List - ${list.points}` +
-            (list.pointsLimit ? `/${list.pointsLimit}` : "") +
-            "pts"}
-        </h3>
-      </div>
-      <FullCompactToggle
-        expanded={expandAll}
-        onToggle={() => setExpandAll(!expandAll)}
-      />
+      {unitGroupKeys.map((key) => {
+        const armyBook = loadedArmyBooks.find((book) => book.uid === key);
+        return (
+          <MainListSection
+            key={key}
+            army={armyBook}
+            showTitle={loadedArmyBooks.length > 1}
+            group={unitGroups[key]}
+            onSelected={onSelected}
+            onUnitRemoved={onUnitRemoved}
+            points={points}
+          />
+        );
+      })}
+    </>
+  );
+}
 
-      <ul className="mt-2">
-        {
-          // For each selected unit
-          rootUnits.map((s: ISelectedUnit, index: number) => {
-            const isHero = s.specialRules.some((r) => r.name === "Hero");
+function MainListSection({ group, army, showTitle, onSelected, onUnitRemoved, points }) {
+  const list = useSelector((state: RootState) => state.list);
+  const [collapsed, setCollapsed] = useState(false);
 
-            const attachedUnits: ISelectedUnit[] = UnitService.getAttachedUnits(
-              list,
-              s
+  return (
+    <Card elevation={2} sx={{ backgroundColor: "#FAFAFA", marginBottom: "1rem" }} square>
+      {showTitle && (
+        <ArmyBookGroupHeader
+          army={army}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          points={points}
+        />
+      )}
+      {!collapsed && (
+        <>
+          {group.map((s: ISelectedUnit, index: number) => {
+            // TODO: REFACTOR!
+
+            const attachedUnits: ISelectedUnit[] = UnitService.getAttachedUnits(list, s);
+            const [heroes, otherJoined]: [ISelectedUnit[], ISelectedUnit[]] = _.partition(
+              attachedUnits,
+              (u) => u.specialRules.some((r) => r.name === "Hero")
             );
-            const [heroes, otherJoined]: [ISelectedUnit[], ISelectedUnit[]] =
-              _.partition(attachedUnits, (u) =>
-                u.specialRules.some((r) => r.name === "Hero")
-              );
             const hasJoined = attachedUnits.length > 0;
-
             const hasHeroes = hasJoined && heroes.length > 0;
-            const hasNonHeroesJoined = hasJoined && otherJoined.length > 0;
 
             const unitSize = otherJoined.reduce((size, u) => {
               return size + UnitService.getSize(u);
@@ -83,30 +87,20 @@ export function MainList({ onSelected, onUnitRemoved, mobile = false }) {
             }, UpgradeService.calculateUnitTotal(s));
 
             const handleClick = (unit) => {
-              if (!mobile)
-                setExpandedId(
-                  expandedId == unit.selectionId ? null : unit.selectionId
-                );
               onSelected(unit);
             };
 
             return (
-              <li
+              <div
                 key={index}
                 className={hasJoined ? "my-2" : ""}
                 style={{ backgroundColor: hasJoined ? "rgba(0,0,0,.12)" : "" }}
               >
                 {hasJoined && (
                   <div className="is-flex px-4 py-2 is-align-items-center">
-                    <LinkIcon
-                      style={{ fontSize: "24px", color: "rgba(0,0,0,.38)" }}
-                    />
-                    <h3
-                      className="ml-2"
-                      style={{ fontWeight: 400, flexGrow: 1 }}
-                    >
-                      {hasHeroes &&
-                        `${heroes[0].customName || heroes[0].name} & `}
+                    <LinkIcon style={{ fontSize: "24px", color: "rgba(0,0,0,.38)" }} />
+                    <h3 className="ml-2" style={{ fontWeight: 400, flexGrow: 1 }}>
+                      {hasHeroes && `${heroes[0].customName || heroes[0].name} & `}
                       {s.customName || s.name}
                       {` [${unitSize}]`}
                     </h3>
@@ -114,7 +108,6 @@ export function MainList({ onSelected, onUnitRemoved, mobile = false }) {
                     <DropMenu>
                       <DuplicateButton
                         units={[s, ...attachedUnits].filter((u) => u)}
-                        list={list}
                         text="Duplicate"
                       />
                     </DropMenu>
@@ -123,9 +116,9 @@ export function MainList({ onSelected, onUnitRemoved, mobile = false }) {
                 <div className={hasJoined ? "ml-1" : ""}>
                   {heroes.map((h) => (
                     <MainListItem
+                      key={h.selectionId}
                       list={list}
                       unit={h}
-                      expanded={expandAll || expandedId == h.selectionId}
                       onSelected={handleClick}
                       onUnitRemoved={onUnitRemoved}
                     />
@@ -133,38 +126,30 @@ export function MainList({ onSelected, onUnitRemoved, mobile = false }) {
                   <MainListItem
                     list={list}
                     unit={s}
-                    expanded={expandAll || expandedId == s.selectionId}
                     onSelected={handleClick}
                     onUnitRemoved={onUnitRemoved}
                   />
                   {otherJoined.map((u) => (
                     <MainListItem
+                      key={u.selectionId}
                       list={list}
                       unit={u}
-                      expanded={expandAll || expandedId == u.selectionId}
                       onSelected={handleClick}
                       onUnitRemoved={onUnitRemoved}
                     />
                   ))}
                 </div>
-              </li>
+              </div>
             );
-          })
-        }
-      </ul>
-    </>
+          })}
+        </>
+      )}
+    </Card>
   );
 }
 
-function MainListItem({ list, unit, expanded, onSelected, onUnitRemoved }) {
+function MainListItem({ list, unit, onSelected, onUnitRemoved }) {
   const dispatch = useDispatch();
-
-  const weaponNames = unit.loadout.map((u) => ({
-    name: u.name,
-    count: u.count,
-  }));
-
-  const weaponGroups = _.groupBy(weaponNames, (x) => x.name);
 
   const handleSelectUnit = (unit: ISelectedUnit) => {
     if (list.selectedUnitId !== unit.selectionId) {
@@ -178,96 +163,45 @@ function MainListItem({ list, unit, expanded, onSelected, onUnitRemoved }) {
     dispatch(removeUnit(unit.selectionId));
   };
 
-  const unitSize = UnitService.getSize(unit);
-
   return (
-    <Accordion
-      square
-      disableGutters
-      elevation={1}
-      expanded={expanded}
-      onClick={() => handleSelectUnit(unit)}
-      style={{
-        backgroundColor:
-          list.selectedUnitId === unit.selectionId
-            ? "rgba(249, 253, 255, 1)"
-            : null,
+    <UnitListItem
+      unit={unit}
+      selected={list.selectedUnitId === unit.selectionId}
+      onClick={() => {
+        handleSelectUnit(unit);
       }}
-    >
-      <AccordionSummary>
-        <div
-          id={`Unit${unit.selectionId}`}
-          className="is-flex is-flex-grow-1 is-align-items-center"
-        >
-          <div className="is-flex-grow-1">
-            <p className="mb-1" style={{ fontWeight: 600 }}>
-              {unit.customName || unit.name} [{unitSize}]
-            </p>
-            <div
-              className="is-flex"
-              style={{ fontSize: "14px", color: "#666" }}
-            >
-              <p>Qua {unit.quality}+</p>
-              <p className="ml-2">Def {unit.defense}+</p>
-            </div>
-          </div>
-          <p className="mr-2">{UpgradeService.calculateUnitTotal(unit)}pts</p>
-          <DropMenu>
-            <DuplicateButton units={[unit]} list={list} text=" Duplicate" />
-            <MenuItem
-              color="primary"
-              onClick={(e) => {
-                handleRemove(unit);
-              }}
-            >
-              <ListItemIcon>
-                <RemoveIcon />
-              </ListItemIcon>
-              <ListItemText>Remove</ListItemText>
-            </MenuItem>
-          </DropMenu>
-        </div>
-      </AccordionSummary>
-      <AccordionDetails className="pt-0">
-        <div style={{ fontSize: "14px", color: "#666666" }}>
-          <div>
-            {Object.values(weaponGroups).map((group: any[], i) => {
-              const count = group.reduce((c, next) => c + next.count, 0);
-              return (
-                <span key={i}>
-                  {i > 0 ? ", " : ""}
-                  {count > 1 ? `${count}x ` : ""}
-                  {group[0].name}
-                </span>
-              );
-            })}
-          </div>
-          <RuleList
-            specialRules={unit.specialRules.concat(
-              UnitService.getAllUpgradedRules(unit)
-            )}
-          />
-        </div>
-      </AccordionDetails>
-    </Accordion>
+      rightControl={
+        <DropMenu>
+          <DuplicateButton units={[unit]} text="Duplicate" />
+          <MenuItem
+            color="primary"
+            onClick={(e) => {
+              handleRemove(unit);
+            }}
+          >
+            <ListItemIcon>
+              <RemoveIcon />
+            </ListItemIcon>
+            <ListItemText>Remove</ListItemText>
+          </MenuItem>
+        </DropMenu>
+      }
+    />
   );
 }
 
-export function DuplicateButton({ units, list, text = "" }) {
+export function DuplicateButton({ units, text = "" }) {
   const dispatch = useDispatch();
 
-  const duplicateUnits = (units: ISelectedUnit[], list: ListState) => {
-    console.log(units);
-    dispatch(
-      addUnits({ units: units, index: list.units.indexOf(units.at(-1)) + 1 })
-    );
+  const duplicateUnits = (units: ISelectedUnit[]) => {
+    dispatch(addUnits(units));
   };
 
   return (
     <MenuItem
       color="primary"
       onClick={(e) => {
-        duplicateUnits(units, list);
+        duplicateUnits(units);
       }}
     >
       {text ? (
