@@ -1,6 +1,6 @@
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import { Dispatch } from "react";
-import { ArmyState, getArmyBookData, getGameRules, IArmyData, setGameSystem } from "../data/armySlice";
+import { ArmyState, getArmyBookData, getGameRules, IArmyData, resetLoadedBooks, setGameSystem } from "../data/armySlice";
 import { ISaveData, ISavedListState, ISelectedUnit, ISpecialRule, IUnit, IUpgrade, IUpgradeGainsWeapon, IUpgradeOption } from "../data/interfaces";
 import { ListState, loadSavedList } from "../data/listSlice";
 import { RootState } from "../data/store";
