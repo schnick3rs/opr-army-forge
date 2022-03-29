@@ -1,5 +1,5 @@
 import { useDispatch } from "react-redux";
-import { setGameSystem } from "../data/armySlice";
+import { resetLoadedBooks, setGameSystem } from "../data/armySlice";
 import { useRouter } from "next/router";
 import { Paper } from "@mui/material";
 import { useEffect } from "react";

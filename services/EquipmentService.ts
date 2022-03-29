@@ -85,9 +85,12 @@ export default class EquipmentService {
       const item = eqp as IUpgradeGainsItem;
       parts.push(...item.content.map(c => this.formatString(c)));
     }
-    return `${name} (${parts
-      .filter((m) => !!m) // Remove empty/null entries
-      .join(", ")})`; // comma separated list
+
+    const displayParts = parts.filter((m) => !!m);
+
+    return displayParts.length > 0
+      ? `${name} (${displayParts.join(", ")})`
+      : name; // comma separated list
   }
 
   static getStringParts(eqp: IUpgradeGains, count: number): { name: string, rules: string } {

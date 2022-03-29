@@ -59,7 +59,12 @@ export default class UpgradeService {
 
       return;
     } else if (upgrade.type === "upgrade") {
-      unit.loadout = unit.loadout.concat(gainEquipment);
+      unit.loadout = unit.loadout.concat(
+        gainEquipment.map((g) => ({
+          ...g,
+          count: isAffectsAll ? g.count * unit.size : g.count,
+        }))
+      );
     } else if (upgrade.type === "replace") {
       let removeCount = affectsCount;
       const allEquipment = UnitService.getAllEquipment(unit);

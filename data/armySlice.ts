@@ -91,7 +91,8 @@ export const armySlice = createSlice({
     setGameSystem: (state, action: PayloadAction<string>) => {
       return {
         ...state,
-        gameSystem: action.payload
+        gameSystem: action.payload,
+        armyBooks: []
       };
     },
     setArmyFile: (state, action: PayloadAction<string>) => {

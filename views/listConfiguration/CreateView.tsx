@@ -23,16 +23,9 @@ export function CreateView(props: CreateViewProps) {
   const armyState = useSelector((state: RootState) => state.army);
 
   const [autoSave, setAutoSave] = useState(true);
-  const [selectedChild, setSelectedChild] = useState(null);
 
   const factionName = router.query["faction"] as string;
   const armyId = router.query["armyId"] as string;
-
-  const factionData = armyState.armyBooks?.filter(
-    (a) => a.factionName === factionName && a.official === true
-  );
-  const factionRelation =
-    factionData?.length > 0 ? factionData[0].factionRelation : null;
 
   useEffect(() => {
     if (armyState.armyBooks?.length < 1) return;
@@ -52,8 +45,6 @@ export function CreateView(props: CreateViewProps) {
   }, [armyState.armyBooks, armyState.loadedArmyBooks]);
 
   const create = async () => {
-    if (factionData?.length > 0 && !selectedChild)
-      return alert("Must select a " + factionRelation);
 
     const name = props.armyName || "My List";
 
