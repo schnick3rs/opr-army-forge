@@ -65,6 +65,18 @@ export const campaignSlice = createSlice({
       }
 
       debounceSave(current(state));
+    },
+    toggleTrait(state, action: PayloadAction<{ unitId: string, trait: string }>) {
+      const { unitId, trait } = action.payload;
+      const unit = state.units.find(u => u.unitId === unitId);
+      const existingTraitIndex = unit.traits.findIndex(t => t === trait);
+      if (existingTraitIndex >= 0) {
+        unit.traits.splice(existingTraitIndex, 1);
+      } else {
+        unit.traits.push(trait);
+      }
+
+      debounceSave(current(state));
     }
   },
 });
@@ -99,6 +111,6 @@ export function getTraitDefinitions(gameSystem: string): ITrait[] {
 }
 
 // Action creators are generated for each case reducer function
-export const { initialiseCampaign, loadCampaign, adjustXp } = campaignSlice.actions
+export const { initialiseCampaign, loadCampaign, adjustXp, toggleTrait } = campaignSlice.actions
 
 export default campaignSlice.reducer

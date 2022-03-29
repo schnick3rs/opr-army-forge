@@ -5,7 +5,13 @@ import UpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { ISelectedUnit } from "../../data/interfaces";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../data/store";
-import { adjustXp, defaultCampaignUnit, getTraitDefinitions } from "../../data/campaignSlice";
+import {
+  adjustXp,
+  defaultCampaignUnit,
+  getTraitDefinitions,
+  ITrait,
+  toggleTrait,
+} from "../../data/campaignSlice";
 
 interface CampaignUpgradesProps {
   unit: ISelectedUnit;
@@ -22,6 +28,10 @@ export default function CampaignUpgrades(props: CampaignUpgradesProps) {
 
   const adjustUnitXp = (xp: number) => {
     dispatch(adjustXp({ unitId: props.unit.selectionId, xp }));
+  };
+
+  const toggleUnitTrait = (trait: ITrait) => {
+    dispatch(toggleTrait({ unitId: props.unit.selectionId, trait: trait.name }));
   };
 
   return (
@@ -51,7 +61,12 @@ export default function CampaignUpgrades(props: CampaignUpgradesProps) {
           {traitDefinitions.map((trait) => (
             <div key={trait.name} className="is-flex is-align-items-center">
               <div className="is-flex-grow-1 pr-2">{trait.name}</div>
-              <Checkbox checked={!!campaignUnit.traits.find(t => t === trait.name)} onClick={() => {}} value={trait.name} />
+              <Checkbox
+                checked={!!campaignUnit.traits.find((t) => t === trait.name)}
+                onClick={() => toggleUnitTrait(trait)}
+                value={trait.name}
+                disabled={campaignUnit.xp < 5}
+              />
             </div>
           ))}
         </div>
