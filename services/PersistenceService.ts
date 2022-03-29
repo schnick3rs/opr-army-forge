@@ -1,6 +1,6 @@
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import { Dispatch } from "react";
-import { ArmyState, getArmyBookData, getGameRules, IArmyData, setGameSystem } from "../data/armySlice";
+import { ArmyState, getArmyBookData, getGameRules, IArmyData, resetLoadedBooks, setGameSystem } from "../data/armySlice";
 import { ISaveData, ISavedListState, ISelectedUnit, ISpecialRule, IUnit, IUpgrade, IUpgradeGainsWeapon, IUpgradeOption } from "../data/interfaces";
 import { ListState, loadSavedList } from "../data/listSlice";
 import { RootState } from "../data/store";
@@ -10,6 +10,7 @@ import UnitService from "./UnitService";
 import UpgradeService from "./UpgradeService";
 import _ from "lodash";
 import { IViewPreferences } from "../pages/view";
+import { CampaignState, loadCampaign } from "../data/campaignSlice";
 
 export default class PersistenceService {
 
@@ -84,26 +85,39 @@ export default class PersistenceService {
 
   public static updateSave(list: ListState) {
 
-    const key = this.getSaveKey(list.creationTime);
+    this.updateSaveData(list.creationTime, existingSave => {
+      const armyIds = _.uniq(list.units.map(u => u.armyId));
+      const points: number = UpgradeService.calculateListTotal(list.units);
+
+      const saveData: ISaveData = {
+        ...existingSave,
+        armyIds: armyIds,
+        modified: new Date().toJSON(),
+        listPoints: points,
+        list: this.getDataForSave(list),
+        saveVersion: this.currentSaveVersion
+      };
+
+      console.log("Updating save...", saveData);
+
+      return saveData;
+    });
+  }
+
+  public static updateCampaignSave(campaign: CampaignState) {
+    this.updateSaveData(campaign.saveKey, existingSave => ({
+      ...existingSave,
+      campaign
+    }));
+  }
+
+  private static updateSaveData(creationTime: any, modifySaveFunc: (save: ISaveData) => ISaveData) {
+    const key = this.getSaveKey(creationTime);
     const localSave = localStorage[key];
     if (!localSave)
       return;
 
-    const armyIds = _.uniq(list.units.map(u => u.armyId));
-
-    const existingSave: ISaveData = JSON.parse(localSave);
-    const points: number = UpgradeService.calculateListTotal(list.units);
-
-    const saveData: ISaveData = {
-      ...existingSave,
-      armyIds: armyIds,
-      modified: new Date().toJSON(),
-      listPoints: points,
-      list: this.getDataForSave(list),
-      saveVersion: this.currentSaveVersion
-    };
-
-    console.log("Updating save...", saveData);
+    const saveData = modifySaveFunc(JSON.parse(localSave));
 
     localStorage[key] = JSON.stringify(saveData);
   }
@@ -202,7 +216,9 @@ export default class PersistenceService {
     console.log("Loading save...", save);
 
     dispatch(setGameSystem(save.gameSystem));
-
+    if (save.list.campaignMode && save.campaign) {
+      dispatch(loadCampaign(save.campaign));
+    }
     const armyIds = save.armyIds || [save.armyId];
 
     const promises = armyIds.map(id => dispatch(getArmyBookData({

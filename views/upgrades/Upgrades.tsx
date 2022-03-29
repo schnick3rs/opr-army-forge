@@ -20,7 +20,7 @@ import { joinUnit, addCombinedUnit, removeUnit, moveUnit, selectUnit } from "../
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SpellsTable from "../SpellsTable";
 import { CustomTooltip } from "../components/CustomTooltip";
-import UpgradeService from "../../services/UpgradeService";
+import CampaignUpgrades from "./CampaignUpgrades";
 
 export function Upgrades({ mobile = false }) {
   const list = useSelector((state: RootState) => state.list);
@@ -205,6 +205,8 @@ export function Upgrades({ mobile = false }) {
           )}
         </Paper>
       )}
+
+      {list.campaignMode && <CampaignUpgrades unit={selectedUnit} gameSystem={gameSystem} />}
 
       {upgradeSets.map((pkg: IUpgradePackage) => (
         <div key={pkg.uid}>

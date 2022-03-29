@@ -177,7 +177,7 @@ function UpgradeItemItem(props: UpgradeItemItemProps) {
       <span className={styles.upgradeRules} style={{ color: subtextColour }}>
         (
         {item.content.map((c, i) => (
-          <Fragment key={c.id}>
+          <Fragment key={i}>
             <span>{i === 0 ? "" : ", "}</span>
             <UpgradeItemDisplay eqp={c} count={count} isValid={isValid} />
           </Fragment>

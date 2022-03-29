@@ -17,6 +17,7 @@ export interface ListState {
   selectedUnitId?: string;
   points: number;
   unitPreview?: ISelectedUnit;
+  campaignMode?: boolean;
 }
 
 const initialState: ListState = {
@@ -27,7 +28,8 @@ const initialState: ListState = {
   selectedUnitId: null,
   undoUnitRemove: null,
   points: 0,
-  unitPreview: null
+  unitPreview: null,
+  campaignMode: false
 };
 
 const debounceSave = debounce(1500, (state: ListState) => {
@@ -41,11 +43,8 @@ export const listSlice = createSlice({
     resetList: (state) => {
       return initialState;
     },
-    createList: (state, action: PayloadAction<{ name: string; pointsLimit?: number; creationTime: string; }>) => {
-      const { name, pointsLimit, creationTime } = action.payload;
-      state.creationTime = creationTime;
-      state.name = name;
-      state.pointsLimit = pointsLimit;
+    createList: (state, action: PayloadAction<ListState>) => {
+      return action.payload;
     },
     updateCreationTime: (state, action: PayloadAction<string>) => {
       state.creationTime = action.payload;
