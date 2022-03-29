@@ -294,6 +294,6 @@ export const {
   removeUnitsForBook,
   previewUnit,
   clearPreview
-} = listSlice.actions
+} = listSlice.actions;
 
-export default listSlice.reducer
+export default listSlice.reducer;
