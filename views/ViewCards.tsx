@@ -12,13 +12,14 @@ import UpgradeService from "../services/UpgradeService";
 import _ from "lodash";
 import { ISelectedUnit } from "../data/interfaces";
 import RuleList from "./components/RuleList";
+import { IViewPreferences } from "../pages/view";
 
-export default function ViewCards({
-  showPsychic,
-  showFullRules,
-  showPointCosts,
-  combineSameUnits,
-}) {
+interface ViewCardsProps {
+  showPsychic: boolean;
+  prefs: IViewPreferences;
+}
+
+export default function ViewCards({ showPsychic, prefs }: ViewCardsProps) {
   const list = useSelector((state: RootState) => state.list);
   const army = useSelector((state: RootState) => state.army);
 
@@ -54,8 +55,7 @@ export default function ViewCards({
         rules={rules}
         unit={unit}
         count={unitCount}
-        showPointCosts={showPointCosts}
-        showFullRules={showFullRules}
+        prefs={prefs}
         ruleDefinitions={ruleDefinitions}
       />
     );
@@ -64,7 +64,7 @@ export default function ViewCards({
   return (
     <>
       <div className={style.grid}>
-        {combineSameUnits
+        {prefs.combineSameUnits
           ? Object.values(unitGroups).map((grp: ISelectedUnit[], i) => {
               const unit = grp[0];
               const count = grp.length;
@@ -79,10 +79,7 @@ export default function ViewCards({
               <Card elevation={1}>
                 <div className="mb-4">
                   <div className="card-body">
-                    <h3
-                      className="is-size-4 my-2"
-                      style={{ fontWeight: 500, textAlign: "center" }}
-                    >
+                    <h3 className="is-size-4 my-2" style={{ fontWeight: 500, textAlign: "center" }}>
                       Psychic/Spells
                     </h3>
                     <hr className="my-0" />
@@ -105,15 +102,12 @@ export default function ViewCards({
             </div>
           ))}
       </div>
-      {!showFullRules && (
+      {!prefs.showFullRules && (
         <div className={`mx-4 ${style.card}`}>
           <Card elevation={1}>
             <div className="mb-4">
               <div className="card-body">
-                <h3
-                  className="is-size-4 my-2"
-                  style={{ fontWeight: 500, textAlign: "center" }}
-                >
+                <h3 className="is-size-4 my-2" style={{ fontWeight: 500, textAlign: "center" }}>
                   Special Rules
                 </h3>
                 <hr className="my-0" />
@@ -125,12 +119,7 @@ export default function ViewCards({
                       .map((r, i) => (
                         <p key={i} style={{ breakInside: "avoid" }}>
                           <span style={{ fontWeight: 600 }}>{r} - </span>
-                          <span>
-                            {
-                              ruleDefinitions.find((t) => t.name === r)
-                                ?.description
-                            }
-                          </span>
+                          <span>{ruleDefinitions.find((t) => t.name === r)?.description}</span>
                         </p>
                       ))}
                   </div>
@@ -144,14 +133,15 @@ export default function ViewCards({
   );
 }
 
-function UnitCard({
-  unit,
-  rules,
-  count,
-  showPointCosts,
-  showFullRules,
-  ruleDefinitions,
-}) {
+interface UnitCardProps {
+  unit: ISelectedUnit;
+  rules: any;
+  count: number;
+  prefs: IViewPreferences;
+  ruleDefinitions: any;
+}
+
+function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps) {
   const toughness = toughFromUnit(unit);
 
   const ruleKeys = rules.keys;
@@ -166,17 +156,14 @@ function UnitCard({
     <div className={style.card}>
       <Card elevation={1}>
         <div className="card-body mb-4">
-          <h3
-            className="is-size-5 my-2"
-            style={{ fontWeight: 500, textAlign: "center" }}
-          >
+          <h3 className="is-size-5 my-2" style={{ fontWeight: 500, textAlign: "center" }}>
             {count > 1 ? `${count}x ` : ""}
             {unit.customName || unit.name}
             <span className="" style={{ color: "#666666" }}>
               {" "}
               [{unit.size}]
             </span>
-            {showPointCosts && (
+            {prefs.showPointCosts && (
               <span className="is-size-6 ml-1" style={{ color: "#666666" }}>
                 - {UpgradeService.calculateUnitTotal(unit)}pts
               </span>
@@ -207,7 +194,7 @@ function UnitCard({
                 {ruleKeys.map((key, index) => {
                   const group = ruleGroups[key];
 
-                  if (!showFullRules)
+                  if (!prefs.showFullRules)
                     return (
                       <span key={index} style={{ fontWeight: 600 }}>
                         {index === 0 ? "" : ", "}
@@ -218,8 +205,7 @@ function UnitCard({
 
                   const rule = group[0];
                   const rating = group.reduce(
-                    (total, next) =>
-                      next.rating ? total + parseInt(next.rating) : total,
+                    (total, next) => (next.rating ? total + parseInt(next.rating) : total),
                     0
                   );
 
@@ -253,9 +239,7 @@ function getRules(unit: ISelectedUnit) {
     .filter((e) => e.attacks > 0)
     .flatMap((e) => e.specialRules);
 
-  const rules = unitRules
-    .concat(rulesFromUpgrades)
-    .filter((r) => !!r && r.name != "-");
+  const rules = unitRules.concat(rulesFromUpgrades).filter((r) => !!r && r.name != "-");
   const ruleGroups = groupBy(rules, "name");
   const ruleKeys = Object.keys(ruleGroups);
   return { keys: ruleKeys, groups: ruleGroups, weaponRules };
@@ -271,15 +255,12 @@ function toughFromUnit(unit) {
     return tough;
   }, 0);
 
-  baseTough += UnitService.getAllUpgradedRules(unit).reduce(
-    (tough, { name, rating }) => {
-      if (name === "Tough") {
-        tough += parseInt(rating);
-      }
-      return tough;
-    },
-    0
-  );
+  baseTough += UnitService.getAllUpgradedRules(unit).reduce((tough, { name, rating }) => {
+    if (name === "Tough") {
+      tough += parseInt(rating);
+    }
+    return tough;
+  }, 0);
 
   return baseTough || 1;
 }
