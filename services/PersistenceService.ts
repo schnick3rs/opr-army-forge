@@ -215,6 +215,7 @@ export default class PersistenceService {
 
     console.log("Loading save...", save);
 
+    dispatch(resetLoadedBooks());
     dispatch(setGameSystem(save.gameSystem));
     if (save.list.campaignMode && save.campaign) {
       dispatch(loadCampaign(save.campaign));
