@@ -201,6 +201,7 @@ export default class PersistenceService {
 
     console.log("Loading save...", save);
 
+    dispatch(resetLoadedBooks());
     dispatch(setGameSystem(save.gameSystem));
 
     const armyIds = save.armyIds || [save.armyId];
