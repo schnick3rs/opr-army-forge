@@ -206,7 +206,9 @@ export function Upgrades({ mobile = false }) {
         </Paper>
       )}
 
-      {list.campaignMode && <CampaignUpgrades unit={selectedUnit} gameSystem={gameSystem} />}
+      {list.campaignMode && selectedUnit && (
+        <CampaignUpgrades unit={selectedUnit} gameSystem={gameSystem} />
+      )}
 
       {upgradeSets.map((pkg: IUpgradePackage) => (
         <div key={pkg.uid}>

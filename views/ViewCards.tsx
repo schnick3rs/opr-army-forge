@@ -13,6 +13,7 @@ import _ from "lodash";
 import { ISelectedUnit } from "../data/interfaces";
 import RuleList from "./components/RuleList";
 import { IViewPreferences } from "../pages/view";
+import { ICampaignUnit } from "../data/campaignSlice";
 
 interface ViewCardsProps {
   showPsychic: boolean;
@@ -21,6 +22,7 @@ interface ViewCardsProps {
 
 export default function ViewCards({ showPsychic, prefs }: ViewCardsProps) {
   const list = useSelector((state: RootState) => state.list);
+  const campaign = useSelector((state: RootState) => state.campaign);
   const army = useSelector((state: RootState) => state.army);
 
   const gameRules = army.rules;
@@ -57,6 +59,9 @@ export default function ViewCards({ showPsychic, prefs }: ViewCardsProps) {
         count={unitCount}
         prefs={prefs}
         ruleDefinitions={ruleDefinitions}
+        campaignUnit={
+          list.campaignMode && campaign.units.find((u) => u.unitId === unit.selectionId)
+        }
       />
     );
   };
@@ -139,9 +144,10 @@ interface UnitCardProps {
   count: number;
   prefs: IViewPreferences;
   ruleDefinitions: any;
+  campaignUnit: ICampaignUnit;
 }
 
-function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps) {
+function UnitCard({ unit, rules, count, prefs, ruleDefinitions, campaignUnit }: UnitCardProps) {
   const toughness = toughFromUnit(unit);
 
   const ruleKeys = rules.keys;
@@ -224,6 +230,13 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
                 })}
               </div>
             </Paper>
+          )}
+          {campaignUnit && (
+            <div>
+              {campaignUnit.traits.map((trait) => (
+                <p key={trait}>{trait}</p>
+              ))}
+            </div>
           )}
         </div>
       </Card>
