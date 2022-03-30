@@ -30,9 +30,6 @@ export default function ViewCards({ showPsychic, prefs }: ViewCardsProps) {
   const ruleDefinitions: IGameRule[] = gameRules.concat(armyRules);
 
   const units = (list?.units ?? []).map((u) => makeCopy(u));
-  for (let unit of units) {
-    delete unit.selectionId;
-  }
 
   const usedRules = [];
 
@@ -59,9 +56,7 @@ export default function ViewCards({ showPsychic, prefs }: ViewCardsProps) {
         count={unitCount}
         prefs={prefs}
         ruleDefinitions={ruleDefinitions}
-        campaignUnit={
-          list.campaignMode && campaign.units.find((u) => u.unitId === unit.selectionId)
-        }
+        campaignUnit={campaign?.units?.find((u) => u.unitId === unit.selectionId)}
       />
     );
   };
@@ -232,9 +227,12 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions, campaignUnit }: 
             </Paper>
           )}
           {campaignUnit && (
-            <div>
-              {campaignUnit.traits.map((trait) => (
-                <p key={trait}>{trait}</p>
+            <div className="px-2">
+              {campaignUnit.traits.map((trait, i) => (
+                <span key={trait} style={{ fontWeight: 600 }}>
+                  {i === 0 ? "" : ", "}
+                  {trait}
+                </span>
               ))}
             </div>
           )}

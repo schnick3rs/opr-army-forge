@@ -61,7 +61,9 @@ export default function CampaignUpgrades(props: CampaignUpgradesProps) {
       <Card elevation={0} square>
         <div className="py-2 px-4">
           <div className="is-flex is-align-items-center">
-            <div className="is-flex-grow-1 pr-2">Unit XP</div>
+            <div className="is-flex-grow-1 pr-2">
+              Unit XP <span style={{ color: "rgba(0,0,0,0.6)" }}>(25pts per 5XP)</span>
+            </div>
             <IconButton
               disabled={campaignUnit.xp === 0}
               color={campaignUnit.xp > 0 ? "primary" : "default"}
@@ -79,7 +81,9 @@ export default function CampaignUpgrades(props: CampaignUpgradesProps) {
             ? (traitDefinitions as ISkillSet[]).map((skillSet) => (
                 <Fragment key={skillSet.name}>
                   <Divider />
-                  <p className="mt-2" style={{ fontWeight: 600, fontSize: "14px" }}>{skillSet.name}</p>
+                  <p className="mt-2" style={{ fontWeight: 600, fontSize: "14px" }}>
+                    {skillSet.name}
+                  </p>
                   {traitControls(skillSet.traits)}
                 </Fragment>
               ))
