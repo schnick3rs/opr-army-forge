@@ -215,7 +215,7 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
 
                   return (
                     <p key={index}>
-                      <span style={{ fontWeight: 600 }}>
+                      <span>
                         {RulesService.displayName({ ...rule, rating }, count)} -
                       </span>
                       <span> {ruleDefinition?.description || ""}</span>
