@@ -46,8 +46,8 @@ export default function UnitListItem(props: UnitListItemProps) {
             <div
               className="is-flex"
               style={{
-                fontSize: "12px",
-                color: "rgba(0,0,0,0.8)",
+                fontSize: "14px",
+                color: "rgba(0,0,0,0.6)",
               }}
             >
               <p>Qua {unit.quality}+</p>
@@ -57,7 +57,7 @@ export default function UnitListItem(props: UnitListItemProps) {
           <p>{UpgradeService.calculateUnitTotal(unit)}pts</p>
           {props.rightControl}
         </div>
-        <div style={{ fontSize: "12px", color: "rgba(0,0,0,0.8)" }}>
+        <div style={{ fontSize: "14px", color: "rgba(0,0,0,0.6)" }}>
           <div>
             {Object.values(weaponGroups).map((group: any[], i) => {
               const count = group.reduce((c, next) => c + next.count, 0);
