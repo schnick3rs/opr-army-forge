@@ -138,9 +138,7 @@ export default function View() {
         {isCardView ? (
           <ViewCards
             showPsychic={showPsychic}
-            showFullRules={preferences.showFullRules}
-            showPointCosts={preferences.showPointCosts}
-            combineSameUnits={preferences.combineSameUnits}
+            prefs={preferences}
           />
         ) : (
           <ViewList
