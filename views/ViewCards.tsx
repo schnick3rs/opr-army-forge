@@ -190,15 +190,14 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
           <UnitEquipmentTable unit={unit} square />
           {ruleKeys?.length > 0 && (
             <Paper square elevation={0}>
-              <div className="px-2 my-2">
+              <div className="px-2 my-2" style={{ fontSize: "0.875rem" }}>
                 {ruleKeys.map((key, index) => {
                   const group = ruleGroups[key];
 
                   if (!prefs.showFullRules)
                     return (
-                      <span key={index} style={{ fontWeight: 600 }}>
+                      <span key={index}>
                         {index === 0 ? "" : ", "}
-                        {/* <RuleList specialRules={[{ ...rule, rating, count }]} /> */}
                         <RuleList specialRules={group} />
                       </span>
                     );
@@ -215,7 +214,7 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
 
                   return (
                     <p key={index}>
-                      <span>
+                      <span style={{ fontWeight: 600 }}>
                         {RulesService.displayName({ ...rule, rating }, count)} -
                       </span>
                       <span> {ruleDefinition?.description || ""}</span>
