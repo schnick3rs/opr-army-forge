@@ -28,6 +28,7 @@ export interface IViewPreferences {
   showFullRules: boolean;
   showPointCosts: boolean;
   combineSameUnits: boolean;
+  showPsychic: boolean;
 }
 
 export default function View() {
@@ -38,6 +39,7 @@ export default function View() {
     showFullRules: false,
     showPointCosts: true,
     combineSameUnits: true,
+    showPsychic: listContainsPyschic(list),
   } as IViewPreferences;
 
   const [preferences, setPreferenceState] = useState({
@@ -52,8 +54,6 @@ export default function View() {
     setPreferenceState(setFunc);
     PersistenceService.saveViewPreferences(newPrefs);
   }
-
-  const showPsychic = listContainsPyschic(list);
 
   return (
     <>
@@ -95,6 +95,16 @@ export default function View() {
           </IconButton>
         </div>
         <List>
+        <ListItem>
+            <ListItemText>Show Psychic/Spells</ListItemText>
+            <Switch
+              edge="end"
+              checked={preferences.showPsychic}
+              onChange={() =>
+                setPreferences((prefs) => ({ ...prefs, showPsychic: !prefs.showPsychic }))
+              }
+            />
+          </ListItem>
           <ListItem>
             <ListItemText>Show full special rules text</ListItemText>
             <Switch
@@ -135,18 +145,7 @@ export default function View() {
         </Button>
       </div>
       <div className="px-4">
-        {isCardView ? (
-          <ViewCards
-            showPsychic={showPsychic}
-            prefs={preferences}
-          />
-        ) : (
-          <ViewList
-            showPsychic={showPsychic}
-            showFullRules={preferences.showFullRules}
-            showPointCosts={preferences.showPointCosts}
-          />
-        )}
+        {isCardView ? <ViewCards prefs={preferences} /> : <ViewList prefs={preferences} />}
       </div>
     </>
   );

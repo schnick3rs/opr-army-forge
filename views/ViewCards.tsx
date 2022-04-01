@@ -15,11 +15,10 @@ import RuleList from "./components/RuleList";
 import { IViewPreferences } from "../pages/view";
 
 interface ViewCardsProps {
-  showPsychic: boolean;
   prefs: IViewPreferences;
 }
 
-export default function ViewCards({ showPsychic, prefs }: ViewCardsProps) {
+export default function ViewCards({ prefs }: ViewCardsProps) {
   const list = useSelector((state: RootState) => state.list);
   const army = useSelector((state: RootState) => state.army);
 
@@ -73,7 +72,7 @@ export default function ViewCards({ showPsychic, prefs }: ViewCardsProps) {
           : units.map((unit, i) => {
               return getUnitCard(unit, 1);
             })}
-        {showPsychic &&
+        {prefs.showPsychic &&
           army.loadedArmyBooks.map((book) => (
             <div key={book.uid} className={style.card}>
               <Card elevation={1}>
