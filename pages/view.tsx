@@ -57,7 +57,7 @@ export default function View() {
 
   return (
     <>
-      <Paper elevation={2} color="primary" square>
+      <Paper className="no-print" elevation={2} color="primary" square>
         <AppBar position="static" elevation={0}>
           <Toolbar>
             <IconButton
