@@ -17,6 +17,7 @@ import {
 import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import HomeIcon from '@mui/icons-material/Home';
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../data/store";
@@ -69,9 +70,10 @@ export default function MainMenu() {
   };
 
   const goBack = () => {
-    const confirmMsg = "Going back will lose unsaved changed. Continue?";
-    if (list.creationTime || confirm(confirmMsg)) {
-      router.back();
+    const confirmMsg = "Going back will leave your current list and go back home. Continue?";
+    if (confirm(confirmMsg)) {
+      //router.back();
+      router.replace("/");
     }
   };
 
@@ -88,8 +90,9 @@ export default function MainMenu() {
             aria-label="menu"
             onClick={goBack}
             style={{ marginLeft: "0" }}
+            className="mr-4"
           >
-            <BackIcon />
+            <HomeIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             {list.name}
