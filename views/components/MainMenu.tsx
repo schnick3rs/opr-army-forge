@@ -71,7 +71,7 @@ export default function MainMenu() {
 
   const goBack = () => {
     const confirmMsg = "Going back will leave your current list and go back home. Continue?";
-    if (confirm(confirmMsg)) {
+    if (list.creationTime || confirm(confirmMsg)) {
       //router.back();
       router.replace("/");
     }
