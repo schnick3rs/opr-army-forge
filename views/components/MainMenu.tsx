@@ -178,11 +178,11 @@ export default function MainMenu() {
             onClose={(_) => setMenuAnchorElement(null)}
           >
             <MenuItem onClick={navigateToListConfig}>Edit Details</MenuItem>
-            <MenuItem onClick={() => router.push("/view")}>View</MenuItem>
+            <MenuItem onClick={() => router.push("/view")}>View Cards</MenuItem>
             {!list.creationTime && <MenuItem onClick={handleSave}>Save</MenuItem>}
             <MenuItem onClick={handleShare}>Export as Army Forge File</MenuItem>
             <MenuItem onClick={handleTextExport}>Export as Text</MenuItem>
-            <MenuItem onClick={handleLoad}>Load</MenuItem>
+            <MenuItem onClick={handleLoad}>Open A List</MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>
