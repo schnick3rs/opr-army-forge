@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../data/store";
 import { useRouter } from "next/router";
@@ -42,12 +42,18 @@ export default function View() {
     showPsychic: listContainsPyschic(list),
   } as IViewPreferences;
 
-  const [preferences, setPreferenceState] = useState({
-    ...defaultPrefs,
-    ...PersistenceService.getViewPreferences(),
-  });
+  const [preferences, setPreferenceState] = useState(defaultPrefs);
   const [isCardView, setCardView] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+useEffect(() => {
+  const prefs = PersistenceService.getViewPreferences();
+  setPreferenceState(prev => ({
+    ...prev,
+    ...prefs,
+    showPsychic: listContainsPyschic(list) || prefs.showPsychic
+  }));
+}, []);
 
   function setPreferences(setFunc) {
     const newPrefs = setFunc(preferences);
