@@ -47,11 +47,11 @@ export default function View() {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
 useEffect(() => {
-  const prefs = PersistenceService.getViewPreferences();
+  const prefs = PersistenceService.getViewPreferences() || {};
   setPreferenceState(prev => ({
     ...prev,
     ...prefs,
-    showPsychic: listContainsPyschic(list) || prefs.showPsychic
+    showPsychic: listContainsPyschic(list) || ((prefs as any)?.showPsychic ?? false)
   }));
 }, []);
 
