@@ -21,17 +21,20 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SpellsTable from "../SpellsTable";
 import { CustomTooltip } from "../components/CustomTooltip";
 import CampaignUpgrades from "./CampaignUpgrades";
+import UpgradeService from "../../services/UpgradeService";
+import { IGameRule } from "../../data/armySlice";
 
 export function Upgrades({ mobile = false }) {
   const list = useSelector((state: RootState) => state.list);
-  const gameSystem = useSelector((state: RootState) => state.army.gameSystem);
-  const loadedArmyBooks = useSelector((state: RootState) => state.army.loadedArmyBooks);
+  const { gameSystem, loadedArmyBooks, rules } = useSelector((state: RootState) => state.army);
   const dispatch = useDispatch();
 
   const competitive = false;
   const previewMode = !!list.unitPreview;
   const selectedUnit = list.unitPreview ?? UnitService.getSelected(list);
   const army = selectedUnit && loadedArmyBooks?.find((book) => book.uid === selectedUnit.armyId);
+  const armyRules = loadedArmyBooks.flatMap((x) => x.specialRules);
+  const ruleDefinitions: IGameRule[] = rules.concat(armyRules);
 
   const getUpgradeSet = (id) => army.upgradePackages.filter((s) => s.uid === id)[0];
 
@@ -55,8 +58,18 @@ export function Upgrades({ mobile = false }) {
   const isHero = selectedUnit
     ? selectedUnit.specialRules.findIndex((sr) => sr.name === "Hero") > -1
     : false;
-  const isPsychic =
-    specialRules?.findIndex((r) => r.name === "Psychic" || r.name === "Wizard") > -1;
+
+  const isPsychic = (() => {
+    let result = false;
+    for (let r of specialRules ?? []) {
+      result ||= r.name === "Psychic" || r.name === "Wizard";
+      const ruleDef = ruleDefinitions.find((rd) => rd.name === r.name);
+      console.log(r.name, ruleDef);
+      const ruleDesc = ruleDef?.description;
+      result ||= ruleDesc && /(?:Psychic|Wizard)\(\d\)/i.test(ruleDesc);
+    }
+    return result;
+  })();
 
   const joinToUnit = (e) => {
     const joinToUnitId = e.target.value;

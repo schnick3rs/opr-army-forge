@@ -16,11 +16,10 @@ import { IViewPreferences } from "../pages/view";
 import { ICampaignUnit } from "../data/campaignSlice";
 
 interface ViewCardsProps {
-  showPsychic: boolean;
   prefs: IViewPreferences;
 }
 
-export default function ViewCards({ showPsychic, prefs }: ViewCardsProps) {
+export default function ViewCards({ prefs }: ViewCardsProps) {
   const list = useSelector((state: RootState) => state.list);
   const campaign = useSelector((state: RootState) => state.campaign);
   const army = useSelector((state: RootState) => state.army);
@@ -73,7 +72,7 @@ export default function ViewCards({ showPsychic, prefs }: ViewCardsProps) {
           : units.map((unit, i) => {
               return getUnitCard(unit, 1);
             })}
-        {showPsychic &&
+        {prefs.showPsychic &&
           army.loadedArmyBooks.map((book) => (
             <div key={book.uid} className={style.card}>
               <Card elevation={1}>
@@ -191,15 +190,14 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions, campaignUnit }: 
           <UnitEquipmentTable unit={unit} square />
           {ruleKeys?.length > 0 && (
             <Paper square elevation={0}>
-              <div className="px-2 my-2">
+              <div className="px-2 my-2" style={{ fontSize: "0.875rem" }}>
                 {ruleKeys.map((key, index) => {
                   const group = ruleGroups[key];
 
                   if (!prefs.showFullRules)
                     return (
-                      <span key={index} style={{ fontWeight: 600 }}>
+                      <span key={index}>
                         {index === 0 ? "" : ", "}
-                        {/* <RuleList specialRules={[{ ...rule, rating, count }]} /> */}
                         <RuleList specialRules={group} />
                       </span>
                     );

@@ -29,8 +29,11 @@ export default class UpgradeService {
 
     unit.loadout = JSON.parse(JSON.stringify(unit.equipment));
 
-    for (let upgrade of unit.selectedUpgrades) {
+    //console.log("Build upgrades for:", makeCopy(unit));
+
+    for (let upgrade of makeCopy(unit.selectedUpgrades)) {
       this.applyUpgrade(unit, upgrade.upgrade, upgrade.option);
+      //console.log("after upgrade, ", makeCopy(unit));
     }
 
     return unit;

@@ -34,10 +34,12 @@ export default function Load() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const saves = Object.keys(localStorage).filter((k) =>
-      k.startsWith("AF_Save")
-    );
-    setLocalSaves(saves);
+    const getSaves = () => Object.keys(localStorage).filter((k) => k.startsWith("AF_Save"));
+    for (let save of getSaves()) {
+      if (localStorage.getItem(save).indexOf('"listPoints":0') >= 0) delete localStorage[save];
+    }
+
+    setLocalSaves(getSaves());
   }, [forceLoad]);
 
   const importFile = () => {
@@ -107,21 +109,11 @@ export default function Load() {
     <>
       <MenuBar title="Open a List" onBackClick={() => tryBack(() => router.replace("/"))} />
       <div className="container">
-        <input
-          type="file"
-          id="file-input"
-          style={{ display: "none" }}
-          onChange={readSingleFile}
-        />
+        <input type="file" id="file-input" style={{ display: "none" }} onChange={readSingleFile} />
         <div className="mx-auto" style={{ maxWidth: "480px" }}>
           <div className="is-flex is-justify-content-center p-4 my-4">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => importFile()}
-            >
-              <FileUploadOutlinedIcon />{" "}
-              <span className="ml-2">Upload Army Forge File</span>
+            <Button variant="contained" color="primary" onClick={() => importFile()}>
+              <FileUploadOutlinedIcon /> <span className="ml-2">Upload Army Forge File</span>
             </Button>
           </div>
           {loading && (
@@ -143,8 +135,7 @@ export default function Load() {
                 .map((save) => {
                   try {
                     const modified = new Date(save.modified);
-                    const time =
-                      modified.getHours() + ":" + modified.getMinutes();
+                    const time = modified.getHours() + ":" + modified.getMinutes();
                     const points = save.listPoints;
                     const title = (
                       <>
@@ -188,17 +179,11 @@ export default function Load() {
                             />
                           </ListItemAvatar>
                           <ListItemText
-                            className={
-                              "ml-2" +
-                              (save.saveVersion >= 2 ? "" : " has-text-danger")
-                            }
+                            className={"ml-2" + (save.saveVersion >= 2 ? "" : " has-text-danger")}
                             primary={title}
                             secondary={
                               save.saveVersion >= 2
-                                ? "Modified " +
-                                  modified.toLocaleDateString() +
-                                  " " +
-                                  time
+                                ? "Modified " + modified.toLocaleDateString() + " " + time
                                 : "Outdated save format!"
                             }
                           />

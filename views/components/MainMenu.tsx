@@ -13,10 +13,12 @@ import {
   ListItemText,
   ClickAwayListener,
   Snackbar,
+  Divider,
 } from "@mui/material";
 import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import HomeIcon from '@mui/icons-material/Home';
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../data/store";
@@ -59,6 +61,18 @@ export default function MainMenu() {
     }
   };
 
+  const handleShareTTS = () => {
+    if (!list.creationTime) {
+      const creationTime = handleSave();
+      PersistenceService.downloadTTS({
+        ...list,
+        creationTime,
+      });
+    } else {
+      PersistenceService.downloadTTS(list);
+    }
+  };
+
   const handleTextExport = () => {
     PersistenceService.copyAsText(list);
     setShowTextCopiedAlert(true);
@@ -69,7 +83,7 @@ export default function MainMenu() {
   };
 
   const goBack = () => {
-    const confirmMsg = "Going back will lose unsaved changed. Continue?";
+    const confirmMsg = "Going back will leave your current list and go back home. Continue?";
     if (list.creationTime || confirm(confirmMsg)) {
       router.replace("/");
     }
@@ -88,8 +102,9 @@ export default function MainMenu() {
             aria-label="menu"
             onClick={goBack}
             style={{ marginLeft: "0" }}
+            className="mr-4"
           >
-            <BackIcon />
+            <HomeIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             {list.name}
@@ -175,11 +190,14 @@ export default function MainMenu() {
             onClose={(_) => setMenuAnchorElement(null)}
           >
             <MenuItem onClick={navigateToListConfig}>Edit Details</MenuItem>
-            <MenuItem onClick={() => router.push("/view")}>View</MenuItem>
+            <MenuItem onClick={() => router.push("/view")}>View Cards</MenuItem>
             {!list.creationTime && <MenuItem onClick={handleSave}>Save</MenuItem>}
+            <MenuItem onClick={handleLoad}>Open A List</MenuItem>
+            <Divider />
             <MenuItem onClick={handleShare}>Export as Army Forge File</MenuItem>
+            <MenuItem onClick={handleShareTTS}>Export as TTS File</MenuItem>
             <MenuItem onClick={handleTextExport}>Export as Text</MenuItem>
-            <MenuItem onClick={handleLoad}>Load</MenuItem>
+            
           </Menu>
         </Toolbar>
       </AppBar>

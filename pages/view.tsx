@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../data/store";
 import { useRouter } from "next/router";
@@ -28,6 +28,7 @@ export interface IViewPreferences {
   showFullRules: boolean;
   showPointCosts: boolean;
   combineSameUnits: boolean;
+  showPsychic: boolean;
 }
 
 export default function View() {
@@ -38,14 +39,21 @@ export default function View() {
     showFullRules: false,
     showPointCosts: true,
     combineSameUnits: true,
+    showPsychic: listContainsPyschic(list),
   } as IViewPreferences;
 
-  const [preferences, setPreferenceState] = useState({
-    ...defaultPrefs,
-    ...PersistenceService.getViewPreferences(),
-  });
+  const [preferences, setPreferenceState] = useState(defaultPrefs);
   const [isCardView, setCardView] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+useEffect(() => {
+  const prefs = PersistenceService.getViewPreferences() || {};
+  setPreferenceState(prev => ({
+    ...prev,
+    ...prefs,
+    showPsychic: listContainsPyschic(list) || ((prefs as any)?.showPsychic ?? false)
+  }));
+}, []);
 
   function setPreferences(setFunc) {
     const newPrefs = setFunc(preferences);
@@ -53,11 +61,9 @@ export default function View() {
     PersistenceService.saveViewPreferences(newPrefs);
   }
 
-  const showPsychic = listContainsPyschic(list);
-
   return (
     <>
-      <Paper elevation={2} color="primary" square>
+      <Paper className="no-print" elevation={2} color="primary" square>
         <AppBar position="static" elevation={0}>
           <Toolbar>
             <IconButton
@@ -95,6 +101,16 @@ export default function View() {
           </IconButton>
         </div>
         <List>
+        <ListItem>
+            <ListItemText>Show Psychic/Spells</ListItemText>
+            <Switch
+              edge="end"
+              checked={preferences.showPsychic}
+              onChange={() =>
+                setPreferences((prefs) => ({ ...prefs, showPsychic: !prefs.showPsychic }))
+              }
+            />
+          </ListItem>
           <ListItem>
             <ListItemText>Show full special rules text</ListItemText>
             <Switch
@@ -135,18 +151,7 @@ export default function View() {
         </Button>
       </div>
       <div className="px-4">
-        {isCardView ? (
-          <ViewCards
-            showPsychic={showPsychic}
-            prefs={preferences}
-          />
-        ) : (
-          <ViewList
-            showPsychic={showPsychic}
-            showFullRules={preferences.showFullRules}
-            showPointCosts={preferences.showPointCosts}
-          />
-        )}
+        {isCardView ? <ViewCards prefs={preferences} /> : <ViewList prefs={preferences} />}
       </div>
     </>
   );
