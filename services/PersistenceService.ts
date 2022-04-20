@@ -230,6 +230,16 @@ export default class PersistenceService {
     a.dispatchEvent(new MouseEvent('click'));
   }
 
+  public static downloadTTS(list: ListState) {
+    const saveData = JSON.stringify(list);
+    const blob = new Blob([saveData], { type: "application/json" })
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${list.name}${list.creationTime}.json`;
+    document.body.appendChild(a);
+    a.dispatchEvent(new MouseEvent('click'));
+  }
+
   public static checkExists(list: ISavedListState): boolean {
     return !!localStorage[this.getSaveKey(list.creationTime)];
   }

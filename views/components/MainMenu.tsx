@@ -61,6 +61,18 @@ export default function MainMenu() {
     }
   };
 
+  const handleShareTTS = () => {
+    if (!list.creationTime) {
+      const creationTime = handleSave();
+      PersistenceService.downloadTTS({
+        ...list,
+        creationTime,
+      });
+    } else {
+      PersistenceService.downloadTTS(list);
+    }
+  };
+
   const handleTextExport = () => {
     PersistenceService.copyAsText(list);
     setShowTextCopiedAlert(true);
@@ -184,6 +196,7 @@ export default function MainMenu() {
             <MenuItem onClick={handleLoad}>Open A List</MenuItem>
             <Divider />
             <MenuItem onClick={handleShare}>Export as Army Forge File</MenuItem>
+            <MenuItem onClick={handleShareTTS}>Export as TTS File</MenuItem>
             <MenuItem onClick={handleTextExport}>Export as Text</MenuItem>
             
           </Menu>
