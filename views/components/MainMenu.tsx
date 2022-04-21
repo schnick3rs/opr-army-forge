@@ -18,7 +18,7 @@ import {
 import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import HomeIcon from '@mui/icons-material/Home';
+import HomeIcon from "@mui/icons-material/Home";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../data/store";
@@ -80,6 +80,10 @@ export default function MainMenu() {
 
   const navigateToListConfig = () => {
     router.push({ pathname: "/listConfiguration", query: { ...router.query, edit: true } });
+  };
+
+  const openOprWebapp = () => {
+    window.open("https://webapp.onepagerules.com", "_blank");
   };
 
   const goBack = () => {
@@ -196,9 +200,9 @@ export default function MainMenu() {
             <MenuItem onClick={handleLoad}>Open A List</MenuItem>
             <Divider />
             <MenuItem onClick={handleShare}>Export as Army Forge File</MenuItem>
-            <MenuItem onClick={handleShareTTS}>Export as TTS File</MenuItem>
+            {/* <MenuItem onClick={handleShareTTS}>Export as TTS File</MenuItem> */}
             <MenuItem onClick={handleTextExport}>Export as Text</MenuItem>
-            
+            <MenuItem onClick={openOprWebapp}>Open OPR Webapp</MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>
