@@ -202,6 +202,7 @@ export default function MainMenu() {
             <MenuItem onClick={handleShare}>Export as Army Forge File</MenuItem>
             {/* <MenuItem onClick={handleShareTTS}>Export as TTS File</MenuItem> */}
             <MenuItem onClick={handleTextExport}>Export as Text</MenuItem>
+            <Divider />
             <MenuItem onClick={openOprWebapp}>Open OPR Webapp</MenuItem>
           </Menu>
         </Toolbar>
