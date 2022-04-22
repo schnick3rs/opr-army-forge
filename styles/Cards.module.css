@@ -28,6 +28,11 @@
   .grid .card {
     width: 3.5in;
   }
+  .profileStat p:first-child {
+    text-align: center;
+    padding: 0;
+    padding-top: 2px;
+  }
 }
 
 .profileStat {
