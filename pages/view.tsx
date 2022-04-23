@@ -23,6 +23,7 @@ import ViewAgendaIcon from "@mui/icons-material/ViewAgenda";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ClearIcon from "@mui/icons-material/Clear";
 import PersistenceService from "../services/PersistenceService";
+import PrintIcon from '@mui/icons-material/Print';
 
 export interface IViewPreferences {
   showFullRules: boolean;
@@ -79,6 +80,16 @@ useEffect(() => {
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               {list.name} • {list.points}pts
             </Typography>
+            <IconButton
+              className="mr-4"
+              size="large"
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              onClick={() => window.print()}
+            >
+              <PrintIcon />
+            </IconButton>
             <IconButton
               size="large"
               edge="start"

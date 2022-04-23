@@ -75,7 +75,7 @@ export default function UnitEquipmentTable({
     paddingRight: "8px",
     borderBottom: "none",
   };
-  const headerStyle = { ...cellStyle, fontWeight: 600 };
+  const headerStyle = { ...cellStyle, fontWeight: 600, paddingTop: "2px", paddingBottom: "2px" };
 
   return (
     <>

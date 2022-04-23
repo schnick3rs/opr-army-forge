@@ -151,11 +151,19 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
   // Sort rules alphabetically
   ruleKeys.sort((a, b) => a.localeCompare(b));
 
+  const statStyle = {
+    border: "1px solid #EBEBEB",
+    borderRadius: "3px",
+    padding: "4px",
+    margin: "0 8px",
+    marginBottom: "8px",
+  };
+
   return (
     <div className={style.card}>
       <Card elevation={1}>
-        <div className="card-body mb-4">
-          <h3 className="is-size-5 my-2" style={{ fontWeight: 500, textAlign: "center" }}>
+        <div className="card-body">
+          <h3 className="is-size-5 my-2" style={{ fontWeight: 600, textAlign: "center" }}>
             {count > 1 ? `${count}x ` : ""}
             {unit.customName || unit.name}
             <span className="" style={{ color: "#666666" }}>
@@ -170,26 +178,28 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
           </h3>
           <hr className="my-0" />
 
-          <div className="is-flex" style={{ justifyContent: "center" }}>
-            <div className={style.profileStat}>
+          <div className="is-flex mb-2" style={{ justifyContent: "center" }}>
+            <div className={style.profileStat2}>
               <p>Quality</p>
+              <div className="stat-break"></div>
               <p>{unit.quality}+</p>
             </div>
-            <div className={style.profileStat}>
+            <div className={style.profileStat2}>
               <p>Defense</p>
+              <div className="stat-break"></div>
               <p>{unit.defense}+</p>
             </div>
             {toughness > 1 && (
-              <div className={style.profileStat}>
+              <div className={style.profileStat2}>
                 <p>Tough</p>
+                <div className="stat-break"></div>
                 <p>{toughness}</p>
               </div>
             )}
           </div>
-          <UnitEquipmentTable unit={unit} square />
           {ruleKeys?.length > 0 && (
             <Paper square elevation={0}>
-              <div className="px-2 my-2" style={{ fontSize: "0.875rem" }}>
+              <div className="px-2 mb-3" style={{ fontSize: "0.875rem" }}>
                 {ruleKeys.map((key, index) => {
                   const group = ruleGroups[key];
 
@@ -223,6 +233,7 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
               </div>
             </Paper>
           )}
+          <UnitEquipmentTable unit={unit} square />
         </div>
       </Card>
     </div>
