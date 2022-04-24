@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../data/store";
 import style from "../styles/Cards.module.css";
-import UnitEquipmentTable from "./UnitEquipmentTable";
 import { Paper, Card, TableContainer, Table, TableRow, TableCell, TableHead } from "@mui/material";
 import RulesService from "../services/RulesService";
 import { IGameRule } from "../data/armySlice";
@@ -13,7 +12,6 @@ import _ from "lodash";
 import { ISelectedUnit } from "../data/interfaces";
 import RuleList from "./components/RuleList";
 import { IViewPreferences } from "../pages/view";
-import EquipmentService from "../services/EquipmentService";
 
 interface ViewTableProps {
   prefs: IViewPreferences;
@@ -22,6 +20,7 @@ interface ViewTableProps {
 export default function ViewTable({ prefs }: ViewTableProps) {
   const list = useSelector((state: RootState) => state.list);
   const army = useSelector((state: RootState) => state.army);
+  const [maxCellWidth, setMaxCellWidth] = useState(0);
 
   const gameRules = army.rules;
   const armyRules = army.loadedArmyBooks.flatMap((x) => x.specialRules);
@@ -31,6 +30,24 @@ export default function ViewTable({ prefs }: ViewTableProps) {
   for (let unit of units) {
     delete unit.selectionId;
   }
+
+  useEffect(() => {
+    var maxCellWidth = Array.from(document.querySelectorAll(".weapon-name-cell")).reduce(
+      (width, elem) => Math.max(width, elem.getBoundingClientRect().width),
+      0
+    );
+    setMaxCellWidth(maxCellWidth);
+  });
+
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     maxCellWidth = Array.from(document.querySelectorAll(".weapon-name-cell")).reduce(
+  //       (width, elem) => Math.max(width, elem.getBoundingClientRect().width),
+  //       0
+  //     );
+  //     console.log("maxCellWidth", maxCellWidth);
+  //   }, 100);
+  // }, [maxCellWidth]);
 
   const usedRules = [];
 
@@ -57,6 +74,7 @@ export default function ViewTable({ prefs }: ViewTableProps) {
         count={unitCount}
         prefs={prefs}
         ruleDefinitions={ruleDefinitions}
+        maxCellWidth={maxCellWidth}
       />
     );
   };
@@ -64,7 +82,7 @@ export default function ViewTable({ prefs }: ViewTableProps) {
   return (
     <>
       <TableContainer>
-        <Table>
+        <Table size="small">
           <TableHead>
             <TableRow>
               <TableCell style={{ fontWeight: "600" }}>Unit</TableCell>
@@ -149,9 +167,10 @@ interface UnitRowProps {
   count: number;
   prefs: IViewPreferences;
   ruleDefinitions: any;
+  maxCellWidth: number;
 }
 
-function UnitRow({ unit, rules, count, prefs, ruleDefinitions }: UnitRowProps) {
+function UnitRow({ unit, rules, count, prefs, ruleDefinitions, maxCellWidth }: UnitRowProps) {
   const ruleKeys = rules.keys;
   const ruleGroups = rules.groups;
   // usedRules.push(...ruleKeys);
@@ -162,17 +181,48 @@ function UnitRow({ unit, rules, count, prefs, ruleDefinitions }: UnitRowProps) {
 
   const stats = (
     <TableCell>
-      <p>Quality {unit.quality}+</p>
-      <p>Defense {unit.defense}+</p>
+      <table>
+        <tr>
+          <td style={{ paddingRight: "8px" }}>Quality </td>
+          <td style={{ fontWeight: "600" }}> {unit.quality}+</td>
+        </tr>
+        <tr>
+          <td style={{ paddingRight: "8px" }}>Defense</td>
+          <td style={{ fontWeight: "600" }}> {unit.defense}+</td>
+        </tr>
+      </table>
     </TableCell>
   );
 
+  const cellStyle = {
+    padding: "2px 4px",
+  };
+
   const loadout = (
-    <TableCell style={{ fontWeight: "600" }}>
-      {/* {unit.loadout.map((weapon, i) => (
-        <p key={i}>{EquipmentService.formatString(weapon)}</p>
-      ))} */}
-      <UnitEquipmentTable unit={unit} square={true} header={false} />
+    <TableCell>
+      <table>
+        {unit.loadout.map((weapon, i) => (
+          <tr key={i}>
+            <td
+              className="weapon-name-cell"
+              style={{
+                ...cellStyle,
+                paddingRight: "12px",
+                fontWeight: "600",
+                width: maxCellWidth ? maxCellWidth + "px" : null,
+              }}
+            >
+              {weapon.name}
+            </td>
+            <td style={cellStyle}>{weapon.range ? weapon.range + '"' : "-"}</td>
+            <td style={cellStyle}>A{weapon.attacks}</td>
+            <td style={cellStyle}>
+              {weapon.specialRules?.map((r) => RulesService.displayName(r)).join(", ")}
+            </td>
+          </tr>
+        ))}
+      </table>
+      {/* <UnitEquipmentTable unit={unit} square={true} header={false} /> */}
     </TableCell>
   );
 

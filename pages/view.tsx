@@ -164,8 +164,7 @@ export default function View() {
           <span className="pl-1 full-compact-text">{isCardView ? "cards" : "list"}</span>
         </Button>
       </div>
-      <ViewTable prefs={preferences} />
-      {isCardView ? <ViewCards prefs={preferences} /> : <ViewList prefs={preferences} />}
+      {isCardView ? <ViewCards prefs={preferences} /> : <ViewTable prefs={preferences} />}
     </>
   );
 }

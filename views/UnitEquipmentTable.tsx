@@ -77,7 +77,7 @@ export default function UnitEquipmentTable({
           component={Paper}
           square={square}
           elevation={0}
-          style={{ borderBottom: "1px solid rgba(0,0,0,.12)" }}
+          style={{ borderBottom: "1px solid rgba(0,0,0,.12)", backgroundColor:"transparent"  }}
         >
           <Table size="small">
             {header && (
@@ -117,7 +117,7 @@ export default function UnitEquipmentTable({
           className="mt-2"
           square={square}
           elevation={0}
-          style={{ borderBottom: "1px solid rgba(0,0,0,.12)" }}
+          style={{ borderBottom: "1px solid rgba(0,0,0,.12)", backgroundColor:"transparent" }}
         >
           <Table size="small">
             <TableHead>
