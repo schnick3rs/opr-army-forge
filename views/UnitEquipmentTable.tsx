@@ -24,25 +24,22 @@ import DataParsingService from "../services/DataParsingService";
 export default function UnitEquipmentTable({
   unit,
   square,
+  header = true,
 }: {
   unit: ISelectedUnit;
   square: boolean;
+  header: boolean;
 }) {
   const isWeapon = (e) => e.attacks;
 
   const weaponsFromItems = _.flatMap(
     unit.loadout.filter((e) => e.type === "ArmyBookItem"),
-    (e) =>
-      (e as IUpgradeGainsItem).content.filter(
-        (item) => item.type === "ArmyBookWeapon"
-      )
+    (e) => (e as IUpgradeGainsItem).content.filter((item) => item.type === "ArmyBookWeapon")
   );
   const weapons = unit.loadout
     .filter((e) => isWeapon(e))
-    .concat(
-      weaponsFromItems.map((item) => ({ ...item, count: item.count ?? 1 }))
-    );
-  
+    .concat(weaponsFromItems.map((item) => ({ ...item, count: item.count ?? 1 })));
+
   const equipment = unit.loadout.filter((e) => !isWeapon(e));
   const combinedEquipment = equipment.map((e) => {
     if (e.type === "ArmyBookItem")
@@ -62,13 +59,8 @@ export default function UnitEquipmentTable({
   const hasWeapons = weapons.length > 0;
   const hasEquipment = equipment.length > 0; // || itemUpgrades.length > 0;
 
-  const weaponGroups = _.groupBy(
-    weapons,
-    (w) => pluralise.singular(w.name ?? w.label) + w.attacks
-  );
-  const itemGroups = _.groupBy(combinedEquipment, (w) =>
-    pluralise.singular(w.name ?? w.label)
-  );
+  const weaponGroups = _.groupBy(weapons, (w) => pluralise.singular(w.name ?? w.label) + w.attacks);
+  const itemGroups = _.groupBy(combinedEquipment, (w) => pluralise.singular(w.name ?? w.label));
 
   const cellStyle = {
     paddingLeft: "8px",
@@ -87,15 +79,17 @@ export default function UnitEquipmentTable({
           style={{ borderBottom: "1px solid rgba(0,0,0,.12)" }}
         >
           <Table size="small">
-            <TableHead>
-              <TableRow style={{ backgroundColor: "#EBEBEB", fontWeight: 600 }}>
-                <TableCell style={headerStyle}>Weapon</TableCell>
-                <TableCell style={headerStyle}>RNG</TableCell>
-                <TableCell style={headerStyle}>ATK</TableCell>
-                <TableCell style={headerStyle}>AP</TableCell>
-                <TableCell style={headerStyle}>SPE</TableCell>
-              </TableRow>
-            </TableHead>
+            {header && (
+              <TableHead>
+                <TableRow style={{ backgroundColor: "#EBEBEB", fontWeight: 600 }}>
+                  <TableCell style={headerStyle}>Weapon</TableCell>
+                  <TableCell style={headerStyle}>RNG</TableCell>
+                  <TableCell style={headerStyle}>ATK</TableCell>
+                  <TableCell style={headerStyle}>AP</TableCell>
+                  <TableCell style={headerStyle}>SPE</TableCell>
+                </TableRow>
+              </TableHead>
+            )}
             <TableBody>
               {Object.keys(weaponGroups).map((key) => {
                 const group: IUpgradeGainsWeapon[] = weaponGroups[key];
@@ -127,10 +121,7 @@ export default function UnitEquipmentTable({
             <TableBody>
               {Object.values(itemGroups).map((group: any[], index) => {
                 const e = group[0];
-                const count = group.reduce(
-                  (c, next) => c + (next.count || 1),
-                  0
-                );
+                const count = group.reduce((c, next) => c + (next.count || 1), 0);
 
                 return (
                   <TableRow key={index}>
@@ -160,8 +151,7 @@ export function WeaponRow({
   isProfile: boolean;
 }) {
   const count = weapon.count;
-  const name =
-    count > 1 ? pluralise.plural(weapon.name) : pluralise.singular(weapon.name);
+  const name = count > 1 ? pluralise.plural(weapon.name) : pluralise.singular(weapon.name);
   const weaponCount = count > 1 ? `${count}x ` : null;
   const rules = weapon.specialRules.filter((r) => r.name !== "AP");
 
@@ -177,21 +167,11 @@ export function WeaponRow({
         {weaponCount}
         {isProfile ? `- ${name}` : name}
       </TableCell>
+      <TableCell style={borderStyle}>{weapon.range ? weapon.range + '"' : "-"}</TableCell>
+      <TableCell style={borderStyle}>{weapon.attacks ? "A" + weapon.attacks : "-"}</TableCell>
+      <TableCell style={borderStyle}>{EquipmentService.getAP(weapon) || "-"}</TableCell>
       <TableCell style={borderStyle}>
-        {weapon.range ? weapon.range + '"' : "-"}
-      </TableCell>
-      <TableCell style={borderStyle}>
-        {weapon.attacks ? "A" + weapon.attacks : "-"}
-      </TableCell>
-      <TableCell style={borderStyle}>
-        {EquipmentService.getAP(weapon) || "-"}
-      </TableCell>
-      <TableCell style={borderStyle}>
-        {rules && rules.length > 0 ? (
-          <RuleList specialRules={rules} />
-        ) : (
-          <span>-</span>
-        )}
+        {rules && rules.length > 0 ? <RuleList specialRules={rules} /> : <span>-</span>}
       </TableCell>
     </TableRow>
   );

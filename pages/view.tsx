@@ -16,6 +16,8 @@ import {
   ListItem,
   ListItemText,
   Switch,
+  TableContainer,
+  Table,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -24,6 +26,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import ClearIcon from "@mui/icons-material/Clear";
 import PersistenceService from "../services/PersistenceService";
 import PrintIcon from "@mui/icons-material/Print";
+import ViewTable from "../views/ViewTable";
 
 export interface IViewPreferences {
   showFullRules: boolean;
@@ -161,6 +164,7 @@ export default function View() {
           <span className="pl-1 full-compact-text">{isCardView ? "cards" : "list"}</span>
         </Button>
       </div>
+      <ViewTable prefs={preferences} />
       {isCardView ? <ViewCards prefs={preferences} /> : <ViewList prefs={preferences} />}
     </>
   );
