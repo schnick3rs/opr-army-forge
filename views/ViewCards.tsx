@@ -62,7 +62,7 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
 
   return (
     <>
-      <div className={style.grid}>
+      <div className={style.grid + " mx-4"}>
         {prefs.combineSameUnits
           ? Object.values(unitGroups).map((grp: ISelectedUnit[], i) => {
               const unit = grp[0];
@@ -102,31 +102,29 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
           ))}
       </div>
       {!prefs.showFullRules && (
-        <div className={`mx-4 ${style.card}`}>
-          <Card elevation={1}>
-            <div className="mb-4">
-              <div className="card-body">
-                <h3 className="is-size-4 my-2" style={{ fontWeight: 500, textAlign: "center" }}>
-                  Special Rules
-                </h3>
-                <hr className="my-0" />
+        <Card elevation={1} className="mt-4">
+          <div className="mb-4">
+            <div className="card-body">
+              <h3 className="is-size-4 my-2" style={{ fontWeight: 500, textAlign: "center" }}>
+                Special Rules
+              </h3>
+              <hr className="my-0" />
 
-                <Paper square elevation={0}>
-                  <div className={`px-2 my-2 ${style.grid} has-text-left`}>
-                    {_.uniq(usedRules)
-                      .sort()
-                      .map((r, i) => (
-                        <p key={i} style={{ breakInside: "avoid" }}>
-                          <span style={{ fontWeight: 600 }}>{r} - </span>
-                          <span>{ruleDefinitions.find((t) => t.name === r)?.description}</span>
-                        </p>
-                      ))}
-                  </div>
-                </Paper>
-              </div>
+              <Paper square elevation={0}>
+                <div className={`px-2 my-2 ${style.grid} has-text-left`}>
+                  {_.uniq(usedRules)
+                    .sort()
+                    .map((r, i) => (
+                      <p key={i} style={{ breakInside: "avoid" }}>
+                        <span style={{ fontWeight: 600 }}>{r} - </span>
+                        <span>{ruleDefinitions.find((t) => t.name === r)?.description}</span>
+                      </p>
+                    ))}
+                </div>
+              </Paper>
             </div>
-          </Card>
-        </div>
+          </div>
+        </Card>
       )}
     </>
   );
@@ -150,14 +148,6 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
 
   // Sort rules alphabetically
   ruleKeys.sort((a, b) => a.localeCompare(b));
-
-  const statStyle = {
-    border: "1px solid #EBEBEB",
-    borderRadius: "3px",
-    padding: "4px",
-    margin: "0 8px",
-    marginBottom: "8px",
-  };
 
   const stats = (
     <div className="is-flex mb-3" style={{ justifyContent: "center" }}>
@@ -217,28 +207,26 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
   );
 
   return (
-    <div className={style.card}>
-      <Card elevation={1}>
-        <div className="card-body">
-          <h3 className="is-size-5 my-2" style={{ fontWeight: 600, textAlign: "center" }}>
-            {count > 1 ? `${count}x ` : ""}
-            {unit.customName || unit.name}
-            <span className="" style={{ color: "#666666" }}>
-              {" "}
-              [{unit.size}]
+    <Card elevation={1} className={style.card}>
+      <div className="card-body">
+        <h3 className="is-size-5 my-2" style={{ fontWeight: 600, textAlign: "center" }}>
+          {count > 1 ? `${count}x ` : ""}
+          {unit.customName || unit.name}
+          <span className="" style={{ color: "#666666" }}>
+            {" "}
+            [{unit.size}]
+          </span>
+          {prefs.showPointCosts && (
+            <span className="is-size-6 ml-1" style={{ color: "#666666" }}>
+              - {UpgradeService.calculateUnitTotal(unit)}pts
             </span>
-            {prefs.showPointCosts && (
-              <span className="is-size-6 ml-1" style={{ color: "#666666" }}>
-                - {UpgradeService.calculateUnitTotal(unit)}pts
-              </span>
-            )}
-          </h3>
-          {stats}
-          {rulesSection}
-          <UnitEquipmentTable unit={unit} square />
-        </div>
-      </Card>
-    </div>
+          )}
+        </h3>
+        {stats}
+        {rulesSection}
+        <UnitEquipmentTable unit={unit} square />
+      </div>
+    </Card>
   );
 }
 
