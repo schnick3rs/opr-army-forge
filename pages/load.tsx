@@ -187,6 +187,8 @@ export default function Load() {
     </IconButton>
   );
 
+  const favourites = parsedSaves.filter((s) => s.favourite);
+
   return (
     <>
       <MenuBar
@@ -208,10 +210,14 @@ export default function Load() {
               <p>Loading army data...</p>
             </div>
           )}
-          <p className="px-4 mb-2" style={{ fontWeight: 600 }}>
-            Favourite Lists
-          </p>
-          <SaveList saves={parsedSaves.filter((s) => s.favourite)} />
+          {favourites.length > 0 && (
+            <>
+              <p className="px-4 mb-2" style={{ fontWeight: 600 }}>
+                Favourite Lists
+              </p>
+              <SaveList saves={favourites} />
+            </>
+          )}
           <p className="px-4 my-2" style={{ fontWeight: 600 }}>
             Saved Lists
           </p>
