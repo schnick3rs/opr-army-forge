@@ -61,6 +61,7 @@ export default function UnitEquipmentTable({
 
   const weaponGroups = _.groupBy(weapons, (w) => pluralise.singular(w.name ?? w.label) + w.attacks);
   const itemGroups = _.groupBy(combinedEquipment, (w) => pluralise.singular(w.name ?? w.label));
+  const weaponGroupKeys = Object.keys(weaponGroups);
 
   const cellStyle = {
     paddingLeft: "8px",
@@ -91,13 +92,20 @@ export default function UnitEquipmentTable({
               </TableHead>
             )}
             <TableBody>
-              {Object.keys(weaponGroups).map((key) => {
+              {weaponGroupKeys.map((key, i) => {
                 const group: IUpgradeGainsWeapon[] = weaponGroups[key];
                 const upgrade = group[0];
                 const count = group.reduce((c, next) => c + next.count, 0);
                 const e = { ...upgrade, count };
 
-                return <WeaponRow key={key} weapon={e} isProfile={false} />;
+                return (
+                  <WeaponRow
+                    key={key}
+                    weapon={e}
+                    isProfile={false}
+                    isLastRow={i === weaponGroupKeys.length - 1}
+                  />
+                );
               })}
             </TableBody>
           </Table>
@@ -146,19 +154,25 @@ export default function UnitEquipmentTable({
 export function WeaponRow({
   weapon,
   isProfile,
+  isLastRow,
 }: {
   weapon: IUpgradeGainsWeapon;
   isProfile: boolean;
+  isLastRow: boolean;
 }) {
   const count = weapon.count;
   const name = count > 1 ? pluralise.plural(weapon.name) : pluralise.singular(weapon.name);
   const weaponCount = count > 1 ? `${count}x ` : null;
   const rules = weapon.specialRules.filter((r) => r.name !== "AP");
 
-  const cellStyle = { paddingLeft: "8px", paddingRight: "8px" };
+  const cellStyle = {
+    paddingLeft: "8px",
+    paddingRight: "8px"
+  };
   const borderStyle = {
     borderBottom: "none",
     borderTop: isProfile ? "none" : "1px solid rgb(224, 224, 224)",
+    paddingBottom: isLastRow ? "12px" : null,
   };
 
   return (
