@@ -212,7 +212,7 @@ function UnitRow({ unit, rules, count, prefs, ruleDefinitions, maxCellWidth }: U
                 width: maxCellWidth ? maxCellWidth + "px" : null,
               }}
             >
-              {weapon.name}
+              {weapon.count}x {weapon.name}
             </td>
             <td style={cellStyle}>{weapon.range ? weapon.range + '"' : "-"}</td>
             <td style={cellStyle}>A{weapon.attacks}</td>
