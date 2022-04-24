@@ -84,7 +84,7 @@ export default function UnitEquipmentTable({
           component={Paper}
           square={square}
           elevation={0}
-          style={{ border: "1px solid rgba(0,0,0,.12)" }}
+          style={{ borderBottom: "1px solid rgba(0,0,0,.12)" }}
         >
           <Table size="small">
             <TableHead>
@@ -113,8 +113,9 @@ export default function UnitEquipmentTable({
         <TableContainer
           component={Paper}
           className="mt-2"
+          square={square}
           elevation={0}
-          style={{ border: "1px solid rgba(0,0,0,.12)" }}
+          style={{ borderBottom: "1px solid rgba(0,0,0,.12)" }}
         >
           <Table size="small">
             <TableHead>

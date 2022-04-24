@@ -58,8 +58,7 @@ export default function UpgradeGroup({ unit, upgrade, previewMode }: UpgradeGrou
         <p
           className="pt-0"
           style={{
-            fontWeight: "bold",
-            fontSize: "14px",
+            fontWeight: "600",
             lineHeight: 1.7,
           }}
         >

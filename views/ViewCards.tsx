@@ -159,6 +159,63 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
     marginBottom: "8px",
   };
 
+  const stats = (
+    <div className="is-flex mb-3" style={{ justifyContent: "center" }}>
+      <div className={style.profileStat2}>
+        <p>Quality</p>
+        <div className="stat-break"></div>
+        <p>{unit.quality}+</p>
+      </div>
+      <div className={style.profileStat2}>
+        <p>Defense</p>
+        <div className="stat-break"></div>
+        <p>{unit.defense}+</p>
+      </div>
+      {toughness > 1 && (
+        <div className={style.profileStat2}>
+          <p>Tough</p>
+          <div className="stat-break"></div>
+          <p>{toughness}</p>
+        </div>
+      )}
+    </div>
+  );
+
+  const rulesSection = ruleKeys?.length > 0 && (
+    <Paper className="px-2 mb-4" square elevation={0} style={{ fontSize: "14px" }}>
+      {ruleKeys.map((key, index) => {
+        const group = ruleGroups[key];
+
+        if (!prefs.showFullRules)
+          return (
+            <span key={index}>
+              {index === 0 ? "" : ", "}
+              <RuleList specialRules={group} />
+            </span>
+          );
+
+        const rule = group[0];
+        const rating = group.reduce(
+          (total, next) => (next.rating ? total + parseInt(next.rating) : total),
+          0
+        );
+
+        const ruleDefinition = ruleDefinitions.filter(
+          (r) => /(.+?)(?:\(|$)/.exec(r.name)[0] === rule.name
+        )[0];
+
+        return (
+          <p key={index}>
+            <span style={{ fontWeight: 600 }}>
+              {RulesService.displayName({ ...rule, rating }, count)} -
+            </span>
+            <span> {ruleDefinition?.description || ""}</span>
+          </p>
+        );
+      })}
+    </Paper>
+  );
+
   return (
     <div className={style.card}>
       <Card elevation={1}>
@@ -176,63 +233,8 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
               </span>
             )}
           </h3>
-          <hr className="my-0" />
-
-          <div className="is-flex mb-2" style={{ justifyContent: "center" }}>
-            <div className={style.profileStat2}>
-              <p>Quality</p>
-              <div className="stat-break"></div>
-              <p>{unit.quality}+</p>
-            </div>
-            <div className={style.profileStat2}>
-              <p>Defense</p>
-              <div className="stat-break"></div>
-              <p>{unit.defense}+</p>
-            </div>
-            {toughness > 1 && (
-              <div className={style.profileStat2}>
-                <p>Tough</p>
-                <div className="stat-break"></div>
-                <p>{toughness}</p>
-              </div>
-            )}
-          </div>
-          {ruleKeys?.length > 0 && (
-            <Paper square elevation={0}>
-              <div className="px-2 mb-3" style={{ fontSize: "0.875rem" }}>
-                {ruleKeys.map((key, index) => {
-                  const group = ruleGroups[key];
-
-                  if (!prefs.showFullRules)
-                    return (
-                      <span key={index}>
-                        {index === 0 ? "" : ", "}
-                        <RuleList specialRules={group} />
-                      </span>
-                    );
-
-                  const rule = group[0];
-                  const rating = group.reduce(
-                    (total, next) => (next.rating ? total + parseInt(next.rating) : total),
-                    0
-                  );
-
-                  const ruleDefinition = ruleDefinitions.filter(
-                    (r) => /(.+?)(?:\(|$)/.exec(r.name)[0] === rule.name
-                  )[0];
-
-                  return (
-                    <p key={index}>
-                      <span style={{ fontWeight: 600 }}>
-                        {RulesService.displayName({ ...rule, rating }, count)} -
-                      </span>
-                      <span> {ruleDefinition?.description || ""}</span>
-                    </p>
-                  );
-                })}
-              </div>
-            </Paper>
-          )}
+          {stats}
+          {rulesSection}
           <UnitEquipmentTable unit={unit} square />
         </div>
       </Card>
