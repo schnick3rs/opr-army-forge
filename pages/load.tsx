@@ -36,7 +36,6 @@ export default function Load() {
   const [localSaves, setLocalSaves] = useState([]);
   const [forceLoad, setForceLoad] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [deleteMode, setDeleteMode] = useState(false);
   const [selections, setSelections] = useState([]);
 
   useEffect(() => {
@@ -142,18 +141,6 @@ export default function Load() {
                   </>
                 );
 
-                const favouriteButton = (
-                  <IconButton onClick={() => toggleFavourite(save)}>
-                    {save.favourite ? <StarIcon /> : <StarOutlineIcon />}
-                  </IconButton>
-                );
-
-                const deleteButton = (
-                  <IconButton onClick={() => deleteSave(save)}>
-                    <Delete />
-                  </IconButton>
-                );
-
                 const selected = selections.some((x) => x === save.list.creationTime);
 
                 const selectionBox = (
@@ -173,7 +160,7 @@ export default function Load() {
                   <ListItem
                     key={save.list.creationTime}
                     disablePadding
-                    secondaryAction={selectionBox || (deleteMode ? deleteButton : favouriteButton)}
+                    secondaryAction={selectionBox}
                   >
                     <ListItemButton onClick={() => loadSave(save)}>
                       <ListItemAvatar>
@@ -205,22 +192,12 @@ export default function Load() {
     );
   };
 
-  const deleteModeButton = (
-    <IconButton color="inherit" onClick={() => setDeleteMode((x) => !x)}>
-      <Delete />
-    </IconButton>
-  );
-
   const favourites = parsedSaves.filter((s) => s.favourite);
 
   return (
     <>
       {selections.length === 0 ? (
-        <MenuBar
-          title="Open a List"
-          onBackClick={() => tryBack(() => router.replace("/"))}
-          right={deleteModeButton}
-        />
+        <MenuBar title="Open a List" onBackClick={() => tryBack(() => router.replace("/"))} />
       ) : (
         <Paper elevation={2} square>
           <AppBar color="transparent" position="static">
