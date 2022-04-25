@@ -72,6 +72,7 @@ export default function Load() {
     }
     setForceLoad(forceLoad + 1);
     setLocalSaves([]);
+    setSelections([]);
   };
 
   const deleteSave = (save) => {
