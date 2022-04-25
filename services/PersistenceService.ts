@@ -51,7 +51,8 @@ export default class PersistenceService {
       modified: new Date().toJSON(),
       saveVersion: this.currentSaveVersion,
       listPoints: 0,
-      list: this.getDataForSave(list)
+      list: this.getDataForSave(list),
+      favourite: false
     };
 
     console.log("Creating save...", saveData);
