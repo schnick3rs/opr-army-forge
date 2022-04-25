@@ -15,7 +15,6 @@ import {
   Snackbar,
   Divider,
 } from "@mui/material";
-import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import HomeIcon from "@mui/icons-material/Home";
@@ -200,7 +199,7 @@ export default function MainMenu() {
             <MenuItem onClick={handleLoad}>Open a List</MenuItem>
             <Divider />
             <MenuItem onClick={handleShare}>Export as Army Forge File</MenuItem>
-            {/* <MenuItem onClick={handleShareTTS}>Export as TTS File</MenuItem> */}
+            <MenuItem onClick={handleShareTTS}>Export as TTS File</MenuItem>
             <MenuItem onClick={handleTextExport}>Export as Text</MenuItem>
             <Divider />
             <MenuItem onClick={openOprWebapp}>Open OPR Webapp</MenuItem>
