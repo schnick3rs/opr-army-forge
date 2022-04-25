@@ -11,6 +11,11 @@ import {
   ListItemText,
   CircularProgress,
   Paper,
+  Checkbox,
+  Toolbar,
+  Icon,
+  AppBar,
+  Typography,
 } from "@mui/material";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import _ from "lodash";
@@ -23,6 +28,7 @@ import { MenuBar } from "../views/components/MenuBar";
 import { tryBack } from "../services/Helpers";
 import StarOutlineIcon from "@mui/icons-material/StarOutline";
 import StarIcon from "@mui/icons-material/Star";
+import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 
 export default function Load() {
   const dispatch = useDispatch<typeof store.dispatch>();
@@ -31,6 +37,7 @@ export default function Load() {
   const [forceLoad, setForceLoad] = useState(1);
   const [loading, setLoading] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
+  const [selections, setSelections] = useState([]);
 
   useEffect(() => {
     const getSaves = () => Object.keys(localStorage).filter((k) => k.startsWith("AF_Save"));
@@ -59,19 +66,21 @@ export default function Load() {
     });
   };
 
-  const deleteSave = (save) => {
-    if (confirm(`Are you sure you want to delete ${save.list.name}?`)) {
-      PersistenceService.delete(save.list);
-      setForceLoad(forceLoad + 1);
-      setLocalSaves([]);
-      setDeleteMode(false);
+  const forEachSelection = (callback) => {
+    for (var key of selections) {
+      const actualKey = Object.keys(localStorage).find((x) => x.endsWith(key));
+      callback(JSON.parse(localStorage.getItem(actualKey)));
     }
+    setForceLoad(forceLoad + 1);
+    setLocalSaves([]);
+  };
+
+  const deleteSave = (save) => {
+    PersistenceService.delete(save.list);
   };
 
   const toggleFavourite = (save) => {
     PersistenceService.toggleFavourite(save);
-    setForceLoad(forceLoad + 1);
-    setLocalSaves([]);
   };
 
   const readSingleFile = (e) => {
@@ -145,11 +154,26 @@ export default function Load() {
                   </IconButton>
                 );
 
+                const selected = selections.some((x) => x === save.list.creationTime);
+
+                const selectionBox = (
+                  <Checkbox
+                    checked={selected}
+                    onClick={() => {
+                      setSelections((prev) =>
+                        selected
+                          ? prev.filter((x) => x !== save.list.creationTime)
+                          : prev.concat(save.list.creationTime)
+                      );
+                    }}
+                  />
+                );
+
                 return (
                   <ListItem
                     key={save.list.creationTime}
                     disablePadding
-                    secondaryAction={deleteMode ? deleteButton : favouriteButton}
+                    secondaryAction={selectionBox || (deleteMode ? deleteButton : favouriteButton)}
                   >
                     <ListItemButton onClick={() => loadSave(save)}>
                       <ListItemAvatar>
@@ -191,11 +215,46 @@ export default function Load() {
 
   return (
     <>
-      <MenuBar
-        title="Open a List"
-        onBackClick={() => tryBack(() => router.replace("/"))}
-        right={deleteModeButton}
-      />
+      {selections.length === 0 ? (
+        <MenuBar
+          title="Open a List"
+          onBackClick={() => tryBack(() => router.replace("/"))}
+          right={deleteModeButton}
+        />
+      ) : (
+        <Paper elevation={2} square>
+          <AppBar color="transparent" position="static">
+            <Toolbar>
+              <IconButton
+                size="large"
+                edge="start"
+                color="primary"
+                aria-label="menu"
+                sx={{ mr: 2 }}
+                onClick={() => setSelections([])}
+              >
+                <BackIcon />
+              </IconButton>
+              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                {selections.length} selected lists
+              </Typography>
+              <IconButton color="primary" onClick={() => forEachSelection(toggleFavourite)}>
+                <StarIcon />
+              </IconButton>
+              <IconButton
+                color="primary"
+                onClick={() => {
+                  if (confirm(`Are you sure you want to delete ${selections.length} list(s)?`)) {
+                    forEachSelection(deleteSave);
+                  }
+                }}
+              >
+                <Delete />
+              </IconButton>
+            </Toolbar>
+          </AppBar>
+        </Paper>
+      )}
       <div className="container">
         <input type="file" id="file-input" style={{ display: "none" }} onChange={readSingleFile} />
         <div className="mx-auto" style={{ maxWidth: "480px" }}>
