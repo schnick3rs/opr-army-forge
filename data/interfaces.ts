@@ -10,6 +10,7 @@ export interface ISaveData {
   listPoints: number;
   list: ISavedListState;
   saveVersion: number;
+  favourite: boolean;
 }
 
 export interface ISavedListState extends Omit<ListState, 'units'> {
