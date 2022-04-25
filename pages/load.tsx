@@ -72,7 +72,6 @@ export default function Load() {
     }
     setForceLoad(forceLoad + 1);
     setLocalSaves([]);
-    setSelections([]);
   };
 
   const deleteSave = (save) => {
@@ -224,6 +223,7 @@ export default function Load() {
                 onClick={() => {
                   if (confirm(`Are you sure you want to delete ${selections.length} list(s)?`)) {
                     forEachSelection(deleteSave);
+                    setSelections([]);
                   }
                 }}
               >
