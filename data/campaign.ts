@@ -85,6 +85,57 @@ const traitDefinitions = {
             description: "Friendly units within 6” get +1 to shooting."
           }
         ]
+      },
+      {
+        name: "Shooter",
+        traits: [
+          {
+            name: "Hunter",
+            description: "The hero may shoot even after rush actions."
+          },
+          {
+            name: "Destroyer",
+            description: "The hero gets AP(+1) when shooting."
+          },
+          {
+            name: "Suppressor",
+            description: "Enemies shot at by the hero get -1 to shooting until the end of the round."
+          }
+        ]
+      },
+      {
+        name: "Pathfinder",
+        traits: [
+          {
+            name: "Runner",
+            description: "The hero always moves +2” (even in terrain)."
+          },
+          {
+            name: "Prowler",
+            description: "Enemy units further than 12” get -1 to shooting rolls against the hero."
+          },
+          {
+            name: "Daredevil",
+            description: "The hero ignores dangerous terrain effects."
+          }
+        ]
+      },
+      {
+        name: "Healer",
+        traits: [
+          {
+            name: "Chemist",
+            description: "Friendly units within 6” get +1 to morale tests when in melee."
+          },
+          {
+            name: "Herbalist",
+            description: "Friendly units within 6” may ignore wounds on a roll of 6+."
+          },
+          {
+            name: "Warden",
+            description: "When the hero is activated roll one die, on a 5+ all friendly units within 6” stop being pinned."
+          }
+        ]
       }
     ]
   }
