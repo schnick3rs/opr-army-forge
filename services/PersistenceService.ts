@@ -10,7 +10,6 @@ import UnitService from "./UnitService";
 import UpgradeService from "./UpgradeService";
 import _ from "lodash";
 import { IViewPreferences } from "../pages/view";
-import { CampaignState, loadCampaign } from "../data/campaignSlice";
 
 export default class PersistenceService {
 
@@ -79,7 +78,9 @@ export default class PersistenceService {
           optionId: x.option.id
         })),
         combined: u.combined,
-        joinToUnit: u.joinToUnit
+        joinToUnit: u.joinToUnit,
+        xp: u.xp,
+        traits: u.traits
       }))
     };
   }
@@ -105,13 +106,6 @@ export default class PersistenceService {
     });
   }
 
-  public static updateCampaignSave(campaign: CampaignState) {
-    this.updateSaveData(campaign.saveKey, existingSave => ({
-      ...existingSave,
-      campaign
-    }));
-  }
-
   private static updateSaveData(creationTime: any, modifySaveFunc: (save: ISaveData) => ISaveData) {
     const key = this.getSaveKey(creationTime);
     const localSave = localStorage[key];
@@ -127,10 +121,10 @@ export default class PersistenceService {
     const key = Object
       .keys(localStorage)
       .find(key => key.endsWith(save.list.creationTime));
-      localStorage[key] = JSON.stringify({
-        ...save,
-        favourite: !save.favourite
-      });
+    localStorage[key] = JSON.stringify({
+      ...save,
+      favourite: !save.favourite
+    });
   }
 
   public static delete(list: ListState) {
@@ -228,9 +222,6 @@ export default class PersistenceService {
 
     dispatch(resetLoadedBooks());
     dispatch(setGameSystem(save.gameSystem));
-    if (save.list.campaignMode && save.campaign) {
-      dispatch(loadCampaign(save.campaign));
-    }
     const armyIds = save.armyIds || [save.armyId];
 
     const promises = armyIds.map(id => dispatch(getArmyBookData({
@@ -331,7 +322,7 @@ export default class PersistenceService {
     // ...
     for (let unit of list.units) {
       // TODO: Campaign unit pt cost...?
-      lines.push(`${unit.customName ?? unit.name} [${unit.size}] | Qua ${unit.quality}+ Def ${unit.defense}+ | ${UpgradeService.calculateUnitTotal(unit, null)}pts`);
+      lines.push(`${unit.customName ?? unit.name} [${unit.size}] | Qua ${unit.quality}+ Def ${unit.defense}+ | ${UpgradeService.calculateUnitTotal(unit)}pts`);
       lines.push(getWeapons(unit));
       lines.push(getRules(unit) + "\n");
     }
