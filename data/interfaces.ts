@@ -1,4 +1,3 @@
-import { CampaignState } from "./campaignSlice";
 import { ListState } from "./listSlice";
 
 export interface ISaveData {
@@ -11,7 +10,6 @@ export interface ISaveData {
   listPoints: number;
   list: ISavedListState;
   saveVersion: number;
-  campaign?: CampaignState;
   favourite: boolean;
 }
 
@@ -59,6 +57,8 @@ export interface IUnitSelectionData {
   loadout: IUpgradeGains[];
   combined: boolean;
   joinToUnit?: string;
+  xp: number;
+  traits: string[]; // Trait names only
 }
 
 export interface ISelectedUnit extends IUnit, IUnitSelectionData { }

@@ -16,6 +16,7 @@ import UnitListItem from "./components/UnitListItem";
 
 export function MainList({ onSelected, onUnitRemoved }) {
   const list = useSelector((state: RootState) => state.list);
+  const campaign = useSelector((state: RootState) => state.campaign);
   const loadedArmyBooks = useSelector((state: RootState) => state.army.loadedArmyBooks);
 
   const rootUnits = _.orderBy(

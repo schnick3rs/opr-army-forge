@@ -2,14 +2,12 @@ import { configureStore } from '@reduxjs/toolkit';
 import armyReducer from './armySlice';
 import listReducer from './listSlice';
 import appReducer from './appSlice';
-import campaignReducer from './campaignSlice';
 
 export const store = configureStore({
   reducer: {
       army: armyReducer,
       list: listReducer,
-      app: appReducer,
-      campaign: campaignReducer
+      app: appReducer
   },
 });
 

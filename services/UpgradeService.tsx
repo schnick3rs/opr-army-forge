@@ -14,14 +14,16 @@ import { nanoid } from "nanoid";
 import _ from "lodash";
 import UnitService from "./UnitService";
 import { makeCopy } from "./Helpers";
-import { ICampaignUnit } from "../data/campaignSlice";
 
 export default class UpgradeService {
   private static readonly countRegex = /^(\d+)x\s/;
 
   static calculateListTotal(list: ISelectedUnit[]) {
     // TODO: Campaign unit XP
-    return list.reduce((value, current) => value + UpgradeService.calculateUnitTotal(current, null), 0);
+    return list.reduce(
+      (value, current) => value + UpgradeService.calculateUnitTotal(current),
+      0
+    );
   }
 
   public static buildUpgrades(unit: ISelectedUnit) {
@@ -119,7 +121,7 @@ export default class UpgradeService {
     }
   }
 
-  static calculateUnitTotal(unit: ISelectedUnit, campaignUnit: ICampaignUnit) {
+  static calculateUnitTotal(unit: ISelectedUnit) {
     if (!unit) return 0;
     let cost = unit.cost;
 
@@ -129,8 +131,8 @@ export default class UpgradeService {
       }
     }
 
-    if (campaignUnit) {
-      cost += Math.floor(campaignUnit.xp / 5) * 25;
+    if (unit.xp) {
+      cost += Math.floor(unit.xp / 5) * 25;
     }
 
     return cost;

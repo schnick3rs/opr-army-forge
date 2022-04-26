@@ -267,6 +267,26 @@ export const listSlice = createSlice({
     },
     clearPreview(state) {
       state.unitPreview = null;
+    },
+    adjustXp(state, action: PayloadAction<{ unitId: string, xp: number }>) {
+      const { unitId, xp } = action.payload;
+      const unit = state.units.find(u => u.id === unitId);
+      if (!unit.xp)
+        unit.xp = 0;
+      unit.xp += xp;
+      debounceSave(current(state));
+    },
+    toggleTrait(state, action: PayloadAction<{ unitId: string, trait: string }>) {
+      const { unitId, trait } = action.payload;
+      const unit = state.units.find(u => u.id === unitId);
+      const existingTraitIndex = unit.traits.findIndex(t => t === trait);
+      if (existingTraitIndex >= 0) {
+        unit.traits.splice(existingTraitIndex, 1);
+      } else {
+        unit.traits.push(trait);
+      }
+
+      debounceSave(current(state));
     }
   },
 })
@@ -293,7 +313,9 @@ export const {
   undoRemoveUnit,
   removeUnitsForBook,
   previewUnit,
-  clearPreview
+  clearPreview,
+  adjustXp,
+  toggleTrait
 } = listSlice.actions;
 
 export default listSlice.reducer;
