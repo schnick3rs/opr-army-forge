@@ -270,7 +270,7 @@ export const listSlice = createSlice({
     },
     adjustXp(state, action: PayloadAction<{ unitId: string, xp: number }>) {
       const { unitId, xp } = action.payload;
-      const unit = state.units.find(u => u.id === unitId);
+      const unit = state.units.find(u => u.selectionId === unitId);
       if (!unit.xp)
         unit.xp = 0;
       unit.xp += xp;
@@ -278,7 +278,7 @@ export const listSlice = createSlice({
     },
     toggleTrait(state, action: PayloadAction<{ unitId: string, trait: string }>) {
       const { unitId, trait } = action.payload;
-      const unit = state.units.find(u => u.id === unitId);
+      const unit = state.units.find(u => u.selectionId === unitId);
       const existingTraitIndex = unit.traits.findIndex(t => t === trait);
       if (existingTraitIndex >= 0) {
         unit.traits.splice(existingTraitIndex, 1);
