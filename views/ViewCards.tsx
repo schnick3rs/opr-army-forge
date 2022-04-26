@@ -13,7 +13,6 @@ import _ from "lodash";
 import { ISelectedUnit } from "../data/interfaces";
 import RuleList from "./components/RuleList";
 import { IViewPreferences } from "../pages/view";
-import { ICampaignUnit } from "../data/campaignSlice";
 
 interface ViewCardsProps {
   prefs: IViewPreferences;
@@ -21,7 +20,6 @@ interface ViewCardsProps {
 
 export default function ViewCards({ prefs }: ViewCardsProps) {
   const list = useSelector((state: RootState) => state.list);
-  const campaign = useSelector((state: RootState) => state.campaign);
   const army = useSelector((state: RootState) => state.army);
 
   const gameRules = army.rules;
@@ -55,7 +53,6 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
         count={unitCount}
         prefs={prefs}
         ruleDefinitions={ruleDefinitions}
-        campaignUnit={campaign?.units?.find((u) => u.unitId === unit.selectionId)}
       />
     );
   };
@@ -136,10 +133,9 @@ interface UnitCardProps {
   count: number;
   prefs: IViewPreferences;
   ruleDefinitions: any;
-  campaignUnit: ICampaignUnit;
 }
 
-function UnitCard({ unit, rules, count, prefs, ruleDefinitions, campaignUnit }: UnitCardProps) {
+function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps) {
   const toughness = toughFromUnit(unit);
 
   const ruleKeys = rules.keys;
@@ -219,22 +215,22 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions, campaignUnit }: 
           </span>
           {prefs.showPointCosts && (
             <span className="is-size-6 ml-1" style={{ color: "#666666" }}>
-              - {UpgradeService.calculateUnitTotal(unit, campaignUnit)}pts
+              - {UpgradeService.calculateUnitTotal(unit)}pts
             </span>
           )}
         </h3>
         {stats}
         {rulesSection}
-        {campaignUnit && (
-            <div className="px-2">
-              {campaignUnit.traits.map((trait, i) => (
-                <span key={trait} style={{ fontWeight: 600 }}>
-                  {i === 0 ? "" : ", "}
-                  {trait}
-                </span>
-              ))}
-            </div>
-          )}
+        {unit.traits?.length > 0 && (
+          <div className="px-2">
+            {unit.traits.map((trait, i) => (
+              <span key={trait} style={{ fontWeight: 600 }}>
+                {i === 0 ? "" : ", "}
+                {trait}
+              </span>
+            ))}
+          </div>
+        )}
         <UnitEquipmentTable unit={unit} square />
       </div>
     </Card>
