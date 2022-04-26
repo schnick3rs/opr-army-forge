@@ -32,7 +32,7 @@ export default function CampaignUpgrades({ unit, gameSystem }: CampaignUpgradesP
       <div key={trait.name} className="is-flex is-align-items-center">
         <div className="is-flex-grow-1 pr-2">{trait.name}</div>
         <Checkbox
-          checked={!!unit.traits.find((t) => t === trait.name)}
+          checked={!!unit.traits?.find((t) => t === trait.name)}
           onClick={() => toggleUnitTrait(trait)}
           value={trait.name}
           disabled={unit.xp < 5}

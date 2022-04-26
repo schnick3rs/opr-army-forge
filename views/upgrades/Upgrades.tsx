@@ -218,7 +218,7 @@ export function Upgrades({ mobile = false }) {
         </Paper>
       )}
 
-      {list.campaignMode && selectedUnit && (
+      {list.campaignMode && selectedUnit && !previewMode && (
         <CampaignUpgrades unit={selectedUnit} gameSystem={gameSystem} />
       )}
 
