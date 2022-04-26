@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getArmyBookData } from "../../data/armySlice";
-import { initialiseCampaign } from "../../data/campaignSlice";
 import { createList } from "../../data/listSlice";
 import { RootState } from "../../data/store";
 import PersistenceService from "../../services/PersistenceService";
@@ -53,8 +52,6 @@ export function CreateView(props: CreateViewProps) {
         campaignMode: isCampaignList,
       })
     );
-
-    if (isCampaignList) dispatch(initialiseCampaign(creationTime));
 
     router.push({ pathname: "/list", query: { listId: creationTime } });
   };
