@@ -2,7 +2,6 @@ import { useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import {
-  AppBar,
   Button,
   IconButton,
   List,
@@ -12,10 +11,12 @@ import {
   ListItemText,
   CircularProgress,
   Paper,
+  Checkbox,
   Toolbar,
+  Icon,
+  AppBar,
   Typography,
 } from "@mui/material";
-import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import _ from "lodash";
 import { Delete } from "@mui/icons-material";
@@ -25,6 +26,9 @@ import ArmyImage from "../views/components/ArmyImage";
 import { store } from "../data/store";
 import { MenuBar } from "../views/components/MenuBar";
 import { tryBack } from "../services/Helpers";
+import StarOutlineIcon from "@mui/icons-material/StarOutline";
+import StarIcon from "@mui/icons-material/Star";
+import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 
 export default function Load() {
   const dispatch = useDispatch<typeof store.dispatch>();
@@ -32,6 +36,7 @@ export default function Load() {
   const [localSaves, setLocalSaves] = useState([]);
   const [forceLoad, setForceLoad] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [selections, setSelections] = useState([]);
 
   useEffect(() => {
     const getSaves = () => Object.keys(localStorage).filter((k) => k.startsWith("AF_Save"));
@@ -60,12 +65,21 @@ export default function Load() {
     });
   };
 
-  const deleteSave = (save) => {
-    if (confirm(`Are you sure you want to delete ${save.list.name}?`)) {
-      PersistenceService.delete(save.list);
-      setForceLoad(forceLoad + 1);
-      setLocalSaves([]);
+  const forEachSelection = (callback) => {
+    for (var key of selections) {
+      const actualKey = Object.keys(localStorage).find((x) => x.endsWith(key));
+      callback(JSON.parse(localStorage.getItem(actualKey)));
     }
+    setForceLoad(forceLoad + 1);
+    setLocalSaves([]);
+  };
+
+  const deleteSave = (save) => {
+    PersistenceService.delete(save.list);
+  };
+
+  const toggleFavourite = (save) => {
+    PersistenceService.toggleFavourite(save);
   };
 
   const readSingleFile = (e) => {
@@ -105,9 +119,120 @@ export default function Load() {
     reader.readAsText(file);
   };
 
+  const parsedSaves = localSaves.map((key) => JSON.parse(localStorage[key]));
+
+  const SaveList = ({ saves }) => {
+    return (
+      <Paper square elevation={0}>
+        <List>
+          {_.sortBy(saves, (save) => save.modified)
+            .reverse()
+            .map((save) => {
+              try {
+                const modified = new Date(save.modified);
+                const time = modified.getHours() + ":" + modified.getMinutes();
+                const points = save.listPoints;
+                const title = (
+                  <>
+                    <span style={{ fontWeight: 600 }}>
+                      {save.gameSystem?.toUpperCase()} - {save.list.name}
+                    </span>
+                    <span style={{ color: "#656565" }}> • {points}pts</span>
+                  </>
+                );
+
+                const selected = selections.some((x) => x === save.list.creationTime);
+
+                const selectionBox = (
+                  <Checkbox
+                    checked={selected}
+                    onClick={() => {
+                      setSelections((prev) =>
+                        selected
+                          ? prev.filter((x) => x !== save.list.creationTime)
+                          : prev.concat(save.list.creationTime)
+                      );
+                    }}
+                  />
+                );
+
+                return (
+                  <ListItem
+                    key={save.list.creationTime}
+                    disablePadding
+                    secondaryAction={selectionBox}
+                  >
+                    <ListItemButton onClick={() => loadSave(save)}>
+                      <ListItemAvatar>
+                        <ArmyImage
+                          image={save.coverImagePath}
+                          name={save.armyFaction || save.armyName}
+                          armyData={{ gameSystem: save.gameSystem }}
+                          size={"32px"}
+                        />
+                      </ListItemAvatar>
+                      <ListItemText
+                        className={"ml-2" + (save.saveVersion >= 2 ? "" : " has-text-danger")}
+                        primary={title}
+                        secondary={
+                          save.saveVersion >= 2
+                            ? "Modified " + modified.toLocaleDateString() + " " + time
+                            : "Outdated save format!"
+                        }
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                );
+              } catch (e) {
+                console.error(e);
+              }
+            })}
+        </List>
+      </Paper>
+    );
+  };
+
+  const favourites = parsedSaves.filter((s) => s.favourite);
+
   return (
     <>
-      <MenuBar title="Open a List" onBackClick={() => tryBack(() => router.replace("/"))} />
+      {selections.length === 0 ? (
+        <MenuBar title="Open a List" onBackClick={() => tryBack(() => router.replace("/"))} />
+      ) : (
+        <Paper elevation={2} square>
+          <AppBar color="transparent" position="static">
+            <Toolbar>
+              <IconButton
+                size="large"
+                edge="start"
+                color="primary"
+                aria-label="menu"
+                sx={{ mr: 2 }}
+                onClick={() => setSelections([])}
+              >
+                <BackIcon />
+              </IconButton>
+              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                {selections.length} selected lists
+              </Typography>
+              <IconButton color="primary" onClick={() => forEachSelection(toggleFavourite)}>
+                <StarIcon />
+              </IconButton>
+              <IconButton
+                color="primary"
+                onClick={() => {
+                  if (confirm(`Are you sure you want to delete ${selections.length} list(s)?`)) {
+                    forEachSelection(deleteSave);
+                    setSelections([]);
+                  }
+                }}
+              >
+                <Delete />
+              </IconButton>
+            </Toolbar>
+          </AppBar>
+        </Paper>
+      )}
       <div className="container">
         <input type="file" id="file-input" style={{ display: "none" }} onChange={readSingleFile} />
         <div className="mx-auto" style={{ maxWidth: "480px" }}>
@@ -117,85 +242,23 @@ export default function Load() {
             </Button>
           </div>
           {loading && (
-            <div className="is-flex is-flex-direction-column is-align-items-center	">
+            <div className="is-flex is-flex-direction-column is-align-items-center">
               <CircularProgress />
               <p>Loading army data...</p>
             </div>
           )}
-          <p className="px-4 mb-2" style={{ fontWeight: 600 }}>
+          {favourites.length > 0 && (
+            <>
+              <p className="px-4 mb-2" style={{ fontWeight: 600 }}>
+                Favourite Lists
+              </p>
+              <SaveList saves={favourites} />
+            </>
+          )}
+          <p className="px-4 my-2" style={{ fontWeight: 600 }}>
             Saved Lists
           </p>
-          <Paper square elevation={0}>
-            <List>
-              {_.sortBy(
-                localSaves.map((save) => JSON.parse(localStorage[save])),
-                (save) => save.modified
-              )
-                .reverse()
-                .map((save) => {
-                  try {
-                    const modified = new Date(save.modified);
-                    const time = modified.getHours() + ":" + modified.getMinutes();
-                    const points = save.listPoints;
-                    const title = (
-                      <>
-                        <span style={{ fontWeight: 600 }}>
-                          {save.gameSystem?.toUpperCase()} - {save.list.name}
-                        </span>
-                        <span style={{ color: "#656565" }}> • {points}pts</span>
-                      </>
-                    );
-
-                    const deleteButton = (
-                      <IconButton onClick={() => deleteSave(save)}>
-                        <Delete />
-                      </IconButton>
-                    );
-
-                    return (
-                      <ListItem
-                        key={save.list.creationTime}
-                        disablePadding
-                        secondaryAction={deleteButton}
-                      >
-                        <ListItemButton onClick={() => loadSave(save)}>
-                          <ListItemAvatar>
-                            {/* <Avatar sx={{ bgcolor: "#CcE7Fa" }} style={{ overflow: "visible" }}>
-                              <div className="is-flex" style={{
-                                height: "100%",
-                                width: "100%",
-                                backgroundImage: `url("img/gf_armies/${save.armyName}.png")`,
-                                backgroundPosition: "center",
-                                backgroundSize: "contain",
-                                backgroundRepeat: 'no-repeat',
-                                position: "relative", zIndex: 1
-                              }}></div>
-                            </Avatar> */}
-                            <ArmyImage
-                              image={save.coverImagePath}
-                              name={save.armyFaction || save.armyName}
-                              armyData={{ gameSystem: save.gameSystem }}
-                              size={"32px"}
-                            />
-                          </ListItemAvatar>
-                          <ListItemText
-                            className={"ml-2" + (save.saveVersion >= 2 ? "" : " has-text-danger")}
-                            primary={title}
-                            secondary={
-                              save.saveVersion >= 2
-                                ? "Modified " + modified.toLocaleDateString() + " " + time
-                                : "Outdated save format!"
-                            }
-                          />
-                        </ListItemButton>
-                      </ListItem>
-                    );
-                  } catch (e) {
-                    console.error(e);
-                  }
-                })}
-            </List>
-          </Paper>
+          <SaveList saves={parsedSaves.filter((s) => !s.favourite)} />
         </div>
       </div>
     </>

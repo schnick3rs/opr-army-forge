@@ -12,6 +12,7 @@ export interface ISaveData {
   list: ISavedListState;
   saveVersion: number;
   campaign?: CampaignState;
+  favourite: boolean;
 }
 
 export interface ISavedListState extends Omit<ListState, 'units'> {

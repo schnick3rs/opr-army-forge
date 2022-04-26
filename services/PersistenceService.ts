@@ -52,7 +52,8 @@ export default class PersistenceService {
       modified: new Date().toJSON(),
       saveVersion: this.currentSaveVersion,
       listPoints: 0,
-      list: this.getDataForSave(list)
+      list: this.getDataForSave(list),
+      favourite: false
     };
 
     console.log("Creating save...", saveData);
@@ -120,6 +121,16 @@ export default class PersistenceService {
     const saveData = modifySaveFunc(JSON.parse(localSave));
 
     localStorage[key] = JSON.stringify(saveData);
+  }
+
+  public static toggleFavourite(save: ISaveData) {
+    const key = Object
+      .keys(localStorage)
+      .find(key => key.endsWith(save.list.creationTime));
+      localStorage[key] = JSON.stringify({
+        ...save,
+        favourite: !save.favourite
+      });
   }
 
   public static delete(list: ListState) {

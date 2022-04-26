@@ -32,17 +32,12 @@ export default function UnitEquipmentTable({
 
   const weaponsFromItems = _.flatMap(
     unit.loadout.filter((e) => e.type === "ArmyBookItem"),
-    (e) =>
-      (e as IUpgradeGainsItem).content.filter(
-        (item) => item.type === "ArmyBookWeapon"
-      )
+    (e) => (e as IUpgradeGainsItem).content.filter((item) => item.type === "ArmyBookWeapon")
   );
   const weapons = unit.loadout
     .filter((e) => isWeapon(e))
-    .concat(
-      weaponsFromItems.map((item) => ({ ...item, count: item.count ?? 1 }))
-    );
-  
+    .concat(weaponsFromItems.map((item) => ({ ...item, count: item.count ?? 1 })));
+
   const equipment = unit.loadout.filter((e) => !isWeapon(e));
   const combinedEquipment = equipment.map((e) => {
     if (e.type === "ArmyBookItem")
@@ -62,20 +57,16 @@ export default function UnitEquipmentTable({
   const hasWeapons = weapons.length > 0;
   const hasEquipment = equipment.length > 0; // || itemUpgrades.length > 0;
 
-  const weaponGroups = _.groupBy(
-    weapons,
-    (w) => pluralise.singular(w.name ?? w.label) + w.attacks
-  );
-  const itemGroups = _.groupBy(combinedEquipment, (w) =>
-    pluralise.singular(w.name ?? w.label)
-  );
+  const weaponGroups = _.groupBy(weapons, (w) => pluralise.singular(w.name ?? w.label) + w.attacks);
+  const itemGroups = _.groupBy(combinedEquipment, (w) => pluralise.singular(w.name ?? w.label));
+  const weaponGroupKeys = Object.keys(weaponGroups);
 
   const cellStyle = {
     paddingLeft: "8px",
     paddingRight: "8px",
     borderBottom: "none",
   };
-  const headerStyle = { ...cellStyle, fontWeight: 600 };
+  const headerStyle = { ...cellStyle, fontWeight: 600, paddingTop: "2px", paddingBottom: "2px" };
 
   return (
     <>
@@ -84,7 +75,7 @@ export default function UnitEquipmentTable({
           component={Paper}
           square={square}
           elevation={0}
-          style={{ border: "1px solid rgba(0,0,0,.12)" }}
+          style={{ borderBottom: "1px solid rgba(0,0,0,.12)" }}
         >
           <Table size="small">
             <TableHead>
@@ -97,13 +88,20 @@ export default function UnitEquipmentTable({
               </TableRow>
             </TableHead>
             <TableBody>
-              {Object.keys(weaponGroups).map((key) => {
+              {weaponGroupKeys.map((key, i) => {
                 const group: IUpgradeGainsWeapon[] = weaponGroups[key];
                 const upgrade = group[0];
                 const count = group.reduce((c, next) => c + next.count, 0);
                 const e = { ...upgrade, count };
 
-                return <WeaponRow key={key} weapon={e} isProfile={false} />;
+                return (
+                  <WeaponRow
+                    key={key}
+                    weapon={e}
+                    isProfile={false}
+                    isLastRow={i === weaponGroupKeys.length - 1}
+                  />
+                );
               })}
             </TableBody>
           </Table>
@@ -113,8 +111,9 @@ export default function UnitEquipmentTable({
         <TableContainer
           component={Paper}
           className="mt-2"
+          square={square}
           elevation={0}
-          style={{ border: "1px solid rgba(0,0,0,.12)" }}
+          style={{ borderBottom: "1px solid rgba(0,0,0,.12)" }}
         >
           <Table size="small">
             <TableHead>
@@ -126,10 +125,7 @@ export default function UnitEquipmentTable({
             <TableBody>
               {Object.values(itemGroups).map((group: any[], index) => {
                 const e = group[0];
-                const count = group.reduce(
-                  (c, next) => c + (next.count || 1),
-                  0
-                );
+                const count = group.reduce((c, next) => c + (next.count || 1), 0);
 
                 return (
                   <TableRow key={index}>
@@ -154,20 +150,25 @@ export default function UnitEquipmentTable({
 export function WeaponRow({
   weapon,
   isProfile,
+  isLastRow,
 }: {
   weapon: IUpgradeGainsWeapon;
   isProfile: boolean;
+  isLastRow: boolean;
 }) {
   const count = weapon.count;
-  const name =
-    count > 1 ? pluralise.plural(weapon.name) : pluralise.singular(weapon.name);
+  const name = count > 1 ? pluralise.plural(weapon.name) : pluralise.singular(weapon.name);
   const weaponCount = count > 1 ? `${count}x ` : null;
   const rules = weapon.specialRules.filter((r) => r.name !== "AP");
 
-  const cellStyle = { paddingLeft: "8px", paddingRight: "8px" };
+  const cellStyle = {
+    paddingLeft: "8px",
+    paddingRight: "8px"
+  };
   const borderStyle = {
     borderBottom: "none",
     borderTop: isProfile ? "none" : "1px solid rgb(224, 224, 224)",
+    paddingBottom: isLastRow ? "12px" : null,
   };
 
   return (
@@ -176,21 +177,11 @@ export function WeaponRow({
         {weaponCount}
         {isProfile ? `- ${name}` : name}
       </TableCell>
+      <TableCell style={borderStyle}>{weapon.range ? weapon.range + '"' : "-"}</TableCell>
+      <TableCell style={borderStyle}>{weapon.attacks ? "A" + weapon.attacks : "-"}</TableCell>
+      <TableCell style={borderStyle}>{EquipmentService.getAP(weapon) || "-"}</TableCell>
       <TableCell style={borderStyle}>
-        {weapon.range ? weapon.range + '"' : "-"}
-      </TableCell>
-      <TableCell style={borderStyle}>
-        {weapon.attacks ? "A" + weapon.attacks : "-"}
-      </TableCell>
-      <TableCell style={borderStyle}>
-        {EquipmentService.getAP(weapon) || "-"}
-      </TableCell>
-      <TableCell style={borderStyle}>
-        {rules && rules.length > 0 ? (
-          <RuleList specialRules={rules} />
-        ) : (
-          <span>-</span>
-        )}
+        {rules && rules.length > 0 ? <RuleList specialRules={rules} /> : <span>-</span>}
       </TableCell>
     </TableRow>
   );

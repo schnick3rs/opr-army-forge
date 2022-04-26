@@ -62,7 +62,7 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
 
   return (
     <>
-      <div className={style.grid}>
+      <div className={style.grid + " mx-4"}>
         {prefs.combineSameUnits
           ? Object.values(unitGroups).map((grp: ISelectedUnit[], i) => {
               const unit = grp[0];
@@ -102,31 +102,29 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
           ))}
       </div>
       {!prefs.showFullRules && (
-        <div className={`mx-4 ${style.card}`}>
-          <Card elevation={1}>
-            <div className="mb-4">
-              <div className="card-body">
-                <h3 className="is-size-4 my-2" style={{ fontWeight: 500, textAlign: "center" }}>
-                  Special Rules
-                </h3>
-                <hr className="my-0" />
+        <Card elevation={1} className="mt-4">
+          <div className="mb-4">
+            <div className="card-body">
+              <h3 className="is-size-4 my-2" style={{ fontWeight: 500, textAlign: "center" }}>
+                Special Rules
+              </h3>
+              <hr className="my-0" />
 
-                <Paper square elevation={0}>
-                  <div className={`px-2 my-2 ${style.grid} has-text-left`}>
-                    {_.uniq(usedRules)
-                      .sort()
-                      .map((r, i) => (
-                        <p key={i} style={{ breakInside: "avoid" }}>
-                          <span style={{ fontWeight: 600 }}>{r} - </span>
-                          <span>{ruleDefinitions.find((t) => t.name === r)?.description}</span>
-                        </p>
-                      ))}
-                  </div>
-                </Paper>
-              </div>
+              <Paper square elevation={0}>
+                <div className={`px-2 my-2 ${style.grid} has-text-left`}>
+                  {_.uniq(usedRules)
+                    .sort()
+                    .map((r, i) => (
+                      <p key={i} style={{ breakInside: "avoid" }}>
+                        <span style={{ fontWeight: 600 }}>{r} - </span>
+                        <span>{ruleDefinitions.find((t) => t.name === r)?.description}</span>
+                      </p>
+                    ))}
+                </div>
+              </Paper>
             </div>
-          </Card>
-        </div>
+          </div>
+        </Card>
       )}
     </>
   );
@@ -152,79 +150,82 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions, campaignUnit }: 
   // Sort rules alphabetically
   ruleKeys.sort((a, b) => a.localeCompare(b));
 
-  return (
-    <div className={style.card}>
-      <Card elevation={1}>
-        <div className="card-body mb-4">
-          <h3 className="is-size-5 my-2" style={{ fontWeight: 500, textAlign: "center" }}>
-            {count > 1 ? `${count}x ` : ""}
-            {unit.customName || unit.name}
-            <span className="" style={{ color: "#666666" }}>
-              {" "}
-              [{unit.size}]
+  const stats = (
+    <div className="is-flex mb-3" style={{ justifyContent: "center" }}>
+      <div className={style.profileStat2}>
+        <p>Quality</p>
+        <div className="stat-break"></div>
+        <p>{unit.quality}+</p>
+      </div>
+      <div className={style.profileStat2}>
+        <p>Defense</p>
+        <div className="stat-break"></div>
+        <p>{unit.defense}+</p>
+      </div>
+      {toughness > 1 && (
+        <div className={style.profileStat2}>
+          <p>Tough</p>
+          <div className="stat-break"></div>
+          <p>{toughness}</p>
+        </div>
+      )}
+    </div>
+  );
+
+  const rulesSection = ruleKeys?.length > 0 && (
+    <Paper className="px-2 mb-4" square elevation={0} style={{ fontSize: "14px" }}>
+      {ruleKeys.map((key, index) => {
+        const group = ruleGroups[key];
+
+        if (!prefs.showFullRules)
+          return (
+            <span key={index}>
+              {index === 0 ? "" : ", "}
+              <RuleList specialRules={group} />
             </span>
-            {prefs.showPointCosts && (
-              <span className="is-size-6 ml-1" style={{ color: "#666666" }}>
-                - {UpgradeService.calculateUnitTotal(unit)}pts
-              </span>
-            )}
-          </h3>
-          <hr className="my-0" />
+          );
 
-          <div className="is-flex" style={{ justifyContent: "center" }}>
-            <div className={style.profileStat}>
-              <p>Quality</p>
-              <p>{unit.quality}+</p>
-            </div>
-            <div className={style.profileStat}>
-              <p>Defense</p>
-              <p>{unit.defense}+</p>
-            </div>
-            {toughness > 1 && (
-              <div className={style.profileStat}>
-                <p>Tough</p>
-                <p>{toughness}</p>
-              </div>
-            )}
-          </div>
-          <UnitEquipmentTable unit={unit} square />
-          {ruleKeys?.length > 0 && (
-            <Paper square elevation={0}>
-              <div className="px-2 my-2" style={{ fontSize: "0.875rem" }}>
-                {ruleKeys.map((key, index) => {
-                  const group = ruleGroups[key];
+        const rule = group[0];
+        const rating = group.reduce(
+          (total, next) => (next.rating ? total + parseInt(next.rating) : total),
+          0
+        );
 
-                  if (!prefs.showFullRules)
-                    return (
-                      <span key={index}>
-                        {index === 0 ? "" : ", "}
-                        <RuleList specialRules={group} />
-                      </span>
-                    );
+        const ruleDefinition = ruleDefinitions.filter(
+          (r) => /(.+?)(?:\(|$)/.exec(r.name)[0] === rule.name
+        )[0];
 
-                  const rule = group[0];
-                  const rating = group.reduce(
-                    (total, next) => (next.rating ? total + parseInt(next.rating) : total),
-                    0
-                  );
+        return (
+          <p key={index}>
+            <span style={{ fontWeight: 600 }}>
+              {RulesService.displayName({ ...rule, rating }, count)} -
+            </span>
+            <span> {ruleDefinition?.description || ""}</span>
+          </p>
+        );
+      })}
+    </Paper>
+  );
 
-                  const ruleDefinition = ruleDefinitions.filter(
-                    (r) => /(.+?)(?:\(|$)/.exec(r.name)[0] === rule.name
-                  )[0];
-
-                  return (
-                    <p key={index}>
-                      <span style={{ fontWeight: 600 }}>
-                        {RulesService.displayName({ ...rule, rating }, count)} -
-                      </span>
-                      <span> {ruleDefinition?.description || ""}</span>
-                    </p>
-                  );
-                })}
-              </div>
-            </Paper>
+  return (
+    <Card elevation={1} className={style.card}>
+      <div className="card-body">
+        <h3 className="is-size-5 my-2" style={{ fontWeight: 600, textAlign: "center" }}>
+          {count > 1 ? `${count}x ` : ""}
+          {unit.customName || unit.name}
+          <span className="" style={{ color: "#666666" }}>
+            {" "}
+            [{unit.size}]
+          </span>
+          {prefs.showPointCosts && (
+            <span className="is-size-6 ml-1" style={{ color: "#666666" }}>
+              - {UpgradeService.calculateUnitTotal(unit, campaignUnit)}pts
+            </span>
           )}
-          {campaignUnit && (
+        </h3>
+        {stats}
+        {rulesSection}
+        {campaignUnit && (
             <div className="px-2">
               {campaignUnit.traits.map((trait, i) => (
                 <span key={trait} style={{ fontWeight: 600 }}>
@@ -234,9 +235,9 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions, campaignUnit }: 
               ))}
             </div>
           )}
-        </div>
-      </Card>
-    </div>
+        <UnitEquipmentTable unit={unit} square />
+      </div>
+    </Card>
   );
 }
 

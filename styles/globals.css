@@ -82,6 +82,10 @@ div[role="tooltip"] {
   .no-print {
     display:none !important;
   }
+  * {
+    background-color: transparent !important;
+    color: black !important;
+  }
 }
 
 hr {
