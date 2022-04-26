@@ -21,7 +21,6 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SpellsTable from "../SpellsTable";
 import { CustomTooltip } from "../components/CustomTooltip";
 import CampaignUpgrades from "./CampaignUpgrades";
-import UpgradeService from "../../services/UpgradeService";
 import { IGameRule } from "../../data/armySlice";
 
 export function Upgrades({ mobile = false }) {
