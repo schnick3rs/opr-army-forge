@@ -180,11 +180,18 @@ function UnitCard({ unit, pointCost, count, prefs, ruleDefinitions }: UnitCardPr
           (x) => x.type === "ArmyBookRule"
         ) as any;
         const itemHasRules = itemRules.length > 0;
-        console.log("ITEM GROUP", group);
+
+        const upgrade = unit.selectedUpgrades.find((x) =>
+          x.option.gains.some((y) => y.name === item.name)
+        )?.upgrade;
+        const itemAffectsAll = upgrade?.affects === "all";
+        const hasStackableRule = itemRules.some((x) => x.name === "Impact");
+        const hideCount = itemAffectsAll && !hasStackableRule;
+
         return (
           <span key={index}>
             {", "}
-            {count > 1 ? `${count}x ` : ""}
+            {count > 1 && !hideCount && `${count}x `}
             {item.name}
             {itemHasRules && (
               <>
