@@ -163,6 +163,7 @@ export default function Load() {
                 onSelect={selectSave}
                 onItemClick={onItemClick}
                 showCheckbox={selections?.length > 0 || !isMobile}
+                isMobile={isMobile}
               />
             ))}
         </List>
@@ -249,15 +250,23 @@ interface SaveListItemProps {
   onItemClick: (save: ISaveData) => void;
   onSelect: (save: ISaveData) => void;
   showCheckbox: boolean;
+  isMobile: boolean;
 }
 
-function SaveListItem({ save, selected, onItemClick, onSelect, showCheckbox }: SaveListItemProps) {
+function SaveListItem({
+  save,
+  selected,
+  onItemClick,
+  onSelect,
+  showCheckbox,
+  isMobile,
+}: SaveListItemProps) {
   const bindLongPress = useLongPress(() => onSelect(save), {
     onCancel: (_, { reason }) => {
       console.log("reason", reason);
       return reason === "canceled-by-timeout" && onItemClick(save);
     },
-    detect: "touch" as any,
+    detect: (isMobile ? "touch" : "mouse") as any,
     cancelOnMovement: true,
   });
   //const selected = selections.some((x) => x === save.list.creationTime);

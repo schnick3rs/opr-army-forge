@@ -1,6 +1,8 @@
 import { ListState } from "../data/listSlice";
 import _ from "lodash";
 import { ArmyState } from "../data/armySlice";
+import UnitService from "./UnitService";
+import UpgradeService from "./UpgradeService";
 
 const unitPointThresholds = {
   "gf": 200,
@@ -80,6 +82,19 @@ export default class ValidationService {
 
       if (new Set(joinedIds).size < joinedIds.length)
         errors.push(`A unit can only have a maximum of one Hero attached.`);
+    }
+
+    if (army.loadedArmyBooks.length > 2) {
+      errors.push("Players may bring units from up to two factions in the same list.")
+    }
+
+    const unitsByArmy = _.groupBy(units, x => x.armyId);
+    const pointsByArmy = Object.keys(unitsByArmy)
+      .map((key) => unitsByArmy[key]
+        .reduce((pts, unit) => pts + UpgradeService.calculateUnitTotal(unit), 0));
+
+    if (!pointsByArmy.some(x => (x / points * 100) >= 60)) {
+      errors.push("Mixed armies must consist of at least 60% worth of units from their primary faction.");
     }
 
     return errors;
