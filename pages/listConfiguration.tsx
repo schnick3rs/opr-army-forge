@@ -4,7 +4,7 @@ import { RootState, store } from "../data/store";
 import { useRouter } from "next/router";
 import { TextField } from "@mui/material";
 
-import { resetList } from "../data/listSlice";
+import { resetList, selectUnit } from "../data/listSlice";
 import { getArmyBooks, setGameSystem } from "../data/armySlice";
 import ArmyImage from "../views/components/ArmyImage";
 import { MenuBar } from "../views/components/MenuBar";
@@ -22,9 +22,7 @@ export default function ListConfiguration() {
   const listState = useSelector((state: RootState) => state.list);
 
   const [armyName, setArmyName] = useState(isEdit ? listState.name : "");
-  const [pointsLimit, setPointsLimit] = useState(
-    isEdit ? listState.pointsLimit : null
-  );
+  const [pointsLimit, setPointsLimit] = useState(isEdit ? listState.pointsLimit : null);
 
   const armyData = armyState.loadedArmyBooks?.[0];
 
@@ -45,6 +43,7 @@ export default function ListConfiguration() {
 
   // Reset list if not edit mode
   useEffect(() => {
+    dispatch(selectUnit(null));
     if (!isEdit) dispatch(resetList());
   }, []);
 
@@ -56,20 +55,14 @@ export default function ListConfiguration() {
   return (
     <>
       <MenuBar
-        title={(isEdit ? "List Details" : (armyData?.name || "New Army"))}
+        title={isEdit ? "List Details" : armyData?.name || "New Army"}
         onBackClick={() => router.back()}
         transparent
       />
-      <div
-        className="is-flex is-flex-direction-column p-4 mx-auto"
-        style={{ maxWidth: "480px" }}
-      >
+      <div className="is-flex is-flex-direction-column p-4 mx-auto" style={{ maxWidth: "480px" }}>
         <div className="mb-6">
           {armyData && (
-            <ArmyImage
-              name={armyData?.factionName ?? armyData?.name}
-              armyData={armyState}
-            />
+            <ArmyImage name={armyData?.factionName ?? armyData?.name} armyData={armyState} />
           )}
         </div>
         <TextField
@@ -85,9 +78,7 @@ export default function ListConfiguration() {
           type="number"
           className="mb-4"
           value={pointsLimit ?? ""}
-          onChange={(e) =>
-            setPointsLimit(e.target.value ? parseInt(e.target.value) : null)
-          }
+          onChange={(e) => setPointsLimit(e.target.value ? parseInt(e.target.value) : null)}
         />
         <MultipleArmySelections />
         {isEdit ? (
