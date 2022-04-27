@@ -9,7 +9,6 @@ import {
 } from "@mui/material";
 import {
   ISelectedUnit,
-  IUpgradeGains,
   IUpgradeGainsItem,
   IUpgradeGainsRule,
   IUpgradeGainsWeapon,
@@ -17,16 +16,17 @@ import {
 import EquipmentService from "../services/EquipmentService";
 import pluralise from "pluralize";
 import RuleList from "./components/RuleList";
-import { Fragment } from "react";
 import _ from "lodash";
 import DataParsingService from "../services/DataParsingService";
 
 export default function UnitEquipmentTable({
   unit,
   square,
+  hideEquipment = false
 }: {
   unit: ISelectedUnit;
   square: boolean;
+  hideEquipment: boolean;
 }) {
   const isWeapon = (e) => e.attacks;
 
@@ -107,7 +107,7 @@ export default function UnitEquipmentTable({
           </Table>
         </TableContainer>
       )}
-      {hasEquipment && (
+      {hasEquipment && !hideEquipment && (
         <TableContainer
           component={Paper}
           className="mt-2"

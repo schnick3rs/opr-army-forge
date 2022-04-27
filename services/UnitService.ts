@@ -34,6 +34,18 @@ export default class UnitService {
       .reduce((value, option) => value.concat(option.gains), []);
   }
 
+  public static getUpgradeRules(unit: ISelectedUnit): IUpgradeGainsRule[] {
+    return this
+      .getAllUpgrades(unit, true)
+      .filter(x => x.type === "ArmyBookRule") as IUpgradeGainsRule[];
+  }
+
+  public static getUpgradeItems(unit: ISelectedUnit): IUpgradeGainsItem[] {
+    return this
+      .getAllUpgrades(unit, true)
+      .filter(x => x.type === "ArmyBookItem") as IUpgradeGainsItem[];
+  }
+
   public static getAllUpgradedRules(unit: ISelectedUnit): IUpgradeGainsRule[] {
     const upgrades = this.getAllUpgrades(unit, true);
 

@@ -10,7 +10,7 @@ import { groupBy, makeCopy } from "../services/Helpers";
 import UnitService from "../services/UnitService";
 import UpgradeService from "../services/UpgradeService";
 import _ from "lodash";
-import { ISelectedUnit } from "../data/interfaces";
+import { ISelectedUnit, IUpgradeGainsItem, IUpgradeGainsRule } from "../data/interfaces";
 import RuleList from "./components/RuleList";
 import { IViewPreferences } from "../pages/view";
 
@@ -44,7 +44,8 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
     };
   };
 
-  const getAttachedUnit = (u: ISelectedUnit) => units.find((x) => x.joinToUnit === u.selectionId && x.combined);
+  const getAttachedUnit = (u: ISelectedUnit) =>
+    units.find((x) => x.joinToUnit === u.selectionId && x.combined);
 
   const viewUnits = units
     .filter((u) => !u.combined || !u.joinToUnit)
@@ -58,7 +59,15 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
     const rules = getRules(unit);
     usedRules.push(...rules.keys);
     usedRules.push(...rules.weaponRules.map((r) => r.name));
-    return <UnitCard rules={rules} unit={unit} count={unitCount} prefs={prefs} ruleDefinitions={ruleDefinitions} />;
+    return (
+      <UnitCard
+        rules={rules}
+        unit={unit}
+        count={unitCount}
+        prefs={prefs}
+        ruleDefinitions={ruleDefinitions}
+      />
+    );
   };
 
   return (
@@ -73,7 +82,9 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
           : units.map((unit, i) => getUnitCard(unit, 1))}
         {prefs.showPsychic && <PsychicCard army={army} />}
       </div>
-      {!prefs.showFullRules && <SpecialRulesCard usedRules={usedRules} ruleDefinitions={ruleDefinitions} />}
+      {!prefs.showFullRules && (
+        <SpecialRulesCard usedRules={usedRules} ruleDefinitions={ruleDefinitions} />
+      )}
     </div>
   );
 }
@@ -89,13 +100,13 @@ interface UnitCardProps {
 function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps) {
   const toughness = toughFromUnit(unit);
 
-  const ruleKeys = rules.keys;
-  const ruleGroups = rules.groups;
-  // usedRules.push(...ruleKeys);
-  // usedRules.push(...weaponRules.map((r) => r.name));
-
-  // Sort rules alphabetically
-  ruleKeys.sort((a, b) => a.localeCompare(b));
+  const unitRules = unit.specialRules
+    .filter((r) => r.name != "-")
+    .concat(UnitService.getUpgradeRules(unit));
+  const items = unit.loadout.filter(x => x.type === "ArmyBookItem");
+  console.log("unit loadout", unit.loadout);
+  console.log("unit rules", unitRules);
+  console.log("rulesFromUpgrades", items);
 
   const stats = (
     <div className="is-flex mb-3" style={{ justifyContent: "center" }}>
@@ -119,8 +130,13 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
     </div>
   );
 
-  const rulesSection = ruleKeys?.length > 0 && (
-    <Paper className="px-2 mb-4" square elevation={0} style={{ fontSize: "14px" }}>
+  const ruleGroups = _.groupBy(unitRules, (x) => x.name);
+  const ruleKeys = Object.keys(ruleGroups);
+  const itemGroups = _.groupBy(items, (x) => x.name);
+  const itemKeys = Object.keys(itemGroups);
+
+  const rulesSection = unitRules?.length > 0 && (
+    <div className="px-2 mb-4" style={{ fontSize: "14px" }}>
       {ruleKeys.map((key, index) => {
         const group = ruleGroups[key];
 
@@ -133,18 +149,50 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
           );
 
         const rule = group[0];
-        const rating = group.reduce((total, next) => (next.rating ? total + parseInt(next.rating) : total), 0);
+        const rating = group.reduce(
+          (total, next) => (next.rating ? total + parseInt(next.rating) : total),
+          0
+        );
 
-        const ruleDefinition = ruleDefinitions.filter((r) => /(.+?)(?:\(|$)/.exec(r.name)[0] === rule.name)[0];
+        const ruleDefinition = ruleDefinitions.filter(
+          (r) => /(.+?)(?:\(|$)/.exec(r.name)[0] === rule.name
+        )[0];
 
         return (
           <p key={index}>
-            <span style={{ fontWeight: 600 }}>{RulesService.displayName({ ...rule, rating }, count)} -</span>
+            <span style={{ fontWeight: 600 }}>
+              {RulesService.displayName({ ...rule, rating }, count)} -
+            </span>
             <span> {ruleDefinition?.description || ""}</span>
           </p>
         );
       })}
-    </Paper>
+      {itemKeys.map((key, index) => {
+        const group = itemGroups[key];
+        const item: IUpgradeGainsItem = group[0];
+        const count = group.reduce((total, x) => total + (x.count || 1), 0);
+
+        const itemRules: IUpgradeGainsRule[] = item.content.filter(
+          (x) => x.type === "ArmyBookRule"
+        ) as any;
+        const itemHasRules = itemRules.length > 0;
+        console.log("ITEM GROUP", group);
+        return (
+          <span key={index}>
+            {", "}
+            {count > 1 ? `${count}x ` : ""}
+            {item.name}
+            {itemHasRules && (
+              <>
+                <span>(</span>
+                <RuleList specialRules={itemRules} />
+                <span>)</span>
+              </>
+            )}
+          </span>
+        );
+      })}
+    </div>
   );
 
   return (
@@ -168,7 +216,7 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
         <>
           {stats}
           {rulesSection}
-          <UnitEquipmentTable unit={unit} square />
+          <UnitEquipmentTable unit={unit} hideEquipment={true} square />
         </>
       }
     />
@@ -244,8 +292,7 @@ function ViewCard({ title, content }) {
 }
 
 function getRules(unit: ISelectedUnit) {
-  const unitRules = (unit.specialRules || []).filter((r) => r.name != "-");
-
+  const unitRules = unit.specialRules.filter((r) => r.name != "-");
   const rulesFromUpgrades = UnitService.getAllUpgradedRules(unit);
   const weaponRules = UnitService.getAllEquipment(unit)
     .filter((e) => e.attacks > 0)
