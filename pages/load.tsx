@@ -27,6 +27,8 @@ import { MenuBar } from "../views/components/MenuBar";
 import { tryBack } from "../services/Helpers";
 import StarIcon from "@mui/icons-material/Star";
 import BackIcon from "@mui/icons-material/ArrowBackIosNew";
+import { useLongPress } from "use-long-press";
+import UAParser from "ua-parser-js";
 
 export default function Load() {
   const dispatch = useDispatch<typeof store.dispatch>();
@@ -35,6 +37,14 @@ export default function Load() {
   const [forceLoad, setForceLoad] = useState(1);
   const [loading, setLoading] = useState(false);
   const [selections, setSelections] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const ua = window.navigator.userAgent;
+    const uaResult = new UAParser(ua);
+    const device = uaResult.getDevice();
+    setIsMobile(device.type === "mobile");
+  }, []);
 
   useEffect(() => {
     const getSaves = () => Object.keys(localStorage).filter((k) => k.startsWith("AF_Save"));
@@ -53,6 +63,7 @@ export default function Load() {
   };
 
   const onItemClick = (save: ISaveData) => {
+    console.log("Item clicked");
     if (selections.length === 0) {
       loadSave(save);
     } else {
@@ -144,6 +155,7 @@ export default function Load() {
             .reverse()
             .map((save) => {
               try {
+                const selected = selections.some((x) => x === save.list.creationTime);
                 const modified = new Date(save.modified);
                 const time = modified.getHours() + ":" + modified.getMinutes();
                 const points = save.listPoints;
@@ -156,20 +168,27 @@ export default function Load() {
                   </>
                 );
 
-                const selected = selections.some((x) => x === save.list.creationTime);
-
-                const selectionBox = (
-                  <Checkbox checked={selected} onClick={() => selectSave(save)} />
+                const bindLongPress = useLongPress(
+                  (_) => {
+                    selectSave(save);
+                  },
+                  {
+                    onCancel: (_) => onItemClick(save),
+                  }
                 );
 
                 return (
                   <ListItem
                     key={save.list.creationTime}
                     disablePadding
-                    secondaryAction={selectionBox}
+                    secondaryAction={
+                      (selections?.length > 0 || !isMobile) && (
+                        <Checkbox checked={selected} onClick={() => selectSave(save)} />
+                      )
+                    }
                     style={{ backgroundColor: selected ? "#F9FDFF" : null }}
                   >
-                    <ListItemButton onClick={() => onItemClick(save)}>
+                    <ListItemButton {...bindLongPress()}>
                       <ListItemAvatar>
                         <ArmyImage
                           image={save.coverImagePath}

@@ -30,7 +30,9 @@
     "react-slick": "^0.28.1",
     "react-spring-bottom-sheet": "^3.4.0",
     "slick-carousel": "^1.8.1",
-    "throttle-debounce": "^3.0.1"
+    "throttle-debounce": "^3.0.1",
+    "ua-parser-js": "^1.0.2",
+    "use-long-press": "^2.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.15.5",
