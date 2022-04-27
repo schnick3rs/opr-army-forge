@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import _ from "lodash";
-import { Delete } from "@mui/icons-material";
+import { Delete, ShowChartRounded } from "@mui/icons-material";
 import PersistenceService from "../services/PersistenceService";
 import { ISaveData } from "../data/interfaces";
 import ArmyImage from "../views/components/ArmyImage";
@@ -145,6 +145,7 @@ export default function Load() {
     reader.readAsText(file);
   };
 
+  const isSelected = (save) => selections.some((x) => x === save.list.creationTime);
   const parsedSaves = localSaves.map((key) => JSON.parse(localStorage[key]));
 
   const SaveList = ({ saves }) => {
@@ -153,66 +154,16 @@ export default function Load() {
         <List>
           {_.sortBy(saves, (save) => save.modified)
             .reverse()
-            .map((save) => {
-              try {
-                const selected = selections.some((x) => x === save.list.creationTime);
-                const modified = new Date(save.modified);
-                const time = modified.getHours() + ":" + modified.getMinutes();
-                const points = save.listPoints;
-                const title = (
-                  <>
-                    <span style={{ fontWeight: 600 }}>
-                      {save.gameSystem?.toUpperCase()} - {save.list.name}
-                    </span>
-                    <span style={{ color: "#656565" }}> • {points}pts</span>
-                  </>
-                );
-
-                const bindLongPress = useLongPress(
-                  (_) => {
-                    selectSave(save);
-                  },
-                  {
-                    onCancel: (_) => onItemClick(save),
-                  }
-                );
-
-                return (
-                  <ListItem
-                    key={save.list.creationTime}
-                    disablePadding
-                    secondaryAction={
-                      (selections?.length > 0 || !isMobile) && (
-                        <Checkbox checked={selected} onClick={() => selectSave(save)} />
-                      )
-                    }
-                    style={{ backgroundColor: selected ? "#F9FDFF" : null }}
-                  >
-                    <ListItemButton {...bindLongPress()}>
-                      <ListItemAvatar>
-                        <ArmyImage
-                          image={save.coverImagePath}
-                          name={save.armyFaction || save.armyName}
-                          armyData={{ gameSystem: save.gameSystem }}
-                          size={"32px"}
-                        />
-                      </ListItemAvatar>
-                      <ListItemText
-                        className={"ml-2" + (save.saveVersion >= 2 ? "" : " has-text-danger")}
-                        primary={title}
-                        secondary={
-                          save.saveVersion >= 2
-                            ? "Modified " + modified.toLocaleDateString() + " " + time
-                            : "Outdated save format!"
-                        }
-                      />
-                    </ListItemButton>
-                  </ListItem>
-                );
-              } catch (e) {
-                console.error(e);
-              }
-            })}
+            .map((save) => (
+              <SaveListItem
+                key={save.list.creationTime}
+                save={save}
+                selected={isSelected(save)}
+                onSelect={selectSave}
+                onItemClick={onItemClick}
+                showCheckbox={selections?.length > 0 || !isMobile}
+              />
+            ))}
         </List>
       </Paper>
     );
@@ -288,5 +239,61 @@ export default function Load() {
         </div>
       </div>
     </>
+  );
+}
+
+interface SaveListItemProps {
+  save: ISaveData;
+  selected: boolean;
+  onItemClick: (save: ISaveData) => void;
+  onSelect: (save: ISaveData) => void;
+  showCheckbox: boolean;
+}
+
+function SaveListItem({ save, selected, onItemClick, onSelect, showCheckbox }: SaveListItemProps) {
+  const bindLongPress = useLongPress(() => onSelect(save), {
+    onCancel: () => onItemClick(save),
+  });
+  //const selected = selections.some((x) => x === save.list.creationTime);
+  const modified = new Date(save.modified);
+  const time = modified.getHours() + ":" + modified.getMinutes();
+  const points = save.listPoints;
+  const title = (
+    <>
+      <span style={{ fontWeight: 600 }}>
+        {save.gameSystem?.toUpperCase()} - {save.list.name}
+      </span>
+      <span style={{ color: "#656565" }}> • {points}pts</span>
+    </>
+  );
+
+  return (
+    <ListItem
+      key={save.list.creationTime}
+      disablePadding
+      secondaryAction={
+        showCheckbox && <Checkbox checked={selected} onClick={() => onSelect(save)} />
+      }
+      style={{ backgroundColor: selected ? "#F9FDFF" : null }}
+    >
+      <ListItemButton {...bindLongPress()}>
+        <ListItemAvatar>
+          <ArmyImage
+            name={save.armyFaction || save.armyName}
+            armyData={{ gameSystem: save.gameSystem }}
+            size={"32px"}
+          />
+        </ListItemAvatar>
+        <ListItemText
+          className={"ml-2" + (save.saveVersion >= 2 ? "" : " has-text-danger")}
+          primary={title}
+          secondary={
+            save.saveVersion >= 2
+              ? "Modified " + modified.toLocaleDateString() + " " + time
+              : "Outdated save format!"
+          }
+        />
+      </ListItemButton>
+    </ListItem>
   );
 }
