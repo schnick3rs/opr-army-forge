@@ -26,7 +26,7 @@ export default function UnitEquipmentTable({
 }: {
   unit: ISelectedUnit;
   square: boolean;
-  hideEquipment: boolean;
+  hideEquipment?: boolean;
 }) {
   const isWeapon = (e) => e.attacks;
 
