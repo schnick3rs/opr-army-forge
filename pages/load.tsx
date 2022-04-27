@@ -29,6 +29,7 @@ import StarIcon from "@mui/icons-material/Star";
 import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 import { useLongPress } from "use-long-press";
 import UAParser from "ua-parser-js";
+import { LongPressDetectEvents } from "use-long-press/dist/types";
 
 export default function Load() {
   const dispatch = useDispatch<typeof store.dispatch>();
@@ -252,7 +253,11 @@ interface SaveListItemProps {
 
 function SaveListItem({ save, selected, onItemClick, onSelect, showCheckbox }: SaveListItemProps) {
   const bindLongPress = useLongPress(() => onSelect(save), {
-    onCancel: (_, { reason }) => reason === "canceled-by-timeout" && onItemClick(save),
+    onCancel: (_, { reason }) => {
+      console.log("reason", reason);
+      return reason === "canceled-by-timeout" && onItemClick(save);
+    },
+    detect: "touch" as any,
     cancelOnMovement: true,
   });
   //const selected = selections.some((x) => x === save.list.creationTime);
