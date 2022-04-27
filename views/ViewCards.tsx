@@ -63,6 +63,7 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
       <UnitCard
         rules={rules}
         unit={unit}
+        attachedUnit={units.find((x) => x.joinToUnit === unit.selectionId)}
         count={unitCount}
         prefs={prefs}
         ruleDefinitions={ruleDefinitions}
@@ -91,19 +92,20 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
 
 interface UnitCardProps {
   unit: ISelectedUnit;
+  attachedUnit?: ISelectedUnit;
   rules: any;
   count: number;
   prefs: IViewPreferences;
   ruleDefinitions: any;
 }
 
-function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps) {
+function UnitCard({ unit, attachedUnit, count, prefs, ruleDefinitions }: UnitCardProps) {
   const toughness = toughFromUnit(unit);
 
   const unitRules = unit.specialRules
     .filter((r) => r.name != "-")
     .concat(UnitService.getUpgradeRules(unit));
-  const items = unit.loadout.filter(x => x.type === "ArmyBookItem");
+  const items = unit.loadout.filter((x) => x.type === "ArmyBookItem");
   console.log("unit loadout", unit.loadout);
   console.log("unit rules", unitRules);
   console.log("rulesFromUpgrades", items);
@@ -195,6 +197,10 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
     </div>
   );
 
+  const pointCost =
+    UpgradeService.calculateUnitTotal(unit) +
+    (attachedUnit ? UpgradeService.calculateUnitTotal(attachedUnit) : 0);
+
   return (
     <ViewCard
       title={
@@ -207,7 +213,7 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
           </span>
           {prefs.showPointCosts && (
             <span className="is-size-6 ml-1" style={{ color: "#666666" }}>
-              - {UpgradeService.calculateUnitTotal(unit)}pts
+              - {pointCost}pts
             </span>
           )}
         </>
