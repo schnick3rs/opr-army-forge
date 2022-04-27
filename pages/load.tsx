@@ -29,7 +29,6 @@ import StarIcon from "@mui/icons-material/Star";
 import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 import { useLongPress } from "use-long-press";
 import UAParser from "ua-parser-js";
-import { LongPressDetectEvents } from "use-long-press/dist/types";
 
 export default function Load() {
   const dispatch = useDispatch<typeof store.dispatch>();
@@ -267,7 +266,7 @@ function SaveListItem({
       return reason === "canceled-by-timeout" && onItemClick(save);
     },
     detect: (isMobile ? "touch" : "mouse") as any,
-    cancelOnMovement: true,
+    cancelOnMovement: 5,
   });
   //const selected = selections.some((x) => x === save.list.creationTime);
   const modified = new Date(save.modified);

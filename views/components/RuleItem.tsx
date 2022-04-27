@@ -1,15 +1,34 @@
+import { useState } from "react";
+import { useLongPress } from "use-long-press";
 import { CustomTooltip } from "./CustomTooltip";
 
 export default function RuleItem({ label, description }) {
+  const [open, setOpen] = useState(false);
+
+  const bindLongPress = useLongPress(() => setOpen(true), {
+    cancelOnMovement: 5,
+  });
 
   const bullet = /•|/;
-  const descParts = description.split(bullet).map(part => (<p key={part}>{part}</p>));
+  const descParts = description.split(bullet).map((part) => <p key={part}>{part}</p>);
 
-  let content = description ?
-    <CustomTooltip title={descParts} arrow enterTouchDelay={0} leaveTouchDelay={10000} onClick={e => e.stopPropagation()}>
-      <span style={{ textDecoration: "underline", textDecorationStyle: "dashed", textDecorationColor: "#666", textUnderlineOffset: "4px" }}>{label}</span>
+  let content = description ? (
+    <CustomTooltip title={descParts} arrow open={open} onClose={() => setOpen(false)}>
+      <span
+        {...bindLongPress()}
+        style={{
+          textDecoration: "underline",
+          textDecorationStyle: "dashed",
+          textDecorationColor: "#666",
+          textUnderlineOffset: "4px",
+        }}
+      >
+        {label}
+      </span>
     </CustomTooltip>
-    : <span>{label}</span>
+  ) : (
+    <span>{label}</span>
+  );
 
   return content;
 }
