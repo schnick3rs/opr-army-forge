@@ -59,11 +59,16 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
     const rules = getRules(unit);
     usedRules.push(...rules.keys);
     usedRules.push(...rules.weaponRules.map((r) => r.name));
+    const originalUnit = units.find((x) => x.selectionId === unit.selectionId);
+    const attachedUnit = units.find((x) => x.joinToUnit === unit.selectionId);
+    const originalUnitCost = UpgradeService.calculateUnitTotal(originalUnit);
+    const attachedUnitCost = attachedUnit ? UpgradeService.calculateUnitTotal(attachedUnit) : 0;
+
     return (
       <UnitCard
         rules={rules}
         unit={unit}
-        attachedUnit={units.find((x) => x.joinToUnit === unit.selectionId)}
+        pointCost={originalUnitCost + attachedUnitCost}
         count={unitCount}
         prefs={prefs}
         ruleDefinitions={ruleDefinitions}
@@ -92,23 +97,20 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
 
 interface UnitCardProps {
   unit: ISelectedUnit;
-  attachedUnit?: ISelectedUnit;
+  pointCost: number;
   rules: any;
   count: number;
   prefs: IViewPreferences;
   ruleDefinitions: any;
 }
 
-function UnitCard({ unit, attachedUnit, count, prefs, ruleDefinitions }: UnitCardProps) {
+function UnitCard({ unit, pointCost, count, prefs, ruleDefinitions }: UnitCardProps) {
   const toughness = toughFromUnit(unit);
 
   const unitRules = unit.specialRules
     .filter((r) => r.name != "-")
     .concat(UnitService.getUpgradeRules(unit));
   const items = unit.loadout.filter((x) => x.type === "ArmyBookItem");
-  console.log("unit loadout", unit.loadout);
-  console.log("unit rules", unitRules);
-  console.log("rulesFromUpgrades", items);
 
   const stats = (
     <div className="is-flex mb-3" style={{ justifyContent: "center" }}>
@@ -196,10 +198,6 @@ function UnitCard({ unit, attachedUnit, count, prefs, ruleDefinitions }: UnitCar
       })}
     </div>
   );
-
-  const pointCost =
-    UpgradeService.calculateUnitTotal(unit) +
-    (attachedUnit ? UpgradeService.calculateUnitTotal(attachedUnit) : 0);
 
   return (
     <ViewCard
