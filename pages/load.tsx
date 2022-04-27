@@ -13,7 +13,6 @@ import {
   Paper,
   Checkbox,
   Toolbar,
-  Icon,
   AppBar,
   Typography,
 } from "@mui/material";
@@ -26,7 +25,6 @@ import ArmyImage from "../views/components/ArmyImage";
 import { store } from "../data/store";
 import { MenuBar } from "../views/components/MenuBar";
 import { tryBack } from "../services/Helpers";
-import StarOutlineIcon from "@mui/icons-material/StarOutline";
 import StarIcon from "@mui/icons-material/Star";
 import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 
@@ -54,6 +52,14 @@ export default function Load() {
     //console.log(fileSystemHandles);
   };
 
+  const onItemClick = (save: ISaveData) => {
+    if (selections.length === 0) {
+      loadSave(save);
+    } else {
+      selectSave(save);
+    }
+  };
+
   const loadSave = (save: ISaveData) => {
     setLoading(true);
     PersistenceService.load(dispatch, save, (armyData) => {
@@ -72,6 +78,15 @@ export default function Load() {
     }
     setForceLoad(forceLoad + 1);
     setLocalSaves([]);
+  };
+
+  const selectSave = (save) => {
+    const selected = selections.some((x) => x === save.list.creationTime);
+    setSelections((prev) =>
+      selected
+        ? prev.filter((x) => x !== save.list.creationTime)
+        : prev.concat(save.list.creationTime)
+    );
   };
 
   const deleteSave = (save) => {
@@ -144,16 +159,7 @@ export default function Load() {
                 const selected = selections.some((x) => x === save.list.creationTime);
 
                 const selectionBox = (
-                  <Checkbox
-                    checked={selected}
-                    onClick={() => {
-                      setSelections((prev) =>
-                        selected
-                          ? prev.filter((x) => x !== save.list.creationTime)
-                          : prev.concat(save.list.creationTime)
-                      );
-                    }}
-                  />
+                  <Checkbox checked={selected} onClick={() => selectSave(save)} />
                 );
 
                 return (
@@ -161,8 +167,9 @@ export default function Load() {
                     key={save.list.creationTime}
                     disablePadding
                     secondaryAction={selectionBox}
+                    style={{ backgroundColor: selected ? "#F9FDFF" : null }}
                   >
-                    <ListItemButton onClick={() => loadSave(save)}>
+                    <ListItemButton onClick={() => onItemClick(save)}>
                       <ListItemAvatar>
                         <ArmyImage
                           image={save.coverImagePath}
