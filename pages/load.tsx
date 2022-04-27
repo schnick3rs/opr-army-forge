@@ -252,7 +252,8 @@ interface SaveListItemProps {
 
 function SaveListItem({ save, selected, onItemClick, onSelect, showCheckbox }: SaveListItemProps) {
   const bindLongPress = useLongPress(() => onSelect(save), {
-    onCancel: () => onItemClick(save),
+    onCancel: (_, { reason }) => reason === "canceled-by-timeout" && onItemClick(save),
+    cancelOnMovement: true,
   });
   //const selected = selections.some((x) => x === save.list.creationTime);
   const modified = new Date(save.modified);
