@@ -26,107 +26,55 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
   const armyRules = army.loadedArmyBooks.flatMap((x) => x.specialRules);
   const ruleDefinitions: IGameRule[] = gameRules.concat(armyRules);
 
-  const units = (list?.units ?? []).map((u) => makeCopy(u));
-  for (let unit of units) {
-    delete unit.selectionId;
-  }
+  const units: ISelectedUnit[] = (list?.units ?? []).map((u) => makeCopy(u));
 
   const usedRules = [];
 
   const unitAsKey = (unit: ISelectedUnit) => {
     return {
       id: unit.id,
-      upgrades: unit.selectedUpgrades.map((x) => ({
-        sectionId: x.upgrade.uid,
-        optionId: x.option.id,
+      // upgrades: unit.selectedUpgrades.map((x) => ({
+      //   sectionId: x.upgrade.uid,
+      //   optionId: x.option.id,
+      // })),
+      loadout: unit.loadout.map((x) => ({
+        id: x.id,
+        count: x.count,
       })),
     };
   };
 
-  const unitGroups = _.groupBy(units, (u) => JSON.stringify(unitAsKey(u)));
+  const getAttachedUnit = (u: ISelectedUnit) => units.find((x) => x.joinToUnit === u.selectionId && x.combined);
+
+  const viewUnits = units
+    .filter((u) => !u.combined || !u.joinToUnit)
+    .map((u) => (u.combined ? UnitService.mergeCombinedUnit(u, getAttachedUnit(u)) : u));
+
+  console.log(viewUnits);
+
+  const unitGroups = _.groupBy(viewUnits, (u) => JSON.stringify(unitAsKey(u)));
 
   const getUnitCard = (unit: ISelectedUnit, unitCount: number) => {
     const rules = getRules(unit);
     usedRules.push(...rules.keys);
     usedRules.push(...rules.weaponRules.map((r) => r.name));
-    return (
-      <UnitCard
-        rules={rules}
-        unit={unit}
-        count={unitCount}
-        prefs={prefs}
-        ruleDefinitions={ruleDefinitions}
-      />
-    );
+    return <UnitCard rules={rules} unit={unit} count={unitCount} prefs={prefs} ruleDefinitions={ruleDefinitions} />;
   };
 
   return (
-    <>
-      <div className={style.grid + " mx-4"}>
+    <div className="mx-4">
+      <div className={style.grid}>
         {prefs.combineSameUnits
           ? Object.values(unitGroups).map((grp: ISelectedUnit[], i) => {
               const unit = grp[0];
               const count = grp.length;
               return getUnitCard(unit, count);
             })
-          : units.map((unit, i) => {
-              return getUnitCard(unit, 1);
-            })}
-        {prefs.showPsychic &&
-          army.loadedArmyBooks.map((book) => (
-            <div key={book.uid} className={style.card}>
-              <Card elevation={1}>
-                <div className="mb-4">
-                  <div className="card-body">
-                    <h3 className="is-size-4 my-2" style={{ fontWeight: 500, textAlign: "center" }}>
-                      Psychic/Spells
-                    </h3>
-                    <hr className="my-0" />
-
-                    <Paper square elevation={0}>
-                      <div className="px-2 my-2">
-                        {book.spells.map((spell) => (
-                          <p key={spell.id}>
-                            <span style={{ fontWeight: 600 }}>
-                              {spell.name} ({spell.threshold}+):{" "}
-                            </span>
-                            <span>{spell.effect}</span>
-                          </p>
-                        ))}
-                      </div>
-                    </Paper>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          ))}
+          : units.map((unit, i) => getUnitCard(unit, 1))}
+        {prefs.showPsychic && <PsychicCard army={army} />}
       </div>
-      {!prefs.showFullRules && (
-        <Card elevation={1} className="mt-4">
-          <div className="mb-4">
-            <div className="card-body">
-              <h3 className="is-size-4 my-2" style={{ fontWeight: 500, textAlign: "center" }}>
-                Special Rules
-              </h3>
-              <hr className="my-0" />
-
-              <Paper square elevation={0}>
-                <div className={`px-2 my-2 ${style.grid} has-text-left`}>
-                  {_.uniq(usedRules)
-                    .sort()
-                    .map((r, i) => (
-                      <p key={i} style={{ breakInside: "avoid" }}>
-                        <span style={{ fontWeight: 600 }}>{r} - </span>
-                        <span>{ruleDefinitions.find((t) => t.name === r)?.description}</span>
-                      </p>
-                    ))}
-                </div>
-              </Paper>
-            </div>
-          </div>
-        </Card>
-      )}
-    </>
+      {!prefs.showFullRules && <SpecialRulesCard usedRules={usedRules} ruleDefinitions={ruleDefinitions} />}
+    </div>
   );
 }
 
@@ -185,20 +133,13 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
           );
 
         const rule = group[0];
-        const rating = group.reduce(
-          (total, next) => (next.rating ? total + parseInt(next.rating) : total),
-          0
-        );
+        const rating = group.reduce((total, next) => (next.rating ? total + parseInt(next.rating) : total), 0);
 
-        const ruleDefinition = ruleDefinitions.filter(
-          (r) => /(.+?)(?:\(|$)/.exec(r.name)[0] === rule.name
-        )[0];
+        const ruleDefinition = ruleDefinitions.filter((r) => /(.+?)(?:\(|$)/.exec(r.name)[0] === rule.name)[0];
 
         return (
           <p key={index}>
-            <span style={{ fontWeight: 600 }}>
-              {RulesService.displayName({ ...rule, rating }, count)} -
-            </span>
+            <span style={{ fontWeight: 600 }}>{RulesService.displayName({ ...rule, rating }, count)} -</span>
             <span> {ruleDefinition?.description || ""}</span>
           </p>
         );
@@ -207,9 +148,9 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
   );
 
   return (
-    <Card elevation={1} className={style.card}>
-      <div className="card-body">
-        <h3 className="is-size-5 my-2" style={{ fontWeight: 600, textAlign: "center" }}>
+    <ViewCard
+      title={
+        <>
           {count > 1 ? `${count}x ` : ""}
           {unit.customName || unit.name}
           <span className="" style={{ color: "#666666" }}>
@@ -221,10 +162,82 @@ function UnitCard({ unit, rules, count, prefs, ruleDefinitions }: UnitCardProps)
               - {UpgradeService.calculateUnitTotal(unit)}pts
             </span>
           )}
+        </>
+      }
+      content={
+        <>
+          {stats}
+          {rulesSection}
+          <UnitEquipmentTable unit={unit} square />
+        </>
+      }
+    />
+  );
+}
+
+function PsychicCard({ army }) {
+  return (
+    <>
+      {army.loadedArmyBooks.map((book) => (
+        <ViewCard
+          title="Psychic/Spells"
+          content={
+            <>
+              <hr className="my-0" />
+
+              <Paper square elevation={0}>
+                <div className="px-2 my-2">
+                  {book.spells.map((spell) => (
+                    <p key={spell.id}>
+                      <span style={{ fontWeight: 600 }}>
+                        {spell.name} ({spell.threshold}+):{" "}
+                      </span>
+                      <span>{spell.effect}</span>
+                    </p>
+                  ))}
+                </div>
+              </Paper>
+            </>
+          }
+        />
+      ))}
+    </>
+  );
+}
+
+function SpecialRulesCard({ usedRules, ruleDefinitions }) {
+  return (
+    <ViewCard
+      title="Special Rules"
+      content={
+        <>
+          <hr className="my-0" />
+          <Paper square elevation={0}>
+            <div className={`px-2 my-2 ${style.grid} has-text-left`}>
+              {_.uniq(usedRules)
+                .sort()
+                .map((r, i) => (
+                  <p key={i} style={{ breakInside: "avoid" }}>
+                    <span style={{ fontWeight: 600 }}>{r} - </span>
+                    <span>{ruleDefinitions.find((t) => t.name === r)?.description}</span>
+                  </p>
+                ))}
+            </div>
+          </Paper>
+        </>
+      }
+    />
+  );
+}
+
+function ViewCard({ title, content }) {
+  return (
+    <Card elevation={1} className={style.card}>
+      <div className="card-body">
+        <h3 className="is-size-5 my-2" style={{ fontWeight: 600, textAlign: "center" }}>
+          {title}
         </h3>
-        {stats}
-        {rulesSection}
-        <UnitEquipmentTable unit={unit} square />
+        {content}
       </div>
     </Card>
   );
