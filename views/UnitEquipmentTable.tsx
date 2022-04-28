@@ -9,7 +9,6 @@ import {
 } from "@mui/material";
 import {
   ISelectedUnit,
-  IUpgradeGains,
   IUpgradeGainsItem,
   IUpgradeGainsRule,
   IUpgradeGainsWeapon,
@@ -17,18 +16,17 @@ import {
 import EquipmentService from "../services/EquipmentService";
 import pluralise from "pluralize";
 import RuleList from "./components/RuleList";
-import { Fragment } from "react";
 import _ from "lodash";
 import DataParsingService from "../services/DataParsingService";
 
 export default function UnitEquipmentTable({
   unit,
   square,
-  header = true,
+  hideEquipment = false,
 }: {
   unit: ISelectedUnit;
   square: boolean;
-  header: boolean;
+  hideEquipment?: boolean;
 }) {
   const isWeapon = (e) => e.attacks;
 
@@ -77,20 +75,18 @@ export default function UnitEquipmentTable({
           component={Paper}
           square={square}
           elevation={0}
-          style={{ borderBottom: "1px solid rgba(0,0,0,.12)", backgroundColor:"transparent"  }}
+          style={{ borderBottom: "1px solid rgba(0,0,0,.12)", backgroundColor: "transparent" }}
         >
           <Table size="small">
-            {header && (
-              <TableHead>
-                <TableRow style={{ backgroundColor: "#EBEBEB", fontWeight: 600 }}>
-                  <TableCell style={headerStyle}>Weapon</TableCell>
-                  <TableCell style={headerStyle}>RNG</TableCell>
-                  <TableCell style={headerStyle}>ATK</TableCell>
-                  <TableCell style={headerStyle}>AP</TableCell>
-                  <TableCell style={headerStyle}>SPE</TableCell>
-                </TableRow>
-              </TableHead>
-            )}
+            <TableHead>
+              <TableRow style={{ backgroundColor: "#EBEBEB", fontWeight: 600 }}>
+                <TableCell style={headerStyle}>Weapon</TableCell>
+                <TableCell style={headerStyle}>RNG</TableCell>
+                <TableCell style={headerStyle}>ATK</TableCell>
+                <TableCell style={headerStyle}>AP</TableCell>
+                <TableCell style={headerStyle}>SPE</TableCell>
+              </TableRow>
+            </TableHead>
             <TableBody>
               {weaponGroupKeys.map((key, i) => {
                 const group: IUpgradeGainsWeapon[] = weaponGroups[key];
@@ -111,13 +107,13 @@ export default function UnitEquipmentTable({
           </Table>
         </TableContainer>
       )}
-      {hasEquipment && (
+      {hasEquipment && !hideEquipment && (
         <TableContainer
           component={Paper}
           className="mt-2"
           square={square}
           elevation={0}
-          style={{ borderBottom: "1px solid rgba(0,0,0,.12)", backgroundColor:"transparent" }}
+          style={{ borderBottom: "1px solid rgba(0,0,0,.12)", backgroundColor: "transparent" }}
         >
           <Table size="small">
             <TableHead>
@@ -167,7 +163,7 @@ export function WeaponRow({
 
   const cellStyle = {
     paddingLeft: "8px",
-    paddingRight: "8px"
+    paddingRight: "8px",
   };
   const borderStyle = {
     borderBottom: "none",

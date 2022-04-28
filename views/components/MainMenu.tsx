@@ -28,6 +28,7 @@ import { updateCreationTime } from "../../data/listSlice";
 import ValidationErrors from "../ValidationErrors";
 import ValidationService from "../../services/ValidationService";
 import { useMediaQuery } from "react-responsive";
+import { setOpenReleaseNotes } from "../../data/appSlice";
 
 export default function MainMenu() {
   const army = useSelector((state: RootState) => state.army);
@@ -204,6 +205,7 @@ export default function MainMenu() {
             <MenuItem onClick={handleTextExport}>Export as Text</MenuItem>
             <Divider />
             <MenuItem onClick={openOprWebapp}>Open OPR Webapp</MenuItem>
+            <MenuItem onClick={() => dispatch(setOpenReleaseNotes(true))}>Open Release Notes</MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>
