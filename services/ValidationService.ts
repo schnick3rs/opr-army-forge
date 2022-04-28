@@ -93,7 +93,7 @@ export default class ValidationService {
       .map((key) => unitsByArmy[key]
         .reduce((pts, unit) => pts + UpgradeService.calculateUnitTotal(unit), 0));
 
-    if (list.points > 0 && !pointsByArmy.some(x => (x / points * 100) >= 60)) {
+    if (list.points > 0 && army.loadedArmyBooks.length > 1 && !pointsByArmy.some(x => (x / points * 100) >= 60)) {
       errors.push("Mixed armies must consist of at least 60% worth of units from their primary faction.");
     }
 
