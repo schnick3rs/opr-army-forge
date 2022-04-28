@@ -67,6 +67,14 @@ interface IRelease {
 
 const releaseNotes: IRelease[] = [
   {
+    version: "0.6.2",
+    date: "28/04/22",
+    notes: [
+      "Added main menu option to delete list.",
+      "Re-enabled PWA"
+    ],
+  },
+  {
     version: "0.6.1",
     date: "28/04/22",
     notes: [
