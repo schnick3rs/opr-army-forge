@@ -2,7 +2,7 @@ import { Divider, Paper } from "@mui/material";
 import { ISelectedUnit, IUnit } from "../../data/interfaces";
 import EquipmentService from "../../services/EquipmentService";
 import UnitService from "../../services/UnitService";
-import RuleList, { MemoisedRuleList } from "./RuleList";
+import RuleList from "./RuleList";
 import _ from "lodash";
 import UpgradeService from "../../services/UpgradeService";
 
