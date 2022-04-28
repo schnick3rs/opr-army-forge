@@ -13,10 +13,19 @@ export default function RuleItem({ label, description }) {
   const descParts = description.split(bullet).map((part) => <p key={part}>{part}</p>);
 
   let content = description ? (
-    <CustomTooltip title={descParts} arrow open={open} onClose={() => setOpen(false)}>
+    <CustomTooltip
+      title={descParts}
+      arrow
+      open={open}
+      onClose={() => setOpen(false)}
+      onClick={(e) => {
+        e.stopPropagation();
+        setOpen(true);
+      }}
+    >
       <span
-        {...bindLongPress()}
         style={{
+          userSelect: "none",
           textDecoration: "underline",
           textDecorationStyle: "dashed",
           textDecorationColor: "#666",
