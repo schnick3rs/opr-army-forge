@@ -2,7 +2,7 @@ import RuleItem from "./RuleItem";
 import { RootState } from '../../data/store';
 import { useSelector } from 'react-redux';
 import { IGameRule } from "../../data/armySlice";
-import { Fragment } from "react";
+import { Fragment, memo } from "react";
 import { ISpecialRule } from "../../data/interfaces";
 import RulesService from "../../services/RulesService";
 import { groupBy } from "../../services/Helpers";
@@ -53,3 +53,5 @@ export default function RuleList({ specialRules }: { specialRules: ISpecialRule[
     </>
   );
 }
+
+//export const MemoisedRuleList = memo(RuleList);

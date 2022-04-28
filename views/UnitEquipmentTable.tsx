@@ -9,7 +9,6 @@ import {
 } from "@mui/material";
 import {
   ISelectedUnit,
-  IUpgradeGains,
   IUpgradeGainsItem,
   IUpgradeGainsRule,
   IUpgradeGainsWeapon,
@@ -17,16 +16,17 @@ import {
 import EquipmentService from "../services/EquipmentService";
 import pluralise from "pluralize";
 import RuleList from "./components/RuleList";
-import { Fragment } from "react";
 import _ from "lodash";
 import DataParsingService from "../services/DataParsingService";
 
 export default function UnitEquipmentTable({
   unit,
   square,
+  hideEquipment = false,
 }: {
   unit: ISelectedUnit;
   square: boolean;
+  hideEquipment?: boolean;
 }) {
   const isWeapon = (e) => e.attacks;
 
@@ -75,7 +75,7 @@ export default function UnitEquipmentTable({
           component={Paper}
           square={square}
           elevation={0}
-          style={{ borderBottom: "1px solid rgba(0,0,0,.12)" }}
+          style={{ borderBottom: "1px solid rgba(0,0,0,.12)", backgroundColor: "transparent" }}
         >
           <Table size="small">
             <TableHead>
@@ -107,13 +107,13 @@ export default function UnitEquipmentTable({
           </Table>
         </TableContainer>
       )}
-      {hasEquipment && (
+      {hasEquipment && !hideEquipment && (
         <TableContainer
           component={Paper}
           className="mt-2"
           square={square}
           elevation={0}
-          style={{ borderBottom: "1px solid rgba(0,0,0,.12)" }}
+          style={{ borderBottom: "1px solid rgba(0,0,0,.12)", backgroundColor: "transparent" }}
         >
           <Table size="small">
             <TableHead>
@@ -163,7 +163,7 @@ export function WeaponRow({
 
   const cellStyle = {
     paddingLeft: "8px",
-    paddingRight: "8px"
+    paddingRight: "8px",
   };
   const borderStyle = {
     borderBottom: "none",
