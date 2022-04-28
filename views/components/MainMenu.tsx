@@ -44,6 +44,14 @@ export default function MainMenu() {
     router.push("/load");
   };
 
+  const handleDelete = () => {
+    const confirmMsg = "Are you sure you want to delete this list?";
+    if (confirm(confirmMsg)) {
+      PersistenceService.delete(list);
+      router.replace("/");
+    }
+  };
+
   const handleSave = () => {
     const creationTime = PersistenceService.createSave(army, list.name, list);
     dispatch(updateCreationTime(creationTime));
@@ -199,13 +207,16 @@ export default function MainMenu() {
             <MenuItem onClick={() => router.push("/view")}>View Cards</MenuItem>
             {!list.creationTime && <MenuItem onClick={handleSave}>Save</MenuItem>}
             <MenuItem onClick={handleLoad}>Open a List</MenuItem>
+            {list.creationTime && <MenuItem onClick={handleDelete}>Delete List</MenuItem>}
             <Divider />
             <MenuItem onClick={handleShare}>Export as Army Forge File</MenuItem>
             {/* <MenuItem onClick={handleShareTTS}>Export as TTS File</MenuItem> */}
             <MenuItem onClick={handleTextExport}>Export as Text</MenuItem>
             <Divider />
             <MenuItem onClick={openOprWebapp}>Open OPR Webapp</MenuItem>
-            <MenuItem onClick={() => dispatch(setOpenReleaseNotes(true))}>Open Release Notes</MenuItem>
+            <MenuItem onClick={() => dispatch(setOpenReleaseNotes(true))}>
+              Open Release Notes
+            </MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>
