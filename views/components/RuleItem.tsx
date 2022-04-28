@@ -1,13 +1,8 @@
 import { useState } from "react";
-import { useLongPress } from "use-long-press";
 import { CustomTooltip } from "./CustomTooltip";
 
 export default function RuleItem({ label, description }) {
   const [open, setOpen] = useState(false);
-
-  const bindLongPress = useLongPress(() => setOpen(true), {
-    cancelOnMovement: 5,
-  });
 
   const bullet = /•|/;
   const descParts = description.split(bullet).map((part) => <p key={part}>{part}</p>);
@@ -22,6 +17,8 @@ export default function RuleItem({ label, description }) {
         e.stopPropagation();
         setOpen(true);
       }}
+      onMouseOver={() => setOpen(true)}
+      onMouseOut={() => setOpen(false)}
     >
       <span
         style={{
