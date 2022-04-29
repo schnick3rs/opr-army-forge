@@ -40,7 +40,7 @@ export default class ValidationService {
 
     const units = list.units;
     const unitCount = units.filter(u => !u.joinToUnit).length;
-    const heroes = units.filter(u => u.specialRules.some(rule => rule.name === "Hero"))
+    const heroes = units.filter(u => u.isHero)
     const heroCount = heroes.length;
     const joinedHeroes = heroes.filter(u => (u.joinToUnit && units.some(t => t.selectionId === u.joinToUnit)))
     const joinedIds = joinedHeroes.map(u => u.joinToUnit);

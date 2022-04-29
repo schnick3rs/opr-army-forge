@@ -95,6 +95,9 @@ export default class UnitService {
         count: eqp.count || unit.size, // Add count to unit size if not already present
       })),
       loadout: [],
+      isHero: unit.specialRules.some(x => x.name === "Hero"),
+      allSpecialRules: unit.specialRules,
+      groupedRules: []
     };
   }
 

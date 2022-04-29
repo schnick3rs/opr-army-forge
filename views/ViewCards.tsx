@@ -112,9 +112,6 @@ interface UnitCardProps {
 function UnitCard({ unit, attachedTo, pointCost, count, prefs, ruleDefinitions }: UnitCardProps) {
   const toughness = toughFromUnit(unit);
 
-  const unitRules = unit.specialRules
-    .filter((r) => r.name != "-")
-    .concat(UnitService.getUpgradeRules(unit));
   const items = unit.loadout.filter((x) => x.type === "ArmyBookItem");
 
   const stats = (
@@ -139,12 +136,12 @@ function UnitCard({ unit, attachedTo, pointCost, count, prefs, ruleDefinitions }
     </div>
   );
 
-  const ruleGroups = _.groupBy(unitRules, (x) => x.name);
+  const ruleGroups = _.groupBy(unit.allSpecialRules, (x) => x.name);
   const ruleKeys = Object.keys(ruleGroups);
   const itemGroups = _.groupBy(items, (x) => x.name);
   const itemKeys = Object.keys(itemGroups);
 
-  const rulesSection = unitRules?.length > 0 && (
+  const rulesSection = (ruleKeys?.length > 0 || itemKeys?.length > 0) && (
     <div className="px-2 mb-4" style={{ fontSize: "14px" }}>
       {ruleKeys.map((key, index) => {
         const group = ruleGroups[key];
@@ -316,6 +313,7 @@ function ViewCard({ title, content }) {
   );
 }
 
+// TODO: Refactor
 function getRules(unit: ISelectedUnit) {
   const unitRules = unit.specialRules.filter((r) => r.name != "-");
   const rulesFromUpgrades = UnitService.getAllUpgradedRules(unit);

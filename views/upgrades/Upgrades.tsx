@@ -54,9 +54,7 @@ export function Upgrades({ mobile = false }) {
       .filter((r) => r.name !== "-");
 
   const isSkirmish = gameSystem !== "gf" && gameSystem !== "aof";
-  const isHero = selectedUnit
-    ? selectedUnit.specialRules.findIndex((sr) => sr.name === "Hero") > -1
-    : false;
+  const isHero = selectedUnit?.isHero ?? false;
 
   const isPsychic = (() => {
     let result = false;
@@ -70,15 +68,14 @@ export function Upgrades({ mobile = false }) {
     return result;
   })();
 
+  // TODO: Refactor!
   const joinToUnit = (e) => {
     const joinToUnitId = e.target.value;
 
     // if I have any heroes joined to *me*, I need to point them to the new unit instead
     if (unitsWithAttachedHeroes.indexOf(selectedUnit.selectionId) !== -1) {
-      let attachedHeroes = list.units.filter(
-        (u) =>
-          u.specialRules.some((rule) => rule.name === "Hero") &&
-          u.joinToUnit == selectedUnit.selectionId
+      const attachedHeroes = list.units.filter(
+        (u) => u.isHero && u.joinToUnit == selectedUnit.selectionId
       );
       attachedHeroes.forEach((u) => {
         dispatch(
@@ -131,9 +128,9 @@ export function Upgrades({ mobile = false }) {
     }
   };
 
+  // TODO: Pretty sure this is wrong
   const unitsWithAttachedHeroes = list.units
-    .filter((u) => u.specialRules.some((rule) => rule.name === "Hero"))
-    .filter((u) => u.joinToUnit)
+    .filter((u) => u.isHero && u.joinToUnit)
     .map((u) => u.joinToUnit);
 
   const combineUnitControl = () =>
@@ -160,14 +157,7 @@ export function Upgrades({ mobile = false }) {
       </FormGroup>
     );
 
-  const joinCandidates = list.units
-    .filter((u) => (!competitive || u.size > 1) && !u.joinToUnit)
-    .filter(
-      (u) =>
-        !competitive ||
-        unitsWithAttachedHeroes.indexOf(u.selectionId) === -1 ||
-        u.selectionId == selectedUnit?.joinToUnit
-    );
+  const joinCandidates = list.units.filter((u) => (!competitive || u.size > 1) && !u.joinToUnit);
 
   const joinToUnitControl = () =>
     !previewMode &&

@@ -4,6 +4,7 @@ import {
   IUpgradeDependency,
   IUpgradeGains,
   IUpgradeGainsItem,
+  IUpgradeGainsRule,
   IUpgradeOption,
   IUpgradePackage,
 } from "../data/interfaces";
@@ -33,6 +34,18 @@ export default class UpgradeService {
       this.applyUpgrade(unit, upgrade.upgrade, upgrade.option);
       //console.log("after upgrade, ", makeCopy(unit));
     }
+
+    const upgradeRules = UnitService.getUpgradeRules(unit);
+    unit.allSpecialRules = unit.specialRules.concat(upgradeRules);
+    unit.isHero = unit.specialRules.some((rule) => rule.name === "Hero");
+
+    const ruleGroups = _.groupBy(unit.allSpecialRules, (x) => x.name);
+
+    unit.groupedRules = Object.keys(ruleGroups).map((key) => ({
+      key,
+      count: ruleGroups[key].length,
+      group: ruleGroups[key],
+    }));
 
     return unit;
   }

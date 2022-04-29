@@ -55,8 +55,17 @@ export interface IUnitSelectionData {
   customName?: string;
   selectedUpgrades: { instanceId: string, upgrade: IUpgrade, option: IUpgradeOption }[];
   loadout: IUpgradeGains[];
+  allSpecialRules: ISpecialRule[];
+  groupedRules: IGroupedRule[];
   combined: boolean;
   joinToUnit?: string;
+  isHero: boolean;
+}
+
+export interface IGroupedRule {
+  key: string;
+  count: number;
+  group: ISpecialRule[]
 }
 
 export interface ISelectedUnit extends IUnit, IUnitSelectionData { }

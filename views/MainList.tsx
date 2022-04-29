@@ -73,7 +73,7 @@ function MainListSection({ group, army, showTitle, onSelected, onUnitRemoved, po
             const attachedUnits: ISelectedUnit[] = UnitService.getAttachedUnits(list, s);
             const [heroes, otherJoined]: [ISelectedUnit[], ISelectedUnit[]] = _.partition(
               attachedUnits,
-              (u) => u.specialRules.some((r) => r.name === "Hero")
+              (u) => u.isHero
             );
             const hasJoined = attachedUnits.length > 0;
             const hasHeroes = hasJoined && heroes.length > 0;
