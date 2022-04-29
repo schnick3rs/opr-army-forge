@@ -67,7 +67,7 @@ export default function Load() {
 
   const onItemClick = (save: ISaveData) => {
     console.log("Item clicked");
-    if (selections.length === 0) {
+    if (selections.length === 0 && !forceSelectMode) {
       loadSave(save);
     } else {
       selectSave(save);
