@@ -179,7 +179,7 @@ export default function Load() {
 
   return (
     <>
-      {selections.length === 0 ? (
+      {selections.length === 0 && !forceSelectMode ? (
         <MenuBar
           title="Open a List"
           onBackClick={() => tryBack(() => router.replace("/"))}
@@ -201,7 +201,10 @@ export default function Load() {
                 color="primary"
                 aria-label="menu"
                 sx={{ mr: 2 }}
-                onClick={() => setSelections([])}
+                onClick={() => {
+                  setSelections([]);
+                  setForceSelectMode(false);
+                }}
               >
                 <CloseIcon />
               </IconButton>
