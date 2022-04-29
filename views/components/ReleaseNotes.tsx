@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../data/store";
 import { setOpenReleaseNotes } from "../../data/appSlice";
 
-export const APP_VERSION = "0.6.3";
+export const APP_VERSION = "0.6.4";
 
 export default function ReleaseNotes() {
   const open = useSelector((state: RootState) => state.app.openReleaseNotes);
@@ -66,6 +66,11 @@ interface IRelease {
 }
 
 const releaseNotes: IRelease[] = [
+  {
+    version: "0.6.4",
+    date: "29/04/22",
+    notes: ["Open a list screen mobile UX."],
+  },
   {
     version: "0.6.3",
     date: "28/04/22",
