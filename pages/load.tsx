@@ -37,6 +37,7 @@ export default function Load() {
   const [localSaves, setLocalSaves] = useState([]);
   const [forceLoad, setForceLoad] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [forceSelectMode, setForceSelectMode] = useState(false);
   const [selections, setSelections] = useState([] as string[]);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -91,6 +92,7 @@ export default function Load() {
     }
     setForceLoad(forceLoad + 1);
     setLocalSaves([]);
+    setForceSelectMode(false);
   };
 
   const selectSave = (save) => {
@@ -164,7 +166,7 @@ export default function Load() {
                 selected={isSelected(save)}
                 onSelect={selectSave}
                 onItemClick={onItemClick}
-                showCheckbox={selections?.length > 0 || !isMobile}
+                showCheckbox={selections?.length > 0 || !isMobile || forceSelectMode}
                 isMobile={isMobile}
               />
             ))}
@@ -178,7 +180,17 @@ export default function Load() {
   return (
     <>
       {selections.length === 0 ? (
-        <MenuBar title="Open a List" onBackClick={() => tryBack(() => router.replace("/"))} />
+        <MenuBar
+          title="Open a List"
+          onBackClick={() => tryBack(() => router.replace("/"))}
+          right={
+            isMobile && (
+              <Button color="inherit" onClick={() => setForceSelectMode((x) => !x)}>
+                Select
+              </Button>
+            )
+          }
+        />
       ) : (
         <Paper elevation={2} square>
           <AppBar color="transparent" position="static">
