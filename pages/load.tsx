@@ -211,7 +211,11 @@ export default function Load() {
               <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                 {selections.length} selected lists
               </Typography>
-              <IconButton color="primary" onClick={() => forEachSelection(toggleFavourite)}>
+              <IconButton
+                disabled={!selections.length}
+                color="primary"
+                onClick={() => forEachSelection(toggleFavourite)}
+              >
                 {selections.some((x) => !selectionIsFavourite(x)) ? (
                   <StarIcon />
                 ) : (
@@ -220,6 +224,7 @@ export default function Load() {
               </IconButton>
               <IconButton
                 color="primary"
+                disabled={!selections.length}
                 onClick={() => {
                   if (confirm(`Are you sure you want to delete ${selections.length} list(s)?`)) {
                     forEachSelection(deleteSave);
