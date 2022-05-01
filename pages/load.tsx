@@ -128,20 +128,13 @@ export default function Load() {
       try {
         const json: string = event.target.result as string;
         const saveData: ISaveData = JSON.parse(json);
+        const creationTime = new Date().getTime().toString();
+        saveData.list.creationTime = creationTime;
 
         PersistenceService.load(dispatch, saveData, (_) => {
           router.push("/list");
-          // Save to local
-          const saveName = file.name.replace(".json", "");
-          // if it doesn't exist, or user confirms they are happy to overwrite
-          if (
-            !PersistenceService.checkExists(saveData.list) ||
-            confirm(
-              "It looks like this list already exists. Are you sure you'd like to overwrite it?"
-            )
-          ) {
-            PersistenceService.saveImport(saveName, json);
-          }
+
+          PersistenceService.saveImport(creationTime, JSON.stringify(saveData));
 
           setLoading(false);
         });
