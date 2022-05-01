@@ -62,7 +62,7 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
     usedRules.push(...rules.keys);
     usedRules.push(...rules.weaponRules.map((r) => r.name));
     const originalUnit = units.find((x) => x.selectionId === unit.selectionId);
-    const attachedUnit = units.find((x) => x.joinToUnit === unit.selectionId);
+    const attachedUnit = units.find((x) => x.joinToUnit === unit.selectionId && x.id === unit.id);
     const originalUnitCost = UpgradeService.calculateUnitTotal(originalUnit);
     const attachedUnitCost = attachedUnit ? UpgradeService.calculateUnitTotal(attachedUnit) : 0;
     const attachedTo = units.find((x) => x.selectionId === unit.joinToUnit);
