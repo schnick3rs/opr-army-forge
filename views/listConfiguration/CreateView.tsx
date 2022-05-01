@@ -1,9 +1,4 @@
-import {
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup
-} from "@mui/material";
+import { Button, Checkbox, FormControlLabel, FormGroup } from "@mui/material";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -30,10 +25,7 @@ export function CreateView(props: CreateViewProps) {
   useEffect(() => {
     if (armyState.armyBooks?.length < 1) return;
 
-    if (
-      armyId &&
-      !armyState.loadedArmyBooks.some((book) => book.uid === armyId)
-    ) {
+    if (armyId && armyState.loadedArmyBooks.length === 0) {
       dispatch(
         getArmyBookData({
           armyUid: armyId,
@@ -42,15 +34,12 @@ export function CreateView(props: CreateViewProps) {
         })
       );
     }
-  }, [armyState.armyBooks, armyState.loadedArmyBooks]);
+  }, [armyState.armyBooks]);
 
   const create = async () => {
-
     const name = props.armyName || "My List";
 
-    const creationTime = autoSave
-      ? PersistenceService.createSave(armyState, name)
-      : null;
+    const creationTime = autoSave ? PersistenceService.createSave(armyState, name) : null;
 
     dispatch(
       createList({
@@ -67,12 +56,7 @@ export function CreateView(props: CreateViewProps) {
     <>
       <FormGroup className="mt-4 mb-2 is-flex-direction-row is-align-items-center">
         <FormControlLabel
-          control={
-            <Checkbox
-              checked={autoSave}
-              onClick={() => setAutoSave(!autoSave)}
-            />
-          }
+          control={<Checkbox checked={autoSave} onClick={() => setAutoSave(!autoSave)} />}
           label="Auto Save List"
         />
       </FormGroup>
