@@ -27,6 +27,7 @@ import { MenuBar } from "../views/components/MenuBar";
 import { tryBack } from "../services/Helpers";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import CloseIcon from "@mui/icons-material/Close";
 import { useLongPress } from "use-long-press";
 import UAParser from "ua-parser-js";
@@ -127,23 +128,34 @@ export default function Load() {
     reader.onload = function (event) {
       try {
         const json: string = event.target.result as string;
-        const saveData: ISaveData = JSON.parse(json);
-        const creationTime = new Date().getTime().toString();
-        saveData.list.creationTime = creationTime;
-
-        PersistenceService.load(dispatch, saveData, (_) => {
-          router.push("/list");
-
-          PersistenceService.saveImport(creationTime, JSON.stringify(saveData));
-
-          setLoading(false);
-        });
+        loadFromJson(JSON.parse(json));
       } catch (e) {
         setLoading(false);
       }
     };
 
     reader.readAsText(file);
+  };
+
+  const loadFromId = async () => {
+    const id = prompt("Enter list ID:");
+    const res = await fetch("https://army-forge-api.azurewebsites.net/list/" + id);
+    const json = await res.json();
+    loadFromJson(json);
+  };
+
+  const loadFromJson = (json) => {
+    const saveData: ISaveData = json;
+    const creationTime = new Date().getTime().toString();
+    saveData.list.creationTime = creationTime;
+
+    PersistenceService.load(dispatch, saveData, (_) => {
+      router.push("/list");
+
+      PersistenceService.saveImport(creationTime, JSON.stringify(saveData));
+
+      setLoading(false);
+    });
   };
 
   const SaveList = ({ saves }) => {
@@ -235,8 +247,11 @@ export default function Load() {
         <input type="file" id="file-input" style={{ display: "none" }} onChange={readSingleFile} />
         <div className="mx-auto" style={{ maxWidth: "480px" }}>
           <div className="is-flex is-justify-content-center p-4 my-4">
-            <Button variant="contained" color="primary" onClick={() => importFile()}>
+            <Button className="mr-2" variant="contained" color="primary" onClick={() => importFile()}>
               <FileUploadOutlinedIcon /> <span className="ml-2">Upload Army Forge File</span>
+            </Button>
+            <Button className="ml-2" variant="contained" color="primary" onClick={() => loadFromId()}>
+              <CloudDownloadIcon /> <span className="ml-2">Import Cloud Save</span>
             </Button>
           </div>
           {loading && (
