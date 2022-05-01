@@ -67,6 +67,15 @@ interface IRelease {
 
 const releaseNotes: IRelease[] = [
   {
+    version: "0.6.5",
+    date: "01/05/22",
+    notes: [
+      "Webapp integration fix for auto-selecting first detachment on list creation.",
+      "Fixed card view point calculation when hero is joined to combined unit.",
+      "Imported lists now have an updated creationTime to avoid clashing with existing saved lists."
+    ],
+  },
+  {
     version: "0.6.4",
     date: "29/04/22",
     notes: ["Open a list screen mobile UX."],
