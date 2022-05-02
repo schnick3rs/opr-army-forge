@@ -95,6 +95,8 @@ export default class UnitService {
         count: eqp.count || unit.size, // Add count to unit size if not already present
       })),
       loadout: [],
+      xp: 0,
+      traits: []
     };
   }
 

@@ -17,7 +17,6 @@ import {
   ListItemIcon,
   Button,
 } from "@mui/material";
-import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import HomeIcon from "@mui/icons-material/Home";
@@ -31,12 +30,13 @@ import ValidationErrors from "../ValidationErrors";
 import ValidationService from "../../services/ValidationService";
 import { useMediaQuery } from "react-responsive";
 import { createCloudShare, setOpenReleaseNotes } from "../../data/appSlice";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import CodeIcon from "@mui/icons-material/Code";
-import AbcIcon from "@mui/icons-material/Abc";
-import CloudIcon from "@mui/icons-material/Cloud";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import CloudOutlinedIcon from "@mui/icons-material/CloudOutlined";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
+import DownloadFileIcon from "../icons/DownloadFile";
 
 export default function MainMenu() {
   const army = useSelector((state: RootState) => state.army);
@@ -218,55 +218,55 @@ export default function MainMenu() {
           >
             <MenuItem onClick={navigateToListConfig}>
               <ListItemIcon>
-                <EditIcon />
+                <EditOutlinedIcon sx={{ color: "#9E9E9E" }} />
               </ListItemIcon>
               <ListItemText>Edit Details</ListItemText>
             </MenuItem>
             <MenuItem onClick={() => router.push("/view")}>
               <ListItemIcon>
-                <VisibilityIcon />
+                <DashboardOutlinedIcon sx={{ color: "#9E9E9E" }} />
               </ListItemIcon>
               <ListItemText>View Cards</ListItemText>
             </MenuItem>
             {!list.creationTime && <MenuItem onClick={handleSave}>Save</MenuItem>}
-            <MenuItem onClick={handleLoad}>
-              <ListItemIcon>
-                <FolderOpenIcon />
-              </ListItemIcon>
-              <ListItemText>Open a List</ListItemText>
-            </MenuItem>
             {list.creationTime && (
               <MenuItem onClick={handleDelete}>
                 <ListItemIcon>
-                  <DeleteIcon />
+                  <DeleteOutlinedIcon sx={{ color: "#9E9E9E" }} />
                 </ListItemIcon>
                 <ListItemText>Delete List</ListItemText>
               </MenuItem>
             )}
+            <MenuItem onClick={handleLoad}>
+              <ListItemIcon>
+                <FolderOpenIcon sx={{ color: "#9E9E9E" }} />
+              </ListItemIcon>
+              <ListItemText>Open a List</ListItemText>
+            </MenuItem>
             <Divider />
             <MenuItem onClick={handleShare}>
               <ListItemIcon>
-                <CodeIcon />
+                <DownloadFileIcon />
               </ListItemIcon>
               <ListItemText>Export as Army Forge File</ListItemText>
             </MenuItem>
             {/* <MenuItem onClick={handleShareTTS}>Export as TTS File</MenuItem> */}
             <MenuItem onClick={handleTextExport}>
               <ListItemIcon>
-                <AbcIcon />
+                <AssignmentOutlinedIcon sx={{ color: "#9E9E9E" }} />
               </ListItemIcon>
               <ListItemText>Export as Text</ListItemText>
             </MenuItem>
             <MenuItem onClick={handleCloudShare}>
               <ListItemIcon>
-                <CloudIcon />
+                <CloudOutlinedIcon />
               </ListItemIcon>
               <ListItemText>Share Online</ListItemText>
             </MenuItem>
             <Divider />
             <MenuItem onClick={openOprWebapp}>Open OPR Webapp</MenuItem>
             <MenuItem onClick={() => dispatch(setOpenReleaseNotes(true))}>
-              Open Release Notes
+              See Release Notes
             </MenuItem>
           </Menu>
         </Toolbar>

@@ -18,6 +18,7 @@ export function CreateView(props: CreateViewProps) {
   const armyState = useSelector((state: RootState) => state.army);
 
   const [autoSave, setAutoSave] = useState(true);
+  const [isCampaignList, setCampaignList] = useState(false);
 
   const factionName = router.query["faction"] as string;
   const armyId = router.query["armyId"] as string;
@@ -44,8 +45,11 @@ export function CreateView(props: CreateViewProps) {
     dispatch(
       createList({
         name,
+        units: [],
+        points: 0,
         pointsLimit: props.pointsLimit || 0,
         creationTime: creationTime,
+        campaignMode: isCampaignList,
       })
     );
 
@@ -54,10 +58,18 @@ export function CreateView(props: CreateViewProps) {
 
   return (
     <>
-      <FormGroup className="mt-4 mb-2 is-flex-direction-row is-align-items-center">
+      <FormGroup className="mt-4 is-flex-direction-row is-align-items-center">
         <FormControlLabel
-          control={<Checkbox checked={autoSave} onClick={() => setAutoSave(!autoSave)} />}
-          label="Auto Save List"
+          control={<Checkbox checked={autoSave} onClick={() => setAutoSave((prev) => !prev)} />}
+          label="Auto-save changes"
+        />
+      </FormGroup>
+      <FormGroup className="mb-2 is-flex-direction-row is-align-items-center">
+        <FormControlLabel
+          control={
+            <Checkbox checked={isCampaignList} onClick={() => setCampaignList((prev) => !prev)} />
+          }
+          label="Campaign Mode"
         />
       </FormGroup>
       <Button

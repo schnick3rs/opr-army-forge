@@ -20,7 +20,7 @@ import { joinUnit, addCombinedUnit, removeUnit, moveUnit, selectUnit } from "../
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SpellsTable from "../SpellsTable";
 import { CustomTooltip } from "../components/CustomTooltip";
-import UpgradeService from "../../services/UpgradeService";
+import CampaignUpgrades from "./CampaignUpgrades";
 import { IGameRule } from "../../data/armySlice";
 
 export function Upgrades({ mobile = false }) {
@@ -216,6 +216,10 @@ export function Upgrades({ mobile = false }) {
             </div>
           )}
         </Paper>
+      )}
+
+      {list.campaignMode && selectedUnit && !previewMode && (
+        <CampaignUpgrades unit={selectedUnit} gameSystem={gameSystem} />
       )}
 
       {upgradeSets.map((pkg: IUpgradePackage) => (
