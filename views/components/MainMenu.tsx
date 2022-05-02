@@ -14,6 +14,8 @@ import {
   ClickAwayListener,
   Snackbar,
   Divider,
+  ListItemIcon,
+  Button,
 } from "@mui/material";
 import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -28,7 +30,13 @@ import { updateCreationTime } from "../../data/listSlice";
 import ValidationErrors from "../ValidationErrors";
 import ValidationService from "../../services/ValidationService";
 import { useMediaQuery } from "react-responsive";
-import { setOpenReleaseNotes } from "../../data/appSlice";
+import { createCloudShare, setOpenReleaseNotes } from "../../data/appSlice";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import CodeIcon from "@mui/icons-material/Code";
+import AbcIcon from "@mui/icons-material/Abc";
+import CloudIcon from "@mui/icons-material/Cloud";
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 
 export default function MainMenu() {
   const army = useSelector((state: RootState) => state.army);
@@ -68,6 +76,11 @@ export default function MainMenu() {
     } else {
       PersistenceService.download(list);
     }
+  };
+
+  const handleCloudShare = () => {
+    const saveData = JSON.parse(PersistenceService.getSaveData(list));
+    dispatch(createCloudShare(saveData));
   };
 
   const handleShareTTS = () => {
@@ -203,15 +216,53 @@ export default function MainMenu() {
             open={Boolean(menuAnchorElement)}
             onClose={(_) => setMenuAnchorElement(null)}
           >
-            <MenuItem onClick={navigateToListConfig}>Edit Details</MenuItem>
-            <MenuItem onClick={() => router.push("/view")}>View Cards</MenuItem>
+            <MenuItem onClick={navigateToListConfig}>
+              <ListItemIcon>
+                <EditIcon />
+              </ListItemIcon>
+              <ListItemText>Edit Details</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={() => router.push("/view")}>
+              <ListItemIcon>
+                <VisibilityIcon />
+              </ListItemIcon>
+              <ListItemText>View Cards</ListItemText>
+            </MenuItem>
             {!list.creationTime && <MenuItem onClick={handleSave}>Save</MenuItem>}
-            <MenuItem onClick={handleLoad}>Open a List</MenuItem>
-            {list.creationTime && <MenuItem onClick={handleDelete}>Delete List</MenuItem>}
+            <MenuItem onClick={handleLoad}>
+              <ListItemIcon>
+                <FolderOpenIcon />
+              </ListItemIcon>
+              <ListItemText>Open a List</ListItemText>
+            </MenuItem>
+            {list.creationTime && (
+              <MenuItem onClick={handleDelete}>
+                <ListItemIcon>
+                  <DeleteIcon />
+                </ListItemIcon>
+                <ListItemText>Delete List</ListItemText>
+              </MenuItem>
+            )}
             <Divider />
-            <MenuItem onClick={handleShare}>Export as Army Forge File</MenuItem>
+            <MenuItem onClick={handleShare}>
+              <ListItemIcon>
+                <CodeIcon />
+              </ListItemIcon>
+              <ListItemText>Export as Army Forge File</ListItemText>
+            </MenuItem>
             {/* <MenuItem onClick={handleShareTTS}>Export as TTS File</MenuItem> */}
-            <MenuItem onClick={handleTextExport}>Export as Text</MenuItem>
+            <MenuItem onClick={handleTextExport}>
+              <ListItemIcon>
+                <AbcIcon />
+              </ListItemIcon>
+              <ListItemText>Export as Text</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={handleCloudShare}>
+              <ListItemIcon>
+                <CloudIcon />
+              </ListItemIcon>
+              <ListItemText>Share Online</ListItemText>
+            </MenuItem>
             <Divider />
             <MenuItem onClick={openOprWebapp}>Open OPR Webapp</MenuItem>
             <MenuItem onClick={() => dispatch(setOpenReleaseNotes(true))}>

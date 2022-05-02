@@ -113,10 +113,10 @@ export default class PersistenceService {
     const key = Object
       .keys(localStorage)
       .find(key => key.endsWith(save.list.creationTime));
-      localStorage[key] = JSON.stringify({
-        ...save,
-        favourite: isFavourite
-      });
+    localStorage[key] = JSON.stringify({
+      ...save,
+      favourite: isFavourite
+    });
   }
 
   public static delete(list: ListState) {
@@ -231,8 +231,13 @@ export default class PersistenceService {
     });
   }
 
-  public static download(list: ListState) {
+  public static getSaveData(list: ListState):string {
     const saveData = localStorage[this.getSaveKey(list.creationTime)];
+    return saveData;
+  }
+
+  public static download(list: ListState) {
+    const saveData = this.getSaveData(list);
     const blob = new Blob([saveData], { type: "application/json" })
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);

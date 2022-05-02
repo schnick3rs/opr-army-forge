@@ -8,6 +8,7 @@ import MobileView from "../views/listBuilder/MobileView";
 import DesktopView from "../views/listBuilder/DesktopView";
 import { getGameRules } from "../data/armySlice";
 import PersistenceService from "../services/PersistenceService";
+import CloudShareModal from "../views/components/CloudShareModel";
 
 export default function List() {
   const armyState = useSelector((state: RootState) => state.army);
@@ -43,6 +44,7 @@ export default function List() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       {armyState.loaded ? isBigScreen ? <DesktopView /> : <MobileView /> : null}
+      <CloudShareModal />
     </>
   );
 }
