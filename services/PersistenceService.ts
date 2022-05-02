@@ -117,13 +117,13 @@ export default class PersistenceService {
     localStorage[key] = JSON.stringify(saveData);
   }
 
-  public static toggleFavourite(save: ISaveData) {
+  public static toggleFavourite(save: ISaveData, isFavourite: boolean) {
     const key = Object
       .keys(localStorage)
       .find(key => key.endsWith(save.list.creationTime));
     localStorage[key] = JSON.stringify({
       ...save,
-      favourite: !save.favourite
+      favourite: isFavourite
     });
   }
 

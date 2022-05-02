@@ -33,10 +33,12 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
   const unitAsKey = (unit: ISelectedUnit) => {
     return {
       id: unit.id,
-      // upgrades: unit.selectedUpgrades.map((x) => ({
-      //   sectionId: x.upgrade.uid,
-      //   optionId: x.option.id,
-      // })),
+      customName: unit.customName,
+      joinToUnit: unit.joinToUnit,
+      upgrades: unit.selectedUpgrades.map((x) => ({
+        sectionId: x.upgrade.uid,
+        optionId: x.option.id,
+      })),
       loadout: unit.loadout.map((x) => ({
         id: x.id,
         count: x.count,
@@ -60,14 +62,16 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
     usedRules.push(...rules.keys);
     usedRules.push(...rules.weaponRules.map((r) => r.name));
     const originalUnit = units.find((x) => x.selectionId === unit.selectionId);
-    const attachedUnit = units.find((x) => x.joinToUnit === unit.selectionId);
+    const attachedUnit = units.find((x) => x.joinToUnit === unit.selectionId && x.id === unit.id);
     const originalUnitCost = UpgradeService.calculateUnitTotal(originalUnit);
     const attachedUnitCost = attachedUnit ? UpgradeService.calculateUnitTotal(attachedUnit) : 0;
+    const attachedTo = units.find((x) => x.selectionId === unit.joinToUnit);
 
     return (
       <UnitCard
         rules={rules}
         unit={unit}
+        attachedTo={attachedTo}
         pointCost={originalUnitCost + attachedUnitCost}
         count={unitCount}
         prefs={prefs}
@@ -97,6 +101,7 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
 
 interface UnitCardProps {
   unit: ISelectedUnit;
+  attachedTo: ISelectedUnit;
   pointCost: number;
   rules: any;
   count: number;
@@ -104,7 +109,7 @@ interface UnitCardProps {
   ruleDefinitions: any;
 }
 
-function UnitCard({ unit, pointCost, count, prefs, ruleDefinitions }: UnitCardProps) {
+function UnitCard({ unit, attachedTo, pointCost, count, prefs, ruleDefinitions }: UnitCardProps) {
   const toughness = toughFromUnit(unit);
 
   const unitRules = unit.specialRules
@@ -206,6 +211,14 @@ function UnitCard({ unit, pointCost, count, prefs, ruleDefinitions }: UnitCardPr
     </div>
   );
 
+  const joinedUnitText = attachedTo && (
+    <>
+      <p className="mb-2" style={{ textAlign: "center" }}>
+        Joined to {attachedTo.customName || attachedTo.name}
+      </p>
+    </>
+  );
+
   return (
     <ViewCard
       title={
@@ -225,6 +238,7 @@ function UnitCard({ unit, pointCost, count, prefs, ruleDefinitions }: UnitCardPr
       }
       content={
         <>
+          {false && joinedUnitText}
           {stats}
           {rulesSection}
           {unit.traits?.length > 0 && (

@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../data/store";
 import { setOpenReleaseNotes } from "../../data/appSlice";
 
-export const APP_VERSION = "0.6.0";
+export const APP_VERSION = "0.6.4";
 
 export default function ReleaseNotes() {
   const open = useSelector((state: RootState) => state.app.openReleaseNotes);
@@ -67,11 +67,38 @@ interface IRelease {
 
 const releaseNotes: IRelease[] = [
   {
+    version: "0.6.5",
+    date: "01/05/22",
+    notes: [
+      "Webapp integration fix for auto-selecting first detachment on list creation.",
+      "Fixed card view point calculation when hero is joined to combined unit.",
+      "Imported lists now have an updated creationTime to avoid clashing with existing saved lists."
+    ],
+  },
+  {
+    version: "0.6.4",
+    date: "29/04/22",
+    notes: ["Open a list screen mobile UX."],
+  },
+  {
+    version: "0.6.3",
+    date: "28/04/22",
+    notes: ["Unit card combination fixed"],
+  },
+  {
+    version: "0.6.2",
+    date: "28/04/22",
+    notes: ["Added main menu option to delete list.", "Re-enabled PWA"],
+  },
+  {
+    version: "0.6.1",
+    date: "28/04/22",
+    notes: ["Fixed rule text display on hover on desktop."],
+  },
+  {
     version: "0.6.0",
     date: "28/04/22",
-    notes: [
-      "Added tabular list view as alternative to cards.",
-    ],
+    notes: ["Added tabular list view as alternative to cards."],
   },
   {
     version: "0.5.0",
@@ -96,8 +123,8 @@ function isVersionGreaterThan(a, b) {
   const splitA = a.split(".");
   const splitB = b.split(".");
 
-  if (parseInt(a[0]) > parseInt(b[0])) return true;
-  if (parseInt(a[1]) > parseInt(b[1])) return true;
-  if (parseInt(a[2]) > parseInt(b[2])) return true;
+  if (parseInt(splitA[0]) > parseInt(splitB[0])) return true;
+  if (parseInt(splitA[1]) > parseInt(splitB[1])) return true;
+  if (parseInt(splitA[2]) > parseInt(splitB[2])) return true;
   return false;
 }
