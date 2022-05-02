@@ -14,6 +14,8 @@ import {
   ClickAwayListener,
   Snackbar,
   Divider,
+  ListItemIcon,
+  Button,
 } from "@mui/material";
 import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -29,6 +31,14 @@ import ValidationErrors from "../ValidationErrors";
 import ValidationService from "../../services/ValidationService";
 import { useMediaQuery } from "react-responsive";
 import { setOpenReleaseNotes } from "../../data/appSlice";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import CodeIcon from "@mui/icons-material/Code";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import CloudIcon from "@mui/icons-material/Cloud";
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
+import DownloadFileIcon from "../icons/DownloadFile";
 
 export default function MainMenu() {
   const army = useSelector((state: RootState) => state.army);
@@ -98,6 +108,7 @@ export default function MainMenu() {
   const goBack = () => {
     const confirmMsg = "Going back will leave your current list and go back home. Continue?";
     if (list.creationTime || confirm(confirmMsg)) {
+      //router.back();
       router.replace("/");
     }
   };
@@ -153,7 +164,7 @@ export default function MainMenu() {
                       {errors.map((error, index) => (
                         <ListItem
                           key={index}
-                          className="mx-4 px-0"
+                          className="mx-4 Ppx-0"
                           style={{ width: "auto" }}
                           divider={index < errors.length - 1}
                         >
@@ -202,19 +213,51 @@ export default function MainMenu() {
             open={Boolean(menuAnchorElement)}
             onClose={(_) => setMenuAnchorElement(null)}
           >
-            <MenuItem onClick={navigateToListConfig}>Edit Details</MenuItem>
-            <MenuItem onClick={() => router.push("/view")}>View Cards</MenuItem>
+            <MenuItem onClick={navigateToListConfig}>
+              <ListItemIcon>
+                <EditOutlinedIcon sx={{ color: "#9E9E9E" }} />
+              </ListItemIcon>
+              <ListItemText>Edit Details</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={() => router.push("/view")}>
+              <ListItemIcon>
+                <DashboardOutlinedIcon sx={{ color: "#9E9E9E" }} />
+              </ListItemIcon>
+              <ListItemText>View Cards</ListItemText>
+            </MenuItem>
             {!list.creationTime && <MenuItem onClick={handleSave}>Save</MenuItem>}
-            <MenuItem onClick={handleLoad}>Open a List</MenuItem>
-            {list.creationTime && <MenuItem onClick={handleDelete}>Delete List</MenuItem>}
+            {list.creationTime && (
+              <MenuItem onClick={handleDelete}>
+                <ListItemIcon>
+                  <DeleteOutlinedIcon sx={{ color: "#9E9E9E" }} />
+                </ListItemIcon>
+                <ListItemText>Delete List</ListItemText>
+              </MenuItem>
+            )}
+            <MenuItem onClick={handleLoad}>
+              <ListItemIcon>
+                <FolderOpenIcon sx={{ color: "#9E9E9E" }} />
+              </ListItemIcon>
+              <ListItemText>Open a List</ListItemText>
+            </MenuItem>
             <Divider />
-            <MenuItem onClick={handleShare}>Export as Army Forge File</MenuItem>
+            <MenuItem onClick={handleShare}>
+              <ListItemIcon>
+                <DownloadFileIcon />
+              </ListItemIcon>
+              <ListItemText>Export as Army Forge File</ListItemText>
+            </MenuItem>
             {/* <MenuItem onClick={handleShareTTS}>Export as TTS File</MenuItem> */}
-            <MenuItem onClick={handleTextExport}>Export as Text</MenuItem>
+            <MenuItem onClick={handleTextExport}>
+              <ListItemIcon>
+                <AssignmentOutlinedIcon sx={{ color: "#9E9E9E" }} />
+              </ListItemIcon>
+              <ListItemText>Export as Text</ListItemText>
+            </MenuItem>
             <Divider />
             <MenuItem onClick={openOprWebapp}>Open OPR Webapp</MenuItem>
             <MenuItem onClick={() => dispatch(setOpenReleaseNotes(true))}>
-              Open Release Notes
+              See Release Notes
             </MenuItem>
           </Menu>
         </Toolbar>
