@@ -71,10 +71,6 @@ export function CreateView(props: CreateViewProps) {
           }
           label="Campaign Mode"
         />
-        <FormControlLabel
-          control={<Checkbox checked={autoSave} onClick={() => setAutoSave(!autoSave)} />}
-          label="Auto Save List"
-        />
       </FormGroup>
       <Button
         className="mx-auto px-6"

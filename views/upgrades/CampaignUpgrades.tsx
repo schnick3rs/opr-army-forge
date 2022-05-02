@@ -1,4 +1,11 @@
-import { Card, Checkbox, Divider } from "@mui/material";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Card,
+  Checkbox,
+  Divider,
+} from "@mui/material";
 import { IconButton } from "@mui/material";
 import DownIcon from "@mui/icons-material/KeyboardArrowDown";
 import UpIcon from "@mui/icons-material/KeyboardArrowUp";
@@ -7,6 +14,8 @@ import { useDispatch } from "react-redux";
 import { Fragment } from "react";
 import { getTraitDefinitions, ISkillSet, ITrait } from "../../data/campaign";
 import { adjustXp, toggleTrait } from "../../data/listSlice";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import RuleList from "../components/RuleList";
 
 interface CampaignUpgradesProps {
   unit: ISelectedUnit;
@@ -17,7 +26,10 @@ export default function CampaignUpgrades({ unit, gameSystem }: CampaignUpgradesP
   const dispatch = useDispatch();
 
   const isHero = unit.specialRules.some((r) => r.name === "Hero");
-  const traitDefinitions = getTraitDefinitions(gameSystem)[isHero ? "heroes" : "units"];
+  const allTraitDefinitions = getTraitDefinitions(gameSystem);
+  const traitDefinitions = allTraitDefinitions[isHero ? "heroes" : "units"];
+  const injuryDefinitions = allTraitDefinitions["injuries"];
+  const talentDefinitions = allTraitDefinitions["talents"];
 
   const adjustUnitXp = (xp: number) => {
     dispatch(adjustXp({ unitId: unit.selectionId, xp }));
@@ -30,7 +42,9 @@ export default function CampaignUpgrades({ unit, gameSystem }: CampaignUpgradesP
   const traitControls = (traits: ITrait[]) => {
     return traits.map((trait) => (
       <div key={trait.name} className="is-flex is-align-items-center">
-        <div className="is-flex-grow-1 pr-2">{trait.name}</div>
+        <div className="is-flex-grow-1 pr-2">
+          <RuleList specialRules={[trait]} />
+        </div>
         <Checkbox
           checked={!!unit.traits?.find((t) => t === trait.name)}
           onClick={() => toggleUnitTrait(trait)}
@@ -67,17 +81,29 @@ export default function CampaignUpgrades({ unit, gameSystem }: CampaignUpgradesP
             </IconButton>
           </div>
 
-          {isHero
-            ? (traitDefinitions as ISkillSet[]).map((skillSet) => (
-                <Fragment key={skillSet.name}>
-                  <Divider />
-                  <p className="mt-2" style={{ fontWeight: 600, fontSize: "14px" }}>
-                    {skillSet.name}
-                  </p>
-                  {traitControls(skillSet.traits)}
-                </Fragment>
-              ))
-            : traitControls(traitDefinitions)}
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>Skill Sets / Traits</AccordionSummary>
+            <AccordionDetails>
+              {isHero
+                ? (traitDefinitions as ISkillSet[]).map((skillSet) => (
+                    <Accordion key={skillSet.name}>
+                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        {skillSet.name}
+                      </AccordionSummary>
+                      <AccordionDetails>{traitControls(skillSet.traits)}</AccordionDetails>
+                    </Accordion>
+                  ))
+                : traitControls(traitDefinitions)}
+            </AccordionDetails>
+          </Accordion>
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>Injuries</AccordionSummary>
+            <AccordionDetails>{traitControls(injuryDefinitions)}</AccordionDetails>
+          </Accordion>
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>Talents</AccordionSummary>
+            <AccordionDetails>{traitControls(talentDefinitions)}</AccordionDetails>
+          </Accordion>
         </div>
       </Card>
     </>

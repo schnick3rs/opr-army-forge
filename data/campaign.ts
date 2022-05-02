@@ -34,7 +34,7 @@ const traitDefinitions = {
         "description": "May re-roll one roll of any kind once per game."
       }
     ],
-    heroes: [
+    "heroes": [
       {
         name: "Captain",
         traits: [
@@ -137,10 +137,62 @@ const traitDefinitions = {
           }
         ]
       }
+    ],
+    "injuries": [
+      {
+        "name": "Chest Wound",
+        "description": "Gets -1 to rolls when blocking hits."
+      },
+      {
+        "name": "Blinded Eye",
+        "description": "Gets -1 to rolls when shooting."
+      },
+      {
+        "name": "Arm Injury",
+        "description": "Gets -1 to rolls when in melee."
+      },
+      {
+        "name": "Traumatised",
+        "description": "Gets -1 to rolls when taking morale tests."
+      },
+      {
+        "name": "Smashed Leg",
+        "description": "Moves -1” on advance and -2” on rush and charge actions."
+      },
+    ],
+    "talents": [
+      {
+        "name": "Motivated",
+        "description": "Always passes the first morale test of the match."
+      },
+      {
+        "name": "Crazed",
+        "description": "Gets +1 attack in melee when charging."
+      },
+      {
+        "name": "Bitter Rivalry",
+        "description": "Always hits pinned units on 2+."
+      },
+      {
+        "name": "Horrible Scars",
+        "description": "Enemy units get -1 to hit when in melee against the hero."
+      },
+      {
+        "name": "Toughened",
+        "description": "Gets Tough(+1)."
+      },
     ]
   }
 };
 
 export function getTraitDefinitions(gameSystem: string): ITrait[] {
   return traitDefinitions[gameSystem];
+}
+
+export function getFlatTraitDefinitions(gameSystem: string): ITrait[] {
+  const defs = traitDefinitions[gameSystem];
+  if (!traitDefinitions[gameSystem].all) {
+    traitDefinitions[gameSystem].all = defs.units.concat(defs.injuries).concat(defs.talents).concat(defs.heroes.flatMap(x => x.traits));
+  }
+  return traitDefinitions[gameSystem].all;
 }

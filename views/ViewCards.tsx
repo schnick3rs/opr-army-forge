@@ -13,6 +13,7 @@ import _ from "lodash";
 import { ISelectedUnit, IUpgradeGainsItem, IUpgradeGainsRule } from "../data/interfaces";
 import RuleList from "./components/RuleList";
 import { IViewPreferences } from "../pages/view";
+import { getFlatTraitDefinitions, ITrait } from "../data/campaign";
 
 interface ViewCardsProps {
   prefs: IViewPreferences;
@@ -25,6 +26,7 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
   const gameRules = army.rules;
   const armyRules = army.loadedArmyBooks.flatMap((x) => x.specialRules);
   const ruleDefinitions: IGameRule[] = gameRules.concat(armyRules);
+  const traitDefinitions = getFlatTraitDefinitions(army.gameSystem);
 
   const units: ISelectedUnit[] = (list?.units ?? []).map((u) => makeCopy(u));
 
@@ -76,6 +78,7 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
         count={unitCount}
         prefs={prefs}
         ruleDefinitions={ruleDefinitions}
+        traitDefinitions={traitDefinitions}
       />
     );
   };
@@ -107,9 +110,18 @@ interface UnitCardProps {
   count: number;
   prefs: IViewPreferences;
   ruleDefinitions: any;
+  traitDefinitions: ITrait[];
 }
 
-function UnitCard({ unit, attachedTo, pointCost, count, prefs, ruleDefinitions }: UnitCardProps) {
+function UnitCard({
+  unit,
+  attachedTo,
+  pointCost,
+  count,
+  prefs,
+  ruleDefinitions,
+  traitDefinitions,
+}: UnitCardProps) {
   const toughness = toughFromUnit(unit);
 
   const unitRules = unit.specialRules
@@ -211,6 +223,28 @@ function UnitCard({ unit, attachedTo, pointCost, count, prefs, ruleDefinitions }
     </div>
   );
 
+  const traitsSection = unit.traits?.length > 0 && (
+    <div className="px-2 mb-4" style={{ fontSize: "14px" }}>
+      {unit.traits.map((trait: string, index: number) => {
+        const traitDef = traitDefinitions.find((x) => x.name === trait);
+        if (!prefs.showFullRules)
+          return (
+            <span key={index}>
+              {index === 0 ? "" : ", "}
+              <RuleList specialRules={[traitDef]} />
+            </span>
+          );
+
+        return (
+          <p key={index}>
+            <span style={{ fontWeight: 600 }}>{traitDef.name} -</span>
+            <span> {traitDef.description}</span>
+          </p>
+        );
+      })}
+    </div>
+  );
+
   const joinedUnitText = attachedTo && (
     <>
       <p className="mb-2" style={{ textAlign: "center" }}>
@@ -241,16 +275,7 @@ function UnitCard({ unit, attachedTo, pointCost, count, prefs, ruleDefinitions }
           {false && joinedUnitText}
           {stats}
           {rulesSection}
-          {unit.traits?.length > 0 && (
-            <div className="px-2">
-              {unit.traits.map((trait, i) => (
-                <span key={trait} style={{ fontWeight: 600 }}>
-                  {i === 0 ? "" : ", "}
-                  {trait}
-                </span>
-              ))}
-            </div>
-          )}
+          {traitsSection}
           <UnitEquipmentTable unit={unit} hideEquipment={true} square />
         </>
       }
