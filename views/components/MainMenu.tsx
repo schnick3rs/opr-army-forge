@@ -167,7 +167,7 @@ export default function MainMenu() {
                       {errors.map((error, index) => (
                         <ListItem
                           key={index}
-                          className="mx-4 px-0"
+                          className="mx-4 Ppx-0"
                           style={{ width: "auto" }}
                           divider={index < errors.length - 1}
                         >
