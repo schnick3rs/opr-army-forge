@@ -76,7 +76,7 @@ export default function CampaignUpgrades({ unit, gameSystem }: CampaignUpgradesP
               <DownIcon />
             </IconButton>
             <div style={{ color: "#000000" }}>{unit.xp}</div>
-            <IconButton color={"primary"} onClick={() => adjustUnitXp(1)}>
+            <IconButton disabled={unit.xp >= 30} color={"primary"} onClick={() => adjustUnitXp(1)}>
               <UpIcon />
             </IconButton>
           </div>
