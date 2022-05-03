@@ -22,8 +22,12 @@ const traitDefinitions = {
         "description": "Gets +1 to rolls when taking morale tests."
       },
       {
-        "name": "Specialist",
-        "description": "Gets +1 to rolls in melee or shooting (pick one)."
+        "name": "Specialist (Melee)",
+        "description": "Gets +1 to rolls in melee."
+      },
+      {
+        "name": "Specialist (Shooting)",
+        "description": "Gets +1 to rolls when shooting."
       },
       {
         "name": "Resilient",
