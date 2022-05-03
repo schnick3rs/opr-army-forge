@@ -82,7 +82,9 @@ export default function CampaignUpgrades({ unit, gameSystem }: CampaignUpgradesP
           </div>
 
           <Accordion>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>Skill Sets / Traits</AccordionSummary>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              {isHero ? "Skill Sets" : "Traits"}
+            </AccordionSummary>
             <AccordionDetails>
               {isHero
                 ? (traitDefinitions as ISkillSet[]).map((skillSet) => (
