@@ -25,24 +25,12 @@ export default function UnitNotes({ selectedUnit }) {
   };
 
   return (
-    <>
-      {unitNotes?.length >= 0 ? (
-        <TextField
-          rows={3}
-          multiline={true}
-          label="Notes"
-          fullWidth
-          value={unitNotes}
-          onChange={handleNotesChanged}
-        />
-      ) : (
-        <Button
-          size="small"
-          onClick={() => dispatch(setUnitNotes({ unitId: selectedUnit.selectionId, notes: "" }))}
-        >
-          Add Notes
-        </Button>
-      )}
-    </>
+    <TextField
+      multiline={true}
+      label="Notes"
+      fullWidth
+      value={unitNotes}
+      onChange={handleNotesChanged}
+    />
   );
 }

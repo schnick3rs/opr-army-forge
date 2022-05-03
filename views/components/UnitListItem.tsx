@@ -21,6 +21,8 @@ export default function UnitListItem(props: UnitListItemProps) {
   const weaponGroups = _.groupBy(loadout, (x) => x.name);
   const unitSize = UnitService.getSize(unit);
 
+  const level = unit.xp ? Math.floor(unit.xp / 5) : null;
+
   return (
     <>
       <Paper
@@ -40,6 +42,7 @@ export default function UnitListItem(props: UnitListItemProps) {
               {props.countInList > 0 && (
                 <span style={{ color: "#0F71B4" }}>{props.countInList}x </span>
               )}
+              {level > 0 && <span>Lv.{level} </span>}
               <span>{unit.customName || unit.name} </span>
               <span style={{ color: "#656565" }}>[{unitSize}]</span>
             </p>

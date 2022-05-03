@@ -57,8 +57,8 @@ export default function CampaignUpgrades({ unit, gameSystem }: CampaignUpgradesP
 
   return (
     <>
-      <div className="px-4 is-flex is-align-items-center">
-        <p className="pt-0" style={{ fontWeight: 600, fontSize: "14px", lineHeight: 1.7 }}>
+      <div className="px-4 mt-2 is-flex is-align-items-center">
+        <p className="pt-0" style={{ fontWeight: 600, lineHeight: 1.7 }}>
           Campaign Upgrades
         </p>
       </div>
