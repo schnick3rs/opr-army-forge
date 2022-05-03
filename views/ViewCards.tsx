@@ -194,7 +194,7 @@ function UnitCard({
         const count = group.reduce((total, x) => total + (x.count || 1), 0);
 
         const itemRules: IUpgradeGainsRule[] = item.content.filter(
-          (x) => x.type === "ArmyBookRule"
+          (x) => x.type === "ArmyBookRule" || x.type === "ArmyBookDefense"
         ) as any;
         const itemHasRules = itemRules.length > 0;
 
