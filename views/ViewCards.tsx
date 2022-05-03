@@ -157,7 +157,7 @@ function UnitCard({
   const itemKeys = Object.keys(itemGroups);
 
   const rulesSection = unitRules?.length > 0 && (
-    <div className="px-2 mb-4" style={{ fontSize: "14px" }}>
+    <div className="px-2 mb-2" style={{ fontSize: "14px" }}>
       {ruleKeys.map((key, index) => {
         const group = ruleGroups[key];
 
@@ -276,7 +276,9 @@ function UnitCard({
           {stats}
           {rulesSection}
           {traitsSection}
-          <UnitEquipmentTable unit={unit} hideEquipment={true} square />
+          <div className="mt-4">
+            <UnitEquipmentTable unit={unit} hideEquipment={true} square />
+          </div>
         </>
       }
     />
