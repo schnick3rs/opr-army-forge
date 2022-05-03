@@ -28,8 +28,20 @@ export default function CampaignUpgrades({ unit, gameSystem }: CampaignUpgradesP
   const isHero = unit.specialRules.some((r) => r.name === "Hero");
   const allTraitDefinitions = getTraitDefinitions(gameSystem);
   const traitDefinitions = allTraitDefinitions[isHero ? "heroes" : "units"];
-  const injuryDefinitions = allTraitDefinitions["injuries"];
-  const talentDefinitions = allTraitDefinitions["talents"];
+  const injuryDefinitions: ITrait[] = allTraitDefinitions["injuries"];
+  const talentDefinitions: ITrait[] = allTraitDefinitions["talents"];
+
+  const isInjury = (trait: string) => !!injuryDefinitions.find((x) => x.name === trait);
+  const isTalent = (trait: string) => !!injuryDefinitions.find((x) => x.name === trait);
+
+  let traitCount = 0,
+    injuryCount = 0,
+    talentCount = 0;
+  for (let trait of unit.traits) {
+    if (isInjury(trait)) injuryCount++;
+    else if (isTalent(trait)) talentCount++;
+    else traitCount++;
+  }
 
   const adjustUnitXp = (xp: number) => {
     dispatch(adjustXp({ unitId: unit.selectionId, xp }));
@@ -55,6 +67,15 @@ export default function CampaignUpgrades({ unit, gameSystem }: CampaignUpgradesP
     ));
   };
 
+  const level = unit.xp ? Math.floor(unit.xp / 5) : 0;
+  const displayCount = (count) =>
+    count && (
+      <span className="ml-1" style={{ color: "#9E9E9E" }}>
+        {" "}
+        [{count}]
+      </span>
+    );
+
   return (
     <>
       <div className="px-4 mt-2 is-flex is-align-items-center">
@@ -63,10 +84,10 @@ export default function CampaignUpgrades({ unit, gameSystem }: CampaignUpgradesP
         </p>
       </div>
       <Card elevation={0} square>
-        <div className="py-2 px-4">
+        <div className="pt-2 pb-4 px-4">
           <div className="is-flex is-align-items-center">
             <div className="is-flex-grow-1 pr-2">
-              Unit XP <span style={{ color: "rgba(0,0,0,0.6)" }}>(25pts per 5XP)</span>
+              Unit XP <span style={{ color: "rgba(0,0,0,0.6)" }}>(Level {level})</span>
             </div>
             <IconButton
               disabled={unit.xp === 0}
@@ -75,7 +96,7 @@ export default function CampaignUpgrades({ unit, gameSystem }: CampaignUpgradesP
             >
               <DownIcon />
             </IconButton>
-            <div style={{ color: "#000000" }}>{unit.xp}</div>
+            <div style={{ color: "#000000" }}>{unit.xp}XP</div>
             <IconButton disabled={unit.xp >= 30} color={"primary"} onClick={() => adjustUnitXp(1)}>
               <UpIcon />
             </IconButton>
@@ -83,7 +104,8 @@ export default function CampaignUpgrades({ unit, gameSystem }: CampaignUpgradesP
 
           <Accordion>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              {isHero ? "Skill Sets" : "Traits"}
+              {isHero ? "Skill Sets " : "Traits "}
+              {displayCount(traitCount)}
             </AccordionSummary>
             <AccordionDetails>
               {isHero
@@ -99,11 +121,15 @@ export default function CampaignUpgrades({ unit, gameSystem }: CampaignUpgradesP
             </AccordionDetails>
           </Accordion>
           <Accordion>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>Injuries</AccordionSummary>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              Injuries {displayCount(injuryCount)}
+            </AccordionSummary>
             <AccordionDetails>{traitControls(injuryDefinitions)}</AccordionDetails>
           </Accordion>
           <Accordion>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>Talents</AccordionSummary>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              Talents {displayCount(talentCount)}
+            </AccordionSummary>
             <AccordionDetails>{traitControls(talentDefinitions)}</AccordionDetails>
           </Accordion>
         </div>

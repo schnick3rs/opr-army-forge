@@ -30,6 +30,7 @@ import StarBorderIcon from "@mui/icons-material/StarBorder";
 import CloseIcon from "@mui/icons-material/Close";
 import { useLongPress } from "use-long-press";
 import UAParser from "ua-parser-js";
+import DownloadFileIcon from "../views/icons/DownloadFile";
 
 export default function Load() {
   const dispatch = useDispatch<typeof store.dispatch>();
@@ -236,7 +237,7 @@ export default function Load() {
         <div className="mx-auto" style={{ maxWidth: "480px" }}>
           <div className="is-flex is-justify-content-center p-4 my-4">
             <Button variant="contained" color="primary" onClick={() => importFile()}>
-              <FileUploadOutlinedIcon /> <span className="ml-2">Upload Army Forge File</span>
+              <DownloadFileIcon fill="white" /> <span className="ml-2">Upload Army Forge File</span>
             </Button>
           </div>
           {loading && (
