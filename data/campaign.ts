@@ -189,6 +189,8 @@ const traitDefinitions = {
   }
 };
 
+traitDefinitions["gff"] = traitDefinitions["gf"];
+
 export function getTraitDefinitions(gameSystem: string): ITrait[] {
   return traitDefinitions[gameSystem];
 }
