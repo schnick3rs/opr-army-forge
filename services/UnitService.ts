@@ -87,6 +87,7 @@ export default class UnitService {
     return {
       ...unit,
       selectionId: nanoid(5),
+      groupId: "1", // TODO: Add to primary by default?
       selectedUpgrades: [],
       combined: false,
       joinToUnit: null,

@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { ISelectedUnit, IUnit, IUpgrade, IUpgradeOption } from './interfaces';
+import { ISelectedUnit, IUnit, IUnitGroup, IUpgrade, IUpgradeOption } from './interfaces';
 import UpgradeService from '../services/UpgradeService';
 import { debounce } from 'throttle-debounce';
 import { current } from 'immer';
@@ -13,6 +13,7 @@ export interface ListState {
   name: string;
   pointsLimit?: number;
   units: ISelectedUnit[];
+  groups: IUnitGroup[];
   undoUnitRemove?: ISelectedUnit[];
   selectedUnitId?: string;
   points: number;
@@ -25,6 +26,7 @@ const initialState: ListState = {
   name: "New Army",
   pointsLimit: 0,
   units: [],
+  groups: [{ id: "1", name: "Primary" }],
   selectedUnitId: null,
   undoUnitRemove: null,
   points: 0,
@@ -293,6 +295,19 @@ export const listSlice = createSlice({
       const unit = state.units.find(u => u.selectionId === unitId);
       unit.notes = notes;
       debounceSave(current(state));
+    },
+    addGroup(state, action: PayloadAction<string>) {
+      state.groups.push({
+        id: nanoid(5),
+        name: action.payload
+      });
+      debounceSave(current(state));
+    },
+    setUnitGroup(state, action: PayloadAction<{ unitId: string, groupId: string }>) {
+      const { unitId, groupId } = action.payload;
+      const unit = state.units.find(u => u.selectionId === unitId);
+      unit.groupId = groupId;
+      debounceSave(current(state));
     }
   },
 })
@@ -322,7 +337,9 @@ export const {
   clearPreview,
   adjustXp,
   toggleTrait,
-  setUnitNotes
+  setUnitNotes,
+  addGroup,
+  setUnitGroup
 } = listSlice.actions;
 
 export default listSlice.reducer;

@@ -11,58 +11,93 @@ import UnitService from "../services/UnitService";
 import LinkIcon from "@mui/icons-material/Link";
 import _ from "lodash";
 import { DropMenu } from "./components/DropMenu";
-import ArmyBookGroupHeader from "./components/ArmyBookGroupHeader";
 import UnitListItem from "./components/UnitListItem";
+import MainListHeader from "./components/ArmyBookGroupHeader";
 
 export function MainList({ onSelected, onUnitRemoved }) {
   const list = useSelector((state: RootState) => state.list);
   const loadedArmyBooks = useSelector((state: RootState) => state.army.loadedArmyBooks);
 
-  const rootUnits = _.orderBy(
+  const rootUnits: ISelectedUnit[] = _.orderBy(
     list.units.filter(
       (u) => !(u.joinToUnit && list.units.some((t) => t.selectionId === u.joinToUnit))
     ),
     (x) => x.sortId
   );
 
-  const unitGroups = _.groupBy(rootUnits, (x) => x.armyId);
+  const unitGroups = _.groupBy(rootUnits, (x) => x.groupId);
   const unitGroupKeys = Object.keys(unitGroups);
-
+  console.log(unitGroupKeys);
+  console.log(unitGroups["1"]);
   return (
     <>
-      {unitGroupKeys.map((key) => {
-        const armyBook = loadedArmyBooks.find((book) => book.uid === key);
-        const points = list.units
-          .filter((u) => u.armyId === key)
-          .reduce((total, unit) => total + UpgradeService.calculateUnitTotal(unit), 0);
-        return (
-          <MainListSection
-            key={key}
-            army={armyBook}
-            showTitle={loadedArmyBooks.length > 1}
-            group={unitGroups[key]}
-            onSelected={onSelected}
-            onUnitRemoved={onUnitRemoved}
-            points={points}
-          />
-        );
-      })}
+      {unitGroupKeys.map((key) => (
+        <UnitGroupSection
+          key={key}
+          list={list}
+          group={list.groups.find((x) => x.id === key)}
+          units={unitGroups[key]}
+          loadedArmyBooks={loadedArmyBooks}
+          showTitle={true}
+          onSelected={onSelected}
+          onUnitRemoved={onUnitRemoved}
+        />
+      ))}
     </>
   );
 }
 
-function MainListSection({ group, army, showTitle, onSelected, onUnitRemoved, points }) {
-  const list = useSelector((state: RootState) => state.list);
+function UnitGroupSection({
+  list,
+  group,
+  units,
+  loadedArmyBooks,
+  showTitle,
+  onSelected,
+  onUnitRemoved,
+}) {
+  const [collapsed, setCollapsed] = useState(false);
+
+  const armyGroups = _.groupBy(units, (x) => x.armyId);
+  const armyGroupKeys = Object.keys(armyGroups);
+  console.log(units);
+  return (
+    <>
+      <MainListHeader leftText={group.name} collapsed={collapsed} setCollapsed={setCollapsed} />
+      {!collapsed &&
+        armyGroupKeys.map((key) => {
+          const armyBook = loadedArmyBooks.find((book) => book.uid === key);
+          const points = units
+            .filter((u) => u.armyId === key)
+            .reduce((total, unit) => total + UpgradeService.calculateUnitTotal(unit), 0);
+          return (
+            <MainListSection
+              key={key}
+              list={list}
+              army={armyBook}
+              showTitle={loadedArmyBooks.length > 1}
+              group={units}
+              onSelected={onSelected}
+              onUnitRemoved={onUnitRemoved}
+              points={points}
+            />
+          );
+        })}
+    </>
+  );
+}
+
+function MainListSection({ list, group, army, showTitle, onSelected, onUnitRemoved, points }) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
     <Card elevation={2} sx={{ backgroundColor: "#FAFAFA", marginBottom: "1rem" }} square>
       {showTitle && (
-        <ArmyBookGroupHeader
-          army={army}
+        <MainListHeader
+          leftText={army.name + " - " + army.versionString}
+          rightText={points ? points + "pts" : null}
           collapsed={collapsed}
           setCollapsed={setCollapsed}
-          points={points}
         />
       )}
       {!collapsed && (

@@ -26,7 +26,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../data/store";
 import NotificationImportantIcon from "@mui/icons-material/NotificationImportant";
 import PersistenceService from "../../services/PersistenceService";
-import { updateCreationTime } from "../../data/listSlice";
+import { addGroup, updateCreationTime } from "../../data/listSlice";
 import ValidationErrors from "../ValidationErrors";
 import ValidationService from "../../services/ValidationService";
 import { useMediaQuery } from "react-responsive";
@@ -97,6 +97,12 @@ export default function MainMenu() {
     setShowTextCopiedAlert(true);
   };
 
+  const handleAddGroup = () => {
+    const groupName = prompt("Group name");
+    if (groupName) {
+      dispatch(addGroup(groupName));
+    }
+  };
   const navigateToListConfig = () => {
     router.push({ pathname: "/listConfiguration", query: { ...router.query, edit: true } });
   };
@@ -239,6 +245,12 @@ export default function MainMenu() {
                 <FolderOpenIcon sx={{ color: "#9E9E9E" }} />
               </ListItemIcon>
               <ListItemText>Open a List</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={handleAddGroup}>
+              <ListItemIcon>
+                <FolderOpenIcon sx={{ color: "#9E9E9E" }} />
+              </ListItemIcon>
+              <ListItemText>Add a Unit Group</ListItemText>
             </MenuItem>
             <Divider />
             <MenuItem onClick={handleShare}>

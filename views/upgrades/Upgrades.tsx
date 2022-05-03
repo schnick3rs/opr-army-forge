@@ -25,6 +25,7 @@ import {
   moveUnit,
   selectUnit,
   setUnitNotes,
+  setUnitGroup,
 } from "../../data/listSlice";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SpellsTable from "../SpellsTable";
@@ -141,6 +142,11 @@ export function Upgrades({ mobile = false }) {
     }
   };
 
+  const onChangeUnitGroup = (e) => {
+    const groupId = e.target.value;
+    dispatch(setUnitGroup({ unitId: selectedUnit.selectionId, groupId }));
+  };
+
   const unitsWithAttachedHeroes = list.units
     .filter((u) => u.specialRules.some((rule) => rule.name === "Hero"))
     .filter((u) => u.joinToUnit)
@@ -202,13 +208,30 @@ export function Upgrades({ mobile = false }) {
       </FormGroup>
     );
 
+  const unitGroupControl = () => (
+    <FormGroup className="px-4 pt-2 pb-3">
+      <FormControl fullWidth>
+        <InputLabel id="demo-simple-select-label" sx={{ zIndex: "unset" }}>
+          Unit Group
+        </InputLabel>
+        <Select value={selectedUnit?.groupId || ""} label="unit Group" onChange={onChangeUnitGroup}>
+          {list.groups.map((group, index) => (
+            <MenuItem key={index} value={group.id}>
+              {group.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </FormGroup>
+  );
+
   return (
     <div className={mobile ? styles["upgrade-panel-mobile"] : styles["upgrade-panel"]}>
       {selectedUnit && (
         <Paper square elevation={0} className="pb-4">
           {combineUnitControl()}
           {joinToUnitControl()}
-
+          {unitGroupControl()}
           {/* Equipment */}
           <div className="px-4 pt-2">
             <UnitEquipmentTable unit={selectedUnit} square={true} />

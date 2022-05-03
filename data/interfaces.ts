@@ -52,6 +52,7 @@ export interface IUnit {
 
 export interface IUnitSelectionData {
   selectionId: string;
+  groupId: string;
   customName?: string;
   selectedUpgrades: { instanceId: string, upgrade: IUpgrade, option: IUpgradeOption }[];
   loadout: IUpgradeGains[];
@@ -63,6 +64,11 @@ export interface IUnitSelectionData {
 }
 
 export interface ISelectedUnit extends IUnit, IUnitSelectionData { }
+
+export interface IUnitGroup {
+  id: string;
+  name: string;
+}
 
 type UpgradeType = "replace" | "upgrade" | "upgradeRule" | "attachment";
 

@@ -37,6 +37,7 @@ export default class PersistenceService {
         creationTime: creationTime,
         name: name,
         units: [],
+        groups: [{ id: "1", name: "Primary" }],
         points: 0,
         undoUnitRemove: null
       };
@@ -72,6 +73,7 @@ export default class PersistenceService {
         armyId: u.armyId,
         customName: u.customName,
         selectionId: u.selectionId,
+        groupId: u.groupId,
         selectedUpgrades: u.selectedUpgrades.map(x => ({
           instanceId: x.instanceId,
           upgradeId: x.upgrade.uid,
@@ -155,11 +157,13 @@ export default class PersistenceService {
 
     return {
       ...savedList,
+      groups: savedList.groups ?? [{ id: "1", name: "Primary" }],
       units: savedList.units.map(u => {
         const unitDefinition: IUnit = armyData.units.find(unit => unit.id === u.id);
         const unit: ISelectedUnit = {
           ...unitDefinition,
           ...u,
+          groupId: u.groupId || "1",
           armyId: armyData.uid,
           equipment: makeCopy(unitDefinition.equipment),
           selectedUpgrades: [],
@@ -188,11 +192,13 @@ export default class PersistenceService {
     console.log(units);
     return {
       ...savedList,
+      groups: savedList.groups ?? [{ id: "1", name: "Primary" }],
       units: savedList.units.map(u => {
         const unitDefinition: IUnit = units.find(unit => unit.id === u.id);
         const unit: ISelectedUnit = {
           ...unitDefinition,
           ...u,
+          groupId: u.groupId || "1",
           equipment: makeCopy(unitDefinition.equipment),
           selectedUpgrades: [],
           loadout: []

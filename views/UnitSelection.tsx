@@ -10,7 +10,6 @@ import ArmyBookGroupHeader from "./components/ArmyBookGroupHeader";
 import UnitListItem from "./components/UnitListItem";
 import { addUnit, previewUnit, removeUnit, selectUnit } from "../data/listSlice";
 import { useRouter } from "next/router";
-import { getTabsListUnstyledUtilityClass } from "@mui/base";
 
 export function UnitSelection() {
   const loadedArmyBooks = useSelector((state: RootState) => state.army.loadedArmyBooks);
@@ -44,7 +43,11 @@ function UnitSelectionForArmy({ army, showTitle }) {
   return (
     <Card elevation={2} sx={{ backgroundColor: "#FAFAFA", marginBottom: "1rem" }} square>
       {showTitle && (
-        <ArmyBookGroupHeader army={army} collapsed={collapsed} setCollapsed={setCollapsed} />
+        <ArmyBookGroupHeader
+          leftText={army.name + " - " + army.versionString}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+        />
       )}
 
       {!collapsed &&
