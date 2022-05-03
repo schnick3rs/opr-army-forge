@@ -59,6 +59,7 @@ export interface IUnitSelectionData {
   joinToUnit?: string;
   xp: number;
   traits: string[]; // Trait names only
+  notes: string;
 }
 
 export interface ISelectedUnit extends IUnit, IUnitSelectionData { }

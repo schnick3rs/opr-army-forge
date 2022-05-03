@@ -80,7 +80,8 @@ export default class PersistenceService {
         combined: u.combined,
         joinToUnit: u.joinToUnit,
         xp: u.xp,
-        traits: u.traits
+        traits: u.traits,
+        notes: u.notes
       }))
     };
   }

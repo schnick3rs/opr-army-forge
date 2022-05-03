@@ -96,7 +96,8 @@ export default class UnitService {
       })),
       loadout: [],
       xp: 0,
-      traits: []
+      traits: [],
+      notes: null
     };
   }
 

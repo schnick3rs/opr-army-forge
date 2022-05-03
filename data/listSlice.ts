@@ -287,6 +287,12 @@ export const listSlice = createSlice({
       }
 
       debounceSave(current(state));
+    },
+    setUnitNotes(state, action: PayloadAction<{ unitId: string, notes: string }>) {
+      const { unitId, notes } = action.payload;
+      const unit = state.units.find(u => u.selectionId === unitId);
+      unit.notes = notes;
+      debounceSave(current(state));
     }
   },
 })
@@ -315,7 +321,8 @@ export const {
   previewUnit,
   clearPreview,
   adjustXp,
-  toggleTrait
+  toggleTrait,
+  setUnitNotes
 } = listSlice.actions;
 
 export default listSlice.reducer;

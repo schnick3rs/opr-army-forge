@@ -7,6 +7,8 @@ import {
   MenuItem,
   InputLabel,
   Select,
+  TextField,
+  Button,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../data/store";
@@ -16,12 +18,20 @@ import UnitEquipmentTable from "../UnitEquipmentTable";
 import RuleList from "../components/RuleList";
 import { ISpecialRule, IUpgradePackage } from "../../data/interfaces";
 import UnitService from "../../services/UnitService";
-import { joinUnit, addCombinedUnit, removeUnit, moveUnit, selectUnit } from "../../data/listSlice";
+import {
+  joinUnit,
+  addCombinedUnit,
+  removeUnit,
+  moveUnit,
+  selectUnit,
+  setUnitNotes,
+} from "../../data/listSlice";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SpellsTable from "../SpellsTable";
 import { CustomTooltip } from "../components/CustomTooltip";
 import CampaignUpgrades from "./CampaignUpgrades";
 import { IGameRule } from "../../data/armySlice";
+import UnitNotes from "../components/UnitNotes";
 
 export function Upgrades({ mobile = false }) {
   const list = useSelector((state: RootState) => state.list);
@@ -195,7 +205,7 @@ export function Upgrades({ mobile = false }) {
   return (
     <div className={mobile ? styles["upgrade-panel-mobile"] : styles["upgrade-panel"]}>
       {selectedUnit && (
-        <Paper square elevation={0}>
+        <Paper square elevation={0} className="pb-4">
           {combineUnitControl()}
           {joinToUnitControl()}
 
@@ -210,11 +220,13 @@ export function Upgrades({ mobile = false }) {
           )}
           {/* Rules */}
           {specialRules?.length > 0 && (
-            <div className="p-4 mb-4">
-              <h4 style={{ fontWeight: 600, fontSize: "14px" }}>Special Rules</h4>
+            <div className="p-4">
               <RuleList specialRules={specialRules} />
             </div>
           )}
+          <div className="mx-4">
+            <UnitNotes selectedUnit={selectedUnit} />
+          </div>
         </Paper>
       )}
 
