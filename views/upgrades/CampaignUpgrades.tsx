@@ -120,18 +120,22 @@ export default function CampaignUpgrades({ unit, gameSystem }: CampaignUpgradesP
                 : traitControls(traitDefinitions)}
             </AccordionDetails>
           </Accordion>
-          <Accordion>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              Injuries {displayCount(injuryCount)}
-            </AccordionSummary>
-            <AccordionDetails>{traitControls(injuryDefinitions)}</AccordionDetails>
-          </Accordion>
-          <Accordion>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              Talents {displayCount(talentCount)}
-            </AccordionSummary>
-            <AccordionDetails>{traitControls(talentDefinitions)}</AccordionDetails>
-          </Accordion>
+          {isHero && (
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                Injuries {displayCount(injuryCount)}
+              </AccordionSummary>
+              <AccordionDetails>{traitControls(injuryDefinitions)}</AccordionDetails>
+            </Accordion>
+          )}
+          {isHero && (
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                Talents {displayCount(talentCount)}
+              </AccordionSummary>
+              <AccordionDetails>{traitControls(talentDefinitions)}</AccordionDetails>
+            </Accordion>
+          )}
         </div>
       </Card>
     </>
