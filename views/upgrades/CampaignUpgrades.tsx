@@ -69,7 +69,7 @@ export default function CampaignUpgrades({ unit, gameSystem }: CampaignUpgradesP
 
   const level = unit.xp ? Math.floor(unit.xp / 5) : 0;
   const displayCount = (count) =>
-    count && (
+    count > 0 && (
       <span className="ml-1" style={{ color: "#9E9E9E" }}>
         {" "}
         [{count}]
@@ -78,7 +78,7 @@ export default function CampaignUpgrades({ unit, gameSystem }: CampaignUpgradesP
 
   return (
     <>
-      <div className="px-4 mt-2 is-flex is-align-items-center">
+      <div className="px-4 mt-4 is-flex is-align-items-center">
         <p className="pt-0" style={{ fontWeight: 600, lineHeight: 1.7 }}>
           Campaign Upgrades
         </p>

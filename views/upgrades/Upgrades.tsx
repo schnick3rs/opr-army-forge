@@ -209,6 +209,13 @@ export function Upgrades({ mobile = false }) {
           {combineUnitControl()}
           {joinToUnitControl()}
 
+          {/* Rules */}
+          {specialRules?.length > 0 && (
+            <div className="p-4">
+              <RuleList specialRules={specialRules} />
+            </div>
+          )}
+
           {/* Equipment */}
           <div className="px-4 pt-2">
             <UnitEquipmentTable unit={selectedUnit} square={true} />
@@ -218,12 +225,7 @@ export function Upgrades({ mobile = false }) {
               <SpellsTable unit={selectedUnit} />
             </div>
           )}
-          {/* Rules */}
-          {specialRules?.length > 0 && (
-            <div className="p-4">
-              <RuleList specialRules={specialRules} />
-            </div>
-          )}
+
           <div className="mx-4">
             <UnitNotes selectedUnit={selectedUnit} />
           </div>
