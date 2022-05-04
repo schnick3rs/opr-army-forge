@@ -26,7 +26,7 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
   const gameRules = army.rules;
   const armyRules = army.loadedArmyBooks.flatMap((x) => x.specialRules);
   const ruleDefinitions: IGameRule[] = gameRules.concat(armyRules);
-  const traitDefinitions = getFlatTraitDefinitions(army.gameSystem);
+  const traitDefinitions = getFlatTraitDefinitions();
 
   const units: ISelectedUnit[] = (list?.units ?? []).map((u) => makeCopy(u));
 

@@ -11,7 +11,6 @@ export interface ISkillSet {
 }
 
 const traitDefinitions = {
-  "gf": {
     units: [
       {
         "name": "Agile",
@@ -186,21 +185,17 @@ const traitDefinitions = {
         "description": "Gets Tough(+1)."
       },
     ]
-  }
 };
 
-traitDefinitions["gff"] = traitDefinitions["gf"];
 
-export function getTraitDefinitions(gameSystem: string): ITrait[] {
-  return traitDefinitions[gameSystem];
+export function getTraitDefinitions() {
+  return traitDefinitions;
 }
 
-export function getFlatTraitDefinitions(gameSystem: string): ITrait[] {
-  const defs = traitDefinitions[gameSystem];
-  if (!defs)
-    return [];
-  if (!traitDefinitions[gameSystem].all) {
-    traitDefinitions[gameSystem].all = defs.units.concat(defs.injuries).concat(defs.talents).concat(defs.heroes.flatMap(x => x.traits));
+export function getFlatTraitDefinitions(): ITrait[] {
+  const defs = traitDefinitions;
+  if (!traitDefinitions["all"]) {
+    traitDefinitions["all"] = defs.units.concat(defs.injuries).concat(defs.talents).concat(defs.heroes.flatMap(x => x.traits));
   }
-  return traitDefinitions[gameSystem].all;
+  return traitDefinitions["all"];
 }
