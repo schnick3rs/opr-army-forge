@@ -13,7 +13,6 @@ export default function RuleList({ specialRules }: { specialRules: (ISpecialRule
   const gameRules = army.rules;
   const armyRules = army.loadedArmyBooks.flatMap((x) => x.specialRules);
   const ruleDefinitions: IGameRule[] = gameRules.concat(armyRules);
-  const allTraitDefinitions = getTraitDefinitions(army.gameSystem);
 
   const rules = specialRules?.filter((r) => !!r && r.name != "-") ?? [];
 

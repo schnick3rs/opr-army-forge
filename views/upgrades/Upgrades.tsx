@@ -237,7 +237,7 @@ export function Upgrades({ mobile = false }) {
       )}
 
       {list.campaignMode && selectedUnit && !previewMode && (
-        <CampaignUpgrades unit={selectedUnit} gameSystem={gameSystem} />
+        <CampaignUpgrades unit={selectedUnit} />
       )}
 
       {upgradeSets.map((pkg: IUpgradePackage) => (
