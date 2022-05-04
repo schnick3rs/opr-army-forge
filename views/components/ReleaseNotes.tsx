@@ -67,6 +67,16 @@ interface IRelease {
 
 const releaseNotes: IRelease[] = [
   {
+    version: "0.7.1",
+    date: "04/05/22",
+    notes: [
+      "Campaign fixes!",
+      "- AoF/AoFS",
+      "- Fixed XP cost for GFF/AoFS",
+      "- Fixed injury/talents requiring 5XP before enabling",
+    ],
+  },
+  {
     version: "0.7.0",
     date: "04/05/22",
     notes: [
