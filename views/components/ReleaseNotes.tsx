@@ -67,12 +67,25 @@ interface IRelease {
 
 const releaseNotes: IRelease[] = [
   {
+    version: "0.7.0",
+    date: "04/05/22",
+    notes: [
+      "Campaign lists!",
+      "- Track unit's XP/level",
+      "- Track unit's Traits, Injuries and Talents",
+      "- Unit's traits displayed in card view",
+      "- Added campaign traits rule text/descriptions",
+      "Add custom notes to unit",
+      "Added quality / defense to upgrade window",
+    ],
+  },
+  {
     version: "0.6.5",
     date: "01/05/22",
     notes: [
       "Webapp integration fix for auto-selecting first detachment on list creation.",
       "Fixed card view point calculation when hero is joined to combined unit.",
-      "Imported lists now have an updated creationTime to avoid clashing with existing saved lists."
+      "Imported lists now have an updated creationTime to avoid clashing with existing saved lists.",
     ],
   },
   {
