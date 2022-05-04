@@ -12,6 +12,8 @@ export default function RuleItem({ label, description }) {
       title={descParts}
       arrow
       open={open}
+      leaveDelay={6000}
+      leaveTouchDelay={6000}
       onClose={() => setOpen(false)}
       onClick={(e) => {
         e.stopPropagation();

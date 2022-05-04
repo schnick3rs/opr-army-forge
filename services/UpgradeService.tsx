@@ -19,7 +19,11 @@ export default class UpgradeService {
   private static readonly countRegex = /^(\d+)x\s/;
 
   static calculateListTotal(list: ISelectedUnit[]) {
-    return list.reduce((value, current) => value + UpgradeService.calculateUnitTotal(current), 0);
+    // TODO: Campaign unit XP
+    return list.reduce(
+      (value, current) => value + UpgradeService.calculateUnitTotal(current),
+      0
+    );
   }
 
   public static buildUpgrades(unit: ISelectedUnit) {
@@ -125,6 +129,10 @@ export default class UpgradeService {
       if (upgrade.cost) {
         cost += upgrade.cost;
       }
+    }
+
+    if (unit.xp) {
+      cost += Math.floor(unit.xp / 5) * 25;
     }
 
     return cost;
