@@ -197,6 +197,8 @@ export function getTraitDefinitions(gameSystem: string): ITrait[] {
 
 export function getFlatTraitDefinitions(gameSystem: string): ITrait[] {
   const defs = traitDefinitions[gameSystem];
+  if (!defs)
+    return [];
   if (!traitDefinitions[gameSystem].all) {
     traitDefinitions[gameSystem].all = defs.units.concat(defs.injuries).concat(defs.talents).concat(defs.heroes.flatMap(x => x.traits));
   }
