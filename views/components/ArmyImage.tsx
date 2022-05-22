@@ -22,6 +22,7 @@ export default function ArmyImage({
 
   const directory = (() => {
     if (urlName === "jackals") return "2022/04";
+    if (urlName === "havoc-war-clans") return "2022/05";
     return "2022/02";
   })();
 
