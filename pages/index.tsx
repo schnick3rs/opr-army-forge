@@ -10,15 +10,16 @@ import { GetServerSidePropsContext } from "next";
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const host = context.req.headers.host;
   const vercelProd = "opr-army-forge-staging.vercel.app";
+  const isVercelProd = host?.toLocaleLowerCase() === vercelProd;
 
-  return host?.toLocaleLowerCase() === vercelProd
+  return isVercelProd
     ? {
         redirect: {
           permanent: true,
           destination: "https://army-forge.onepagerules.com/",
         },
       }
-    : {};
+    : { props: {} };
 }
 
 export default function Home() {
