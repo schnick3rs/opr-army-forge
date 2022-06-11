@@ -27,7 +27,7 @@ import { RootState } from "../../data/store";
 import NotificationImportantIcon from "@mui/icons-material/NotificationImportant";
 import PersistenceService from "../../services/PersistenceService";
 import { updateCreationTime } from "../../data/listSlice";
-import ValidationErrors from "../ValidationErrors";
+import ValidationErrors, { competitiveGoogleDriveLinks } from "../ValidationErrors";
 import ValidationService from "../../services/ValidationService";
 import { useMediaQuery } from "react-responsive";
 import { setOpenReleaseNotes } from "../../data/appSlice";
@@ -113,6 +113,8 @@ export default function MainMenu() {
     }
   };
 
+  const competitiveRulesLink = competitiveGoogleDriveLinks[army.gameSystem];
+
   const isBigScreen = useMediaQuery({ query: "(min-width: 1024px)" });
 
   return (
@@ -158,7 +160,19 @@ export default function MainMenu() {
                     <List>
                       <ListItem divider>
                         <ListItemText>
-                          <span style={{ fontWeight: 600 }}>Competitive List Validation</span>
+                          <p style={{ fontWeight: 600 }}>Competitive List Validation</p>
+                          <p className="mt-2">
+                            These rules are <span style={{ fontWeight: 600 }}>optional</span>. See
+                            the{" "}
+                            <a
+                              href={competitiveRulesLink}
+                              target="_blank"
+                              style={{ textDecoration: "underline" }}
+                            >
+                              competitive rules document
+                            </a>{" "}
+                            for more info.
+                          </p>
                         </ListItemText>
                       </ListItem>
                       {errors.map((error, index) => (
