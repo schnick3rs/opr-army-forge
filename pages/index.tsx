@@ -9,7 +9,7 @@ import { GetServerSidePropsContext } from "next";
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const host = context.req.headers.host;
-  const vercelProd = "opr-army-forge-staging.vercel.app";
+  const vercelProd = "opr-army-forge.vercel.app";
   const isVercelProd = host?.toLocaleLowerCase() === vercelProd;
 
   return isVercelProd
