@@ -165,7 +165,7 @@ function UnitCard({
   const itemGroups = _.groupBy(items, (x) => x.name);
   const itemKeys = Object.keys(itemGroups);
 
-  const rulesSection = unitRules?.length > 0 && (
+  const rulesSection = (
     <div className="px-2 mb-2" style={{ fontSize: "14px" }}>
       {ruleKeys.map((key, index) => {
         const group = ruleGroups[key];
@@ -216,7 +216,7 @@ function UnitCard({
 
         return (
           <span key={index}>
-            {", "}
+            {ruleKeys.length > 0 && ", "}
             {count > 1 && !hideCount && `${count}x `}
             {item.name}
             {itemHasRules && (
