@@ -14,6 +14,7 @@ import { ISelectedUnit, IUpgradeGainsItem, IUpgradeGainsRule } from "../data/int
 import RuleList from "./components/RuleList";
 import { IViewPreferences } from "../pages/view";
 import { getFlatTraitDefinitions, ITrait } from "../data/campaign";
+import LinkIcon from "@mui/icons-material/Link";
 
 interface ViewCardsProps {
   prefs: IViewPreferences;
@@ -103,7 +104,7 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
       {!prefs.showFullRules && (
         <SpecialRulesCard
           usedRules={usedRules}
-          ruleDefinitions={ruleDefinitions.concat(traitDefinitions)}
+          ruleDefinitions={ruleDefinitions.concat(traitDefinitions as any[])}
         />
       )}
     </div>
@@ -254,11 +255,12 @@ function UnitCard({
   );
 
   const joinedUnitText = attachedTo && (
-    <>
+    <div className="is-flex" style={{ justifyContent: "center" }}>
+      <LinkIcon />
       <p className="mb-2" style={{ textAlign: "center" }}>
         Joined to {attachedTo.customName || attachedTo.name}
       </p>
-    </>
+    </div>
   );
 
   return (
@@ -280,7 +282,7 @@ function UnitCard({
       }
       content={
         <>
-          {false && joinedUnitText}
+          {joinedUnitText}
           {stats}
           {rulesSection}
           {traitsSection}
