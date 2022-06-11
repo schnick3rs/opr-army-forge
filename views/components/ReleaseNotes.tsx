@@ -67,6 +67,20 @@ interface IRelease {
 
 const releaseNotes: IRelease[] = [
   {
+    version: "0.8.0",
+    date: "11/06/22",
+    notes: [
+      "Enhancements:",
+      "- Show joined to unit in card view",
+      "- Added competitive list validation optional message with link to rules",
+      "Bug fixes:",
+      "- Fixed custom list names in edit list screen",
+      "- Fixed units notes duplicating between units",
+      "- Fixed campaign traits not showing up in special rules card",
+      "- Fixed equipment rules not showing in card view when unit has no other special rules"
+    ],
+  },
+  {
     version: "0.7.1",
     date: "04/05/22",
     notes: [
