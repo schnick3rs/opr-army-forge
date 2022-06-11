@@ -63,6 +63,11 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
     const rules = getRules(unit);
     usedRules.push(...rules.keys);
     usedRules.push(...rules.weaponRules.map((r) => r.name));
+
+    if (unit.traits?.length > 0) {
+      usedRules.push(...unit.traits);
+    }
+
     const originalUnit = units.find((x) => x.selectionId === unit.selectionId);
     const attachedUnit = units.find((x) => x.joinToUnit === unit.selectionId && x.id === unit.id);
     const originalUnitCost = UpgradeService.calculateUnitTotal(originalUnit);
@@ -96,7 +101,10 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
         {prefs.showPsychic && <PsychicCard army={army} />}
       </div>
       {!prefs.showFullRules && (
-        <SpecialRulesCard usedRules={usedRules} ruleDefinitions={ruleDefinitions} />
+        <SpecialRulesCard
+          usedRules={usedRules}
+          ruleDefinitions={ruleDefinitions.concat(traitDefinitions)}
+        />
       )}
     </div>
   );
