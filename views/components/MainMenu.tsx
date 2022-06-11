@@ -161,7 +161,7 @@ export default function MainMenu() {
                       <ListItem divider>
                         <ListItemText>
                           <p style={{ fontWeight: 600 }}>Competitive List Validation</p>
-                          <p className="mt-2">
+                          <p className="mt-2" style={{ color: "rgba(0,0,0,.66)" }}>
                             These rules are <span style={{ fontWeight: 600 }}>optional</span>. See
                             the{" "}
                             <a

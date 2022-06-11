@@ -16,7 +16,7 @@ export default function ValidationErrors({ open, setOpen }) {
       <DialogTitle className="pb-0">Competitive List Validation</DialogTitle>
       <List>
         <ListItem>
-          <p>
+          <p style={{ color: "rgba(0,0,0,.66)" }}>
             These rules are <span style={{ fontWeight: 600 }}>optional</span>. See the{" "}
             <a href={competitiveRulesLink} target="_blank" style={{ textDecoration: "underline" }}>
               competitive rules document
