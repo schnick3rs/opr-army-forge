@@ -716,8 +716,11 @@ const traitDefinitions = {
         "description": "Gets Tough(+1)."
       },
     ]
-  }
+  },
+  aofr: {}
 };
+
+traitDefinitions["aofr"] = traitDefinitions["aof"];
 
 
 export function getTraitDefinitions() {

@@ -72,7 +72,7 @@ export default class ValidationService {
 
     //#endregion
 
-    if (army.gameSystem === "gf" || army.gameSystem === "aof") {
+    if (army.gameSystem === "gf" || army.gameSystem === "aof" || army.gameSystem === "aofr") {
 
       if (units.some(u => u.combined && u.size === 1))
         errors.push(`Cannot combine units of unit size [1].`);

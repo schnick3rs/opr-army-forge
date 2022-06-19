@@ -63,7 +63,7 @@ export function Upgrades({ mobile = false }) {
       .concat(unitUpgradeRules)
       .filter((r) => r.name !== "-");
 
-  const isSkirmish = gameSystem !== "gf" && gameSystem !== "aof";
+  const isSkirmish = gameSystem !== "gf" && gameSystem !== "aof" && gameSystem !== "aofr";
   const isHero = selectedUnit
     ? selectedUnit.specialRules.findIndex((sr) => sr.name === "Hero") > -1
     : false;
