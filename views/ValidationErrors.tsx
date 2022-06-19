@@ -39,4 +39,5 @@ export const competitiveGoogleDriveLinks = {
   gff: "https://drive.google.com/file/d/1UJtD01GzDpfN6qNtIofYTHeuFdhbG9cX/view?usp=sharing",
   aof: "https://drive.google.com/file/d/1ThYIF-bpU1Bq0vDwT0N479fsAdT4Ch-_/view?usp=sharing",
   aofs: "https://drive.google.com/file/d/1UgrqUD2T0CmrjSSczm4NAFbiQB1Mm5FB/view?usp=sharing",
+  aofr: "https://drive.google.com/file/d/1ThYIF-bpU1Bq0vDwT0N479fsAdT4Ch-_/view?usp=sharing",
 };
