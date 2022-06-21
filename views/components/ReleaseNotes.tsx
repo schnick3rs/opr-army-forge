@@ -67,6 +67,13 @@ interface IRelease {
 
 const releaseNotes: IRelease[] = [
   {
+    version: "0.8.2",
+    date: "21/06/22",
+    notes: [
+      "Updated text export format (more compact).",
+    ],
+  },
+  {
     version: "0.8.1",
     date: "19/06/22",
     notes: [
