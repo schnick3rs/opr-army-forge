@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../data/store";
 import { useRouter } from "next/router";
 import ViewCards from "../views/ViewCards";
@@ -27,6 +27,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import PersistenceService from "../services/PersistenceService";
 import PrintIcon from "@mui/icons-material/Print";
 import ViewTable from "../views/ViewTable";
+import { getGameRules } from "../data/armySlice";
 
 export interface IViewPreferences {
   showFullRules: boolean;
@@ -37,7 +38,9 @@ export interface IViewPreferences {
 
 export default function View() {
   const list = useSelector((state: RootState) => state.list);
+  const armyState = useSelector((state: RootState) => state.army);
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const defaultPrefs = {
     showFullRules: false,
@@ -58,6 +61,27 @@ export default function View() {
       showPsychic: listContainsPyschic(list) || ((prefs as any)?.showPsychic ?? false),
     }));
   }, []);
+
+  // Load army list file
+  useEffect(() => {
+    // Redirect to game selection screen if no army selected
+    if (!armyState.loaded) {
+      const listId = router.query["listId"] as string;
+      if (listId) {
+        PersistenceService.loadFromKey(dispatch, listId, (_) => {});
+        return;
+      }
+
+      router.push({ pathname: "/gameSystem", query: router.query }, null, {
+        shallow: true,
+      });
+      return;
+    } else {
+      dispatch(getGameRules(armyState.gameSystem));
+    }
+  }, []);
+
+  if (!armyState.loaded) return <p>Loading...</p>;
 
   function setPreferences(setFunc) {
     const newPrefs = setFunc(preferences);

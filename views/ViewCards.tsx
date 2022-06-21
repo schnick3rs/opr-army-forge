@@ -6,7 +6,7 @@ import UnitEquipmentTable from "../views/UnitEquipmentTable";
 import { Paper, Card } from "@mui/material";
 import RulesService from "../services/RulesService";
 import { IGameRule } from "../data/armySlice";
-import { groupBy, makeCopy } from "../services/Helpers";
+import { groupBy, groupMap, makeCopy } from "../services/Helpers";
 import UnitService from "../services/UnitService";
 import UpgradeService from "../services/UpgradeService";
 import _ from "lodash";
@@ -111,7 +111,7 @@ function UnitCard({
   const unitRules = unit.specialRules
     .filter((r) => r.name != "-")
     .concat(UnitService.getUpgradeRules(unit));
-  const items = unit.loadout.filter((x) => x.type === "ArmyBookItem");
+  const items = unit.loadout.filter((x) => x.type === "ArmyBookItem") as IUpgradeGainsItem[];
 
   const stats = (
     <div className="is-flex mb-3" style={{ justifyContent: "center" }}>
@@ -135,75 +135,87 @@ function UnitCard({
     </div>
   );
 
-  const ruleGroups = _.groupBy(unitRules, (x) => x.name);
-  const ruleKeys = Object.keys(ruleGroups);
-  const itemGroups = _.groupBy(items, (x) => x.name);
-  const itemKeys = Object.keys(itemGroups);
-
   const rulesSection = (
     <div className="px-2 mb-2" style={{ fontSize: "14px" }}>
-      {ruleKeys.map((key, index) => {
-        const group = ruleGroups[key];
+      {prefs.showFullRules
+        ? (() => {
+            const itemRules = _.flatMap(
+              items,
+              (item) =>
+                item.content.filter(
+                  (x) => x.type === "ArmyBookRule" || x.type === "ArmyBookDefense"
+                ) as IUpgradeGainsRule[]
+            );
+            return groupMap(
+              unitRules.concat(itemRules),
+              (x) => x.name,
+              (group, key) => {
+                const rule = group[0];
+                const rating = group.reduce(
+                  (total, next) => (next.rating ? total + parseInt(next.rating) : total),
+                  0
+                ).toString();
 
-        if (!prefs.showFullRules)
-          return (
-            <span key={index}>
-              {index === 0 ? "" : ", "}
-              <RuleList specialRules={group} />
-            </span>
-          );
+                const ruleDefinition = ruleDefinitions.filter(
+                  (r) => /(.+?)(?:\(|$)/.exec(r.name)[0] === rule.name
+                )[0];
 
-        const rule = group[0];
-        const rating = group.reduce(
-          (total, next) => (next.rating ? total + parseInt(next.rating) : total),
-          0
-        );
+                return (
+                  <p key={key}>
+                    <span style={{ fontWeight: 600 }}>
+                      {RulesService.displayName({ ...rule, rating }, count)} -
+                    </span>
+                    <span> {ruleDefinition?.description || ""}</span>
+                  </p>
+                );
+              }
+            );
+          })()
+        : (() => {
+            const rules = groupMap(
+              unitRules,
+              (x) => x.name,
+              (group, key) => <RuleList key={key} specialRules={group} />
+            );
 
-        const ruleDefinition = ruleDefinitions.filter(
-          (r) => /(.+?)(?:\(|$)/.exec(r.name)[0] === rule.name
-        )[0];
+            const itemRules = groupMap(
+              items,
+              (x) => x.name,
+              (group, key) => {
+                const item: IUpgradeGainsItem = group[0] as IUpgradeGainsItem;
+                const count = _.sumBy(group, (x) => x.count || 1);
 
-        return (
-          <p key={index}>
-            <span style={{ fontWeight: 600 }}>
-              {RulesService.displayName({ ...rule, rating }, count)} -
-            </span>
-            <span> {ruleDefinition?.description || ""}</span>
-          </p>
-        );
-      })}
-      {itemKeys.map((key, index) => {
-        const group = itemGroups[key];
-        const item: IUpgradeGainsItem = group[0];
-        const count = group.reduce((total, x) => total + (x.count || 1), 0);
+                const itemRules: IUpgradeGainsRule[] = item.content.filter(
+                  (x) => x.type === "ArmyBookRule" || x.type === "ArmyBookDefense"
+                ) as any;
 
-        const itemRules: IUpgradeGainsRule[] = item.content.filter(
-          (x) => x.type === "ArmyBookRule" || x.type === "ArmyBookDefense"
-        ) as any;
-        const itemHasRules = itemRules.length > 0;
+                const upgrade = unit.selectedUpgrades.find((x) =>
+                  x.option.gains.some((y) => y.name === item.name)
+                )?.upgrade;
+                const itemAffectsAll = upgrade?.affects === "all";
+                const hasStackableRule = itemRules.some((x) => x.name === "Impact");
+                const hideCount = itemAffectsAll && !hasStackableRule;
 
-        const upgrade = unit.selectedUpgrades.find((x) =>
-          x.option.gains.some((y) => y.name === item.name)
-        )?.upgrade;
-        const itemAffectsAll = upgrade?.affects === "all";
-        const hasStackableRule = itemRules.some((x) => x.name === "Impact");
-        const hideCount = itemAffectsAll && !hasStackableRule;
+                return (
+                  <span key={key}>
+                    {count > 1 && !hideCount && `${count}x `}
+                    {item.name}
+                    {itemRules.length > 0 && (
+                      <>
+                        <span>(</span>
+                        <RuleList specialRules={itemRules} />
+                        <span>)</span>
+                      </>
+                    )}
+                  </span>
+                );
+              }
+            );
 
-        return (
-          <span key={index}>
-            {ruleKeys.length > 0 && ", "}
-            {count > 1 && !hideCount && `${count}x `}
-            {item.name}
-            {itemHasRules && (
-              <>
-                <span>(</span>
-                <RuleList specialRules={itemRules} />
-                <span>)</span>
-              </>
-            )}
-          </span>
-        );
-      })}
+            return rules
+              .concat(itemRules)
+              .reduce((prev, curr) => [prev, <span>, </span>, curr] as any);
+          })()}
     </div>
   );
 
@@ -313,7 +325,7 @@ function SpecialRulesCard({ usedRules, ruleDefinitions }) {
                 .sort()
                 .map((r, i) => (
                   <p key={i} style={{ breakInside: "avoid" }}>
-                    <span style={{ fontWeight: 600 }}>{r} - </span>
+                    <span style={{ fontWeight: 600 }}>{r + " - "}</span>
                     <span>{ruleDefinitions.find((t) => t.name === r)?.description}</span>
                   </p>
                 ))}

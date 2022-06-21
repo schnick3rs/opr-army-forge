@@ -58,7 +58,7 @@ export default function UnitEquipmentTable({
   const hasEquipment = equipment.length > 0; // || itemUpgrades.length > 0;
 
   const weaponGroups = _.groupBy(weapons, (w) => pluralise.singular(w.name ?? w.label) + w.attacks);
-  const itemGroups = _.groupBy(combinedEquipment, (w) => pluralise.singular(w.name ?? w.label));
+  const itemGroups = _.groupBy(combinedEquipment, (w) => pluralise.singular((w as any).name ?? w.label));
   const weaponGroupKeys = Object.keys(weaponGroups);
 
   const cellStyle = {
@@ -89,8 +89,8 @@ export default function UnitEquipmentTable({
             </TableHead>
             <TableBody>
               {weaponGroupKeys.map((key, i) => {
-                const group: IUpgradeGainsWeapon[] = weaponGroups[key];
-                const upgrade = group[0];
+                const group = weaponGroups[key];
+                const upgrade = group[0] as IUpgradeGainsWeapon;
                 const count = group.reduce((c, next) => c + next.count, 0);
                 const e = { ...upgrade, count };
 

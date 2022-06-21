@@ -17,7 +17,6 @@ import {
   ListItemIcon,
   Button,
 } from "@mui/material";
-import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import HomeIcon from "@mui/icons-material/Home";
@@ -33,9 +32,7 @@ import { useMediaQuery } from "react-responsive";
 import { setOpenReleaseNotes } from "../../data/appSlice";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import CodeIcon from "@mui/icons-material/Code";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
-import CloudIcon from "@mui/icons-material/Cloud";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import DownloadFileIcon from "../icons/DownloadFile";
@@ -197,7 +194,7 @@ export default function MainMenu() {
               color="inherit"
               aria-label="menu"
               title="View list"
-              onClick={() => router.push("/view")}
+              onClick={() => router.push({ pathname: "/view", query: router.query })}
               className="mr-2"
             >
               <VisibilityIcon />
@@ -233,7 +230,7 @@ export default function MainMenu() {
               </ListItemIcon>
               <ListItemText>Edit Details</ListItemText>
             </MenuItem>
-            <MenuItem onClick={() => router.push("/view")}>
+            <MenuItem onClick={() => router.push({ pathname: "/view", query: router.query })}>
               <ListItemIcon>
                 <DashboardOutlinedIcon sx={{ color: "#9E9E9E" }} />
               </ListItemIcon>

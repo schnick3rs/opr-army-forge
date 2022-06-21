@@ -1,7 +1,7 @@
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import { Dispatch } from "react";
 import { ArmyState, getArmyBookData, getGameRules, IArmyData, resetLoadedBooks, setGameSystem } from "../data/armySlice";
-import { ISaveData, ISavedListState, ISelectedUnit, ISpecialRule, IUnit, IUpgrade, IUpgradeGainsWeapon, IUpgradeOption } from "../data/interfaces";
+import { ISaveData, ISavedListState, ISelectedUnit, ISpecialRule, IUnit, IUpgrade, IUpgradeGains, IUpgradeGainsWeapon, IUpgradeOption } from "../data/interfaces";
 import { ListState, loadSavedList } from "../data/listSlice";
 import { RootState } from "../data/store";
 import { groupBy, makeCopy } from "./Helpers";
@@ -269,9 +269,10 @@ export default class PersistenceService {
       `++ ${list.name} [${list.points}pts] ++\n`
     ];
 
-    const constructLabel = (item: IUpgradeGainsWeapon) => {
-      const range = item.range ? `${item.range}", ` : "";
-      const attacks = item.attacks ? `A${item.attacks}` : ""
+    const constructLabel = (item: IUpgradeGains) => {
+      const weapon = item as IUpgradeGainsWeapon;
+      const range = weapon.range ? `${weapon.range}", ` : "";
+      const attacks = weapon.attacks ? `A${weapon.attacks}` : ""
       const rules = item.specialRules?.map(RulesService.displayName).join(", ");
 
       if (!range && !attacks && !rules)
