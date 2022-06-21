@@ -29,36 +29,11 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
   const ruleDefinitions: IGameRule[] = gameRules.concat(armyRules);
   const traitDefinitions = getFlatTraitDefinitions();
 
-  const units: ISelectedUnit[] = (list?.units ?? []).map((u) => makeCopy(u));
+  const units = list?.units;
+
+  const unitGroups = UnitService.getDisplayUnits(units);
 
   const usedRules = [];
-
-  const unitAsKey = (unit: ISelectedUnit) => {
-    return {
-      id: unit.id,
-      customName: unit.customName,
-      joinToUnit: unit.joinToUnit,
-      upgrades: unit.selectedUpgrades.map((x) => ({
-        sectionId: x.upgrade.uid,
-        optionId: x.option.id,
-      })),
-      loadout: unit.loadout.map((x) => ({
-        id: x.id,
-        count: x.count,
-      })),
-    };
-  };
-
-  const getAttachedUnit = (u: ISelectedUnit) =>
-    units.find((x) => x.joinToUnit === u.selectionId && x.combined);
-
-  const viewUnits = units
-    .filter((u) => !u.combined || !u.joinToUnit)
-    .map((u) => (u.combined ? UnitService.mergeCombinedUnit(u, getAttachedUnit(u)) : u));
-
-  console.log(viewUnits);
-
-  const unitGroups = _.groupBy(viewUnits, (u) => JSON.stringify(unitAsKey(u)));
 
   const getUnitCard = (unit: ISelectedUnit, unitCount: number) => {
     const rules = getRules(unit);

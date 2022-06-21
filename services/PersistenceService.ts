@@ -270,22 +270,22 @@ export default class PersistenceService {
     ];
 
     const constructLabel = (item: IUpgradeGainsWeapon) => {
-      const count = item.count > 1 ? `${item.count}x ` : "";
       const range = item.range ? `${item.range}", ` : "";
       const attacks = item.attacks ? `A${item.attacks}` : ""
       const rules = item.specialRules?.map(RulesService.displayName).join(", ");
 
       if (!range && !attacks && !rules)
-        return `${count}${item.name}`;
+        return item.name;
 
-      return `${count}${item.name} (${range}${attacks}${rules?.length > 0 ? (", " + rules) : ""})`;
+      return `${item.name} (${range}${attacks}${rules?.length > 0 ? (", " + rules) : ""})`;
     };
-
     const getWeapons = (unit: ISelectedUnit) => {
-      console.log("Loadout", unit.loadout);
-      return unit.loadout
-        .map(constructLabel)
-        .join(", ");
+      const loadoutGroups = _.groupBy(unit.loadout, x => constructLabel(x));
+      return Object.keys(loadoutGroups).map(key => {
+        const group = loadoutGroups[key];
+        const count = group.reduce((sum, next) => sum + next.count, 0);
+        return `${count > 1 ? `${count}x ` : ""}${key}`
+      }).join(", ");
     };
 
     const getRules = (unit: ISelectedUnit) => {
@@ -316,16 +316,20 @@ export default class PersistenceService {
       }).join(", ");
     };
 
-    // Unit name [size] Qua 3+ Def 4+ 123pts
-    // 2x Hand Weapons, Rifle
-    // Fearless
-    //
-    // ...
-    for (let unit of list.units) {
+    const unitGroups = UnitService.getDisplayUnits(list.units);
+    
+    for (let key of Object.keys(unitGroups)) {
+      const group = unitGroups[key];
+      const unit = group[0];
+
+      const originalUnit = list.units.find((x) => x.selectionId === unit.selectionId);
+      const attachedUnit = list.units.find((x) => x.joinToUnit === unit.selectionId && x.id === unit.id);
+      const originalUnitCost = UpgradeService.calculateUnitTotal(originalUnit);
+      const attachedUnitCost = attachedUnit ? UpgradeService.calculateUnitTotal(attachedUnit) : 0;
+      const cost = originalUnitCost + attachedUnitCost;
       // TODO: Campaign unit pt cost...?
-      lines.push(`${unit.customName ?? unit.name} [${unit.size}] | Qua ${unit.quality}+ Def ${unit.defense}+ | ${UpgradeService.calculateUnitTotal(unit)}pts`);
-      lines.push(getWeapons(unit));
-      lines.push(getRules(unit) + "\n");
+      lines.push(`${group.length > 1 ? (group.length + "x ") : ""}${unit.customName ?? unit.name} [${unit.size}] | Qua ${unit.quality}+ Def ${unit.defense}+ | ${cost}pts | ` + getRules(unit));
+      lines.push(getWeapons(unit) + "\n");
     }
 
     return lines.join("\n");
