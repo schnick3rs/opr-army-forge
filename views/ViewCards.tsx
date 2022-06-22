@@ -6,7 +6,7 @@ import UnitEquipmentTable from "../views/UnitEquipmentTable";
 import { Paper, Card } from "@mui/material";
 import RulesService from "../services/RulesService";
 import { IGameRule } from "../data/armySlice";
-import { groupBy, groupMap, makeCopy } from "../services/Helpers";
+import { groupBy, groupMap, intersperse, makeCopy } from "../services/Helpers";
 import UnitService from "../services/UnitService";
 import UpgradeService from "../services/UpgradeService";
 import _ from "lodash";
@@ -154,7 +154,7 @@ function UnitCard({
                 const rating = group.reduce(
                   (total, next) => (next.rating ? total + parseInt(next.rating) : total),
                   0
-                ).toString();
+                );
 
                 const ruleDefinition = ruleDefinitions.filter(
                   (r) => /(.+?)(?:\(|$)/.exec(r.name)[0] === rule.name
@@ -163,7 +163,7 @@ function UnitCard({
                 return (
                   <p key={key}>
                     <span style={{ fontWeight: 600 }}>
-                      {RulesService.displayName({ ...rule, rating }, count)} -
+                      {RulesService.displayName({ ...rule, rating: rating as any  }, count)} -
                     </span>
                     <span> {ruleDefinition?.description || ""}</span>
                   </p>
@@ -212,9 +212,7 @@ function UnitCard({
               }
             );
 
-            return rules
-              .concat(itemRules)
-              .reduce((prev, curr) => [prev, <span>, </span>, curr] as any);
+            return intersperse(rules.concat(itemRules), <span>, </span>);
           })()}
     </div>
   );

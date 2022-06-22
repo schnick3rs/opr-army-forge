@@ -63,3 +63,8 @@ export function groupMap<In, Out>(obj: In[], keySelector: (item: In) => string, 
     .map(iteratee)
     .value() as any;
 }
+
+export function intersperse<T>(arr: T[], sep: T): T[] {
+  return arr
+    .reduce((a: T[], v: T) => a.length ? [...a, v, sep] : [v], []);
+}
