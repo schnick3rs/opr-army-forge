@@ -67,6 +67,13 @@ interface IRelease {
 
 const releaseNotes: IRelease[] = [
   {
+    version: "0.8.3",
+    date: "26/06/22",
+    notes: [
+      "Bug fix - can now refresh view screen.",
+    ],
+  },
+  {
     version: "0.8.2",
     date: "21/06/22",
     notes: [
