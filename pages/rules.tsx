@@ -26,7 +26,7 @@ export default function Rules() {
             <h1 className="is-size-4">{army}</h1>
             <div>
               {rules.map((r) => (
-                <p>
+                <p key={r.name}>
                   <span style={{ fontWeight: 600 }}>{r.name}: </span>
                   {r.description}
                 </p>
