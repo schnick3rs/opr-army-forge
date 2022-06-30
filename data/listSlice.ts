@@ -22,7 +22,7 @@ export interface ListState {
 
 const initialState: ListState = {
   creationTime: null,
-  name: "New Army",
+  name: null,
   pointsLimit: 0,
   units: [],
   selectedUnitId: null,
