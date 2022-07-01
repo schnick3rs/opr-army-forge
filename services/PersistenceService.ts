@@ -329,7 +329,7 @@ export default class PersistenceService {
       const attachedUnitCost = attachedUnit ? UpgradeService.calculateUnitTotal(attachedUnit) : 0;
       const cost = originalUnitCost + attachedUnitCost;
       // TODO: Campaign unit pt cost...?
-      lines.push(`${group.length > 1 ? (group.length + "x ") : ""}${unit.customName ?? unit.name} [${unit.size}] Q${unit.quality}+ D${unit.defense}+ | ${cost}pts | ` + getRules(unit));
+      lines.push(`${group.length > 1 ? (group.length + "x ") : ""}${unit.customName ?? unit.name} [${UnitService.getSize(unit)}] Q${unit.quality}+ D${unit.defense}+ | ${cost}pts | ` + getRules(unit));
       lines.push(getWeapons(unit) + "\n");
     }
 

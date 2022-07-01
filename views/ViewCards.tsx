@@ -256,7 +256,7 @@ function UnitCard({
           {unit.customName || unit.name}
           <span className="" style={{ color: "#666666" }}>
             {" "}
-            [{unit.size}]
+            [{UnitService.getSize(unit)}]
           </span>
           {prefs.showPointCosts && (
             <span className="is-size-6 ml-1" style={{ color: "#666666" }}>
