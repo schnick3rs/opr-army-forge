@@ -281,12 +281,16 @@ export default class PersistenceService {
       return `${item.name} (${range}${attacks}${rules?.length > 0 ? (", " + rules) : ""})`;
     };
     const getWeapons = (unit: ISelectedUnit) => {
-      const loadoutGroups = _.groupBy(unit.loadout, x => constructLabel(x));
-      return Object.keys(loadoutGroups).map(key => {
+      const allWeapons = unit.loadout
+        .concat(_.flatMap(unit.loadout, x => ((x as any).content || [])))
+        .filter(x => x.type === "ArmyBookWeapon");
+      const loadoutGroups = _.groupBy(allWeapons, x => constructLabel(x));
+      const loadoutParts = Object.keys(loadoutGroups).map(key => {
         const group = loadoutGroups[key];
         const count = group.reduce((sum, next) => sum + next.count, 0);
         return `${count > 1 ? `${count}x ` : ""}${key}`
-      }).join(", ");
+      });
+      return loadoutParts.join(", ");
     };
 
     const getRules = (unit: ISelectedUnit) => {
@@ -318,7 +322,7 @@ export default class PersistenceService {
     };
 
     const unitGroups = UnitService.getDisplayUnits(list.units);
-    
+
     for (let key of Object.keys(unitGroups)) {
       const group = unitGroups[key];
       const unit = group[0];
