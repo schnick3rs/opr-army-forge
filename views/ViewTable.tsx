@@ -81,6 +81,7 @@ export default function ViewTable({ prefs }: ViewTableProps) {
 
   return (
     <>
+      <p className="mb-2">This view is a work in progress...</p>
       <TableContainer>
         <Table size="small">
           <TableHead>

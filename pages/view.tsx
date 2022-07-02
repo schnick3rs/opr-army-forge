@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../data/store";
 import { useRouter } from "next/router";
 import ViewCards from "../views/ViewCards";
-import ViewList from "../views/ViewList";
 import {
   AppBar,
   Button,
