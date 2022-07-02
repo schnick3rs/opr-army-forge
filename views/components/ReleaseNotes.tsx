@@ -67,6 +67,13 @@ interface IRelease {
 
 const releaseNotes: IRelease[] = [
   {
+    version: "0.9.1",
+    date: "02/07/22",
+    notes: [
+      "Bug fix - mobile tabs scroll to top on change",
+    ],
+  },
+  {
     version: "0.9.0",
     date: "02/07/22",
     notes: [

@@ -60,6 +60,7 @@ export default function MobileView() {
     arrows: false,
     initialSlide: 1,
     beforeChange: (current, next) => handleSlideChange(null, next),
+    afterChange: () => window.scrollTo(0, 0),
   };
 
   return (
