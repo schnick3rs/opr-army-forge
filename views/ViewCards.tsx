@@ -5,16 +5,17 @@ import style from "../styles/Cards.module.css";
 import UnitEquipmentTable from "../views/UnitEquipmentTable";
 import { Paper, Card } from "@mui/material";
 import RulesService from "../services/RulesService";
-import { IGameRule } from "../data/armySlice";
+import { ArmyState, IGameRule } from "../data/armySlice";
 import { groupBy, groupMap, intersperse, makeCopy } from "../services/Helpers";
 import UnitService from "../services/UnitService";
 import UpgradeService from "../services/UpgradeService";
 import _ from "lodash";
 import { ISelectedUnit, IUpgradeGainsItem, IUpgradeGainsRule } from "../data/interfaces";
 import RuleList from "./components/RuleList";
-import { IViewPreferences } from "../pages/view";
+import { IViewPreferences, listContainsPyschic } from "../pages/view";
 import { getFlatTraitDefinitions, ITrait } from "../data/campaign";
 import LinkIcon from "@mui/icons-material/Link";
+import { ListState } from "../data/listSlice";
 
 interface ViewCardsProps {
   prefs: IViewPreferences;
@@ -74,7 +75,7 @@ export default function ViewCards({ prefs }: ViewCardsProps) {
               return getUnitCard(unit, count);
             })
           : units.map((unit, i) => getUnitCard(unit, 1))}
-        {prefs.showPsychic && <PsychicCard army={army} />}
+        {prefs.showPsychic && <SpellsCard army={army} list={list} />}
       </div>
       {!prefs.showFullRules && (
         <SpecialRulesCard
@@ -163,7 +164,7 @@ function UnitCard({
                 return (
                   <p key={key}>
                     <span style={{ fontWeight: 600 }}>
-                      {RulesService.displayName({ ...rule, rating: rating as any  }, count)} -
+                      {RulesService.displayName({ ...rule, rating: rating as any }, count)} -
                     </span>
                     <span> {ruleDefinition?.description || ""}</span>
                   </p>
@@ -256,7 +257,7 @@ function UnitCard({
           {unit.customName || unit.name}
           <span className="" style={{ color: "#666666" }}>
             {" "}
-            [{unit.size}]
+            [{UnitService.getSize(unit)}]
           </span>
           {prefs.showPointCosts && (
             <span className="is-size-6 ml-1" style={{ color: "#666666" }}>
@@ -280,32 +281,44 @@ function UnitCard({
   );
 }
 
-function PsychicCard({ army }) {
+interface SpellsCardProps {
+  army: ArmyState;
+  list: ListState;
+}
+
+function SpellsCard({ army, list }: SpellsCardProps) {
+  const isGrimdark = army.gameSystem.startsWith("gf");
   return (
     <>
-      {army.loadedArmyBooks.map((book) => (
-        <ViewCard
-          title="Psychic/Spells"
-          content={
-            <>
-              <hr className="my-0" />
+      {army.loadedArmyBooks.map((book) => {
+        const enable = listContainsPyschic(list.units.filter((x) => x.armyId === book.uid));
+        return (
+          enable && (
+            <ViewCard
+              key={book.uid}
+              title={`${book.name} ${(isGrimdark ? "Psychic " : "")} Spells`}
+              content={
+                <>
+                  <hr className="my-0" />
 
-              <Paper square elevation={0}>
-                <div className="px-2 my-2">
-                  {book.spells.map((spell) => (
-                    <p key={spell.id}>
-                      <span style={{ fontWeight: 600 }}>
-                        {spell.name} ({spell.threshold}+):{" "}
-                      </span>
-                      <span>{spell.effect}</span>
-                    </p>
-                  ))}
-                </div>
-              </Paper>
-            </>
-          }
-        />
-      ))}
+                  <Paper square elevation={0}>
+                    <div className="px-2 my-2">
+                      {book.spells.map((spell) => (
+                        <p key={spell.id}>
+                          <span style={{ fontWeight: 600 }}>
+                            {spell.name} ({spell.threshold}+):{" "}
+                          </span>
+                          <span>{spell.effect}</span>
+                        </p>
+                      ))}
+                    </div>
+                  </Paper>
+                </>
+              }
+            />
+          )
+        );
+      })}
     </>
   );
 }

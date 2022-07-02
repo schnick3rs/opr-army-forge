@@ -36,6 +36,10 @@ function UnitSelectionForArmy({ army, showTitle }) {
   };
   const handleSelectClick = (unit: IUnit) => {
     dispatch(previewUnit({ ...unit, armyId: army.uid } as any));
+    const scroll = window.scrollY;
+    router.events.on("routeChangeComplete", () => {
+      window.scrollTo(0, scroll);
+    })
     router.push({ query: { ...router.query, upgradesOpen: true } });
   };
 

@@ -12,6 +12,8 @@ interface UpgradeGroupProps {
   previewMode: boolean;
 }
 export default function UpgradeGroup({ unit, upgrade, previewMode }: UpgradeGroupProps) {
+  if (unit.joinToUnit && upgrade.isCommandGroup) return null;
+
   const controlType = UpgradeService.getControlType(unit, upgrade);
 
   // TODO: #177
@@ -22,7 +24,7 @@ export default function UpgradeGroup({ unit, upgrade, previewMode }: UpgradeGrou
 
   const defaultItemLabel =
     upgrade.type === "replace"
-      ? "Default"// - ${upgrade.replaceWhat?.map((what) => getProfile(what) || "...").join(", ")}`
+      ? "Default" // - ${upgrade.replaceWhat?.map((what) => getProfile(what) || "...").join(", ")}`
       : "None";
   const defaultItem = controlType === "radio" && (
     <UpgradeItem

@@ -67,6 +67,28 @@ interface IRelease {
 
 const releaseNotes: IRelease[] = [
   {
+    version: "0.9.0",
+    date: "02/07/22",
+    notes: [
+      "Enhancements:",
+      '- "Heroes only join units from their own faction" competitive warning',
+      "- Added list title/points to print header for card/list view",
+      "- Desktop sticky headers for columns",
+      "- Main options menu added to view screen",
+      "- Command group upgrades now hidden on combined units",
+      "- Campaign traits added to text export",
+      "Bug fixes:",
+      '- "Defense(+2)" changed to "Defense +2"',
+      "- Spells will only be displayed when list has a psychic/wizard from matching army book",
+      "- Text export displays weapons from additional model upgrades",
+      "- Unit count now updates when additional model upgrade is taken",
+      "- Maintain scroll position when opening upgrade panel on mobile",
+      '- Fixed weapon grouping by name only in "my list" view',
+      '- Command group upgrades no longer copied when "Combined Unit" is checked',
+      "- Army cost now updated when unit xp is added"
+    ],
+  },
+  {
     version: "0.8.3",
     date: "26/06/22",
     notes: [
