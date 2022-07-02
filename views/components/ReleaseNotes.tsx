@@ -67,6 +67,16 @@ interface IRelease {
 
 const releaseNotes: IRelease[] = [
   {
+    version: "0.9.2",
+    date: "02/07/22",
+    notes: [
+      "Enhancements:",
+      '- Added unit notes to card view',
+      "Bug fixes:",
+      "- Special rule comma separation fix"
+    ],
+  },
+  {
     version: "0.9.1",
     date: "02/07/22",
     notes: [

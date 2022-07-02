@@ -213,6 +213,7 @@ function UnitCard({
               }
             );
 
+            console.log(rules.concat(itemRules));
             return intersperse(rules.concat(itemRules), <span>, </span>);
           })()}
     </div>
@@ -275,6 +276,7 @@ function UnitCard({
           <div className="mt-4">
             <UnitEquipmentTable unit={unit} hideEquipment={true} square />
           </div>
+          {unit.notes && <div className="p-2">{unit.notes}</div>}
         </>
       }
     />
