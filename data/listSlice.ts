@@ -75,9 +75,10 @@ export const listSlice = createSlice({
       let parentUnit = state.units[parentindex];
       parentUnit.combined = true;
 
-      let newUnit = {
+      let newUnit: ISelectedUnit = {
         ...parentUnit,
-        selectionId: nanoid(5)
+        selectionId: nanoid(5),
+        selectedUpgrades: parentUnit.selectedUpgrades.filter(x => !x.upgrade.isCommandGroup)
       };
 
       newUnit.joinToUnit = parentUnit.selectionId;
@@ -85,6 +86,8 @@ export const listSlice = createSlice({
 
       state.units.splice(parentindex + 1, 0, newUnit);
       state.points = UpgradeService.calculateListTotal(state.units);
+
+      console.log(newUnit);
 
       debounceSave(current(state));
     },
