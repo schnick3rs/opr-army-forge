@@ -5,7 +5,7 @@ body {
   padding: 0;
   margin: 0;
   height: 100%;
-  background-color: #FAFAFA;
+  background-color: #fafafa;
   overflow-y: unset;
 }
 
@@ -51,7 +51,7 @@ div[role="tooltip"] {
 .sticky {
   position: sticky !important;
   top: 0;
-  background-color: #FAFAFA;
+  background-color: #fafafa;
   z-index: 10;
   overflow: hidden;
 }
@@ -79,11 +79,11 @@ div[role="tooltip"] {
     display: table !important;
   }
   .columns > .column {
-     display: inline-block !important;
-     vertical-align:top;
+    display: inline-block !important;
+    vertical-align: top;
   }
   .no-print {
-    display:none !important;
+    display: none !important;
   }
   * {
     background-color: transparent !important;
@@ -98,4 +98,8 @@ div[role="tooltip"] {
 hr {
   height: auto;
   background-color: transparent;
+}
+
+td.weapon-name-cell {
+  white-space: nowrap;
 }
