@@ -31,6 +31,7 @@ import { getGameRules } from "../data/armySlice";
 import { ListState } from "../data/listSlice";
 import { ISelectedUnit, IUpgradeGainsRule } from "../data/interfaces";
 import UnitService from "../services/UnitService";
+import { MainMenuOptions } from "../views/components/MainMenu";
 
 export interface IViewPreferences {
   showFullRules: boolean;
@@ -98,14 +99,14 @@ export default function View() {
     <>
       <Paper className="no-print" elevation={2} color="primary" square>
         <AppBar position="static" elevation={0}>
-          <Toolbar>
+          <Toolbar className="p-0">
             <IconButton
               size="large"
-              edge="start"
               color="inherit"
               aria-label="menu"
-              sx={{ mr: 2 }}
               onClick={() => router.back()}
+              style={{ marginLeft: "0" }}
+              className="mr-4"
             >
               <CloseIcon />
             </IconButton>
@@ -113,9 +114,7 @@ export default function View() {
               {title}
             </Typography>
             <IconButton
-              className="mr-4"
               size="large"
-              edge="start"
               color="inherit"
               aria-label="menu"
               onClick={() => window.print()}
@@ -124,13 +123,13 @@ export default function View() {
             </IconButton>
             <IconButton
               size="large"
-              edge="start"
               color="inherit"
               aria-label="menu"
               onClick={() => setSettingsOpen(true)}
             >
               <SettingsIcon />
             </IconButton>
+            <MainMenuOptions />
           </Toolbar>
         </AppBar>
       </Paper>

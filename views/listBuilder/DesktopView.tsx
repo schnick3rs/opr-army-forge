@@ -35,7 +35,7 @@ export default function DesktopView() {
       </Paper>
       <div className="columns my-0" style={{ height: "calc(100vh - 64px)" }}>
         <div className="column py-0 pr-0" style={columnStyle} onScroll={setScrolled}>
-          <Card square elevation={1} style={{ position: "sticky", top: 0, zIndex: 999 }}>
+          <Card square elevation={1} style={{ position: "sticky", top: 0, zIndex: 1 }}>
             <h3 className="p-4 is-size-4 is-hidden-mobile">
               {loadedArmyBooks.length > 1
                 ? "Army Books"
@@ -45,7 +45,7 @@ export default function DesktopView() {
           <UnitSelection />
         </div>
         <div className="column p-0" style={columnStyle} onScroll={setScrolled}>
-          <Card square elevation={1} style={{ position: "sticky", top: 0, zIndex: 999 }}>
+          <Card square elevation={1} style={{ position: "sticky", top: 0, zIndex: 1 }}>
             <h3 className="p-4 is-size-4 is-hidden-mobile">
               {`My List - ${list.points}` +
                 (list.pointsLimit ? `/${list.pointsLimit}` : "") +
@@ -59,7 +59,7 @@ export default function DesktopView() {
             square
             elevation={1}
             className="px-4 pt-4 pb-2"
-            style={{ position: "sticky", top: 0, zIndex: 999 }}
+            style={{ position: "sticky", top: 0, zIndex: 1 }}
           >
             <UpgradePanelHeader />
           </Card>
