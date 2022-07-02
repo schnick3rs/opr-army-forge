@@ -51,7 +51,7 @@ export default class UnitService {
     const upgrades = this.getAllUpgrades(unit, true);
 
     const rules = upgrades.filter((u) => u.type === "ArmyBookRule") || [];
-    const rulesFromitems =
+    const rulesFromItems =
       upgrades
         .filter((u) => u.type === "ArmyBookItem")
         .reduce(
@@ -60,7 +60,7 @@ export default class UnitService {
           []
         ) || [];
 
-    return rules.concat(rulesFromitems) as IUpgradeGainsRule[];
+    return rules.concat(rulesFromItems) as IUpgradeGainsRule[];
   }
 
   public static getAllUpgradeWeapons(unit: ISelectedUnit): IUpgradeGainsWeapon[] {

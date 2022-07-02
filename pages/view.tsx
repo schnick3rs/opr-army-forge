@@ -28,6 +28,9 @@ import PersistenceService from "../services/PersistenceService";
 import PrintIcon from "@mui/icons-material/Print";
 import ViewTable from "../views/ViewTable";
 import { getGameRules } from "../data/armySlice";
+import { ListState } from "../data/listSlice";
+import { ISelectedUnit, IUpgradeGainsRule } from "../data/interfaces";
+import UnitService from "../services/UnitService";
 
 export interface IViewPreferences {
   showFullRules: boolean;
@@ -46,7 +49,7 @@ export default function View() {
     showFullRules: false,
     showPointCosts: true,
     combineSameUnits: true,
-    showPsychic: listContainsPyschic(list),
+    showPsychic: listContainsPyschic(list.units),
   } as IViewPreferences;
 
   const [preferences, setPreferenceState] = useState(defaultPrefs);
@@ -58,7 +61,7 @@ export default function View() {
     setPreferenceState((prev) => ({
       ...prev,
       ...prefs,
-      showPsychic: listContainsPyschic(list) || ((prefs as any)?.showPsychic ?? false),
+      showPsychic: listContainsPyschic(list.units) || ((prefs as any)?.showPsychic ?? false),
     }));
   }, []);
 
@@ -194,13 +197,14 @@ export default function View() {
 }
 
 // TODO: extract these as global helper functions
-function listContainsPyschic(list) {
+export function listContainsPyschic(units: ISelectedUnit[]) {
   // TODO: get the special rule def from a well known location
-  return listContainsSpecialRule(list, { key: "psychic", name: "Psychic", rating: "1" });
+  return listContainsSpecialRule(units, "Psychic") || listContainsSpecialRule(units, "Wizard");
 }
 
-function listContainsSpecialRule(list, specialRule) {
-  return list.units.some(({ specialRules }) =>
-    Boolean(specialRules.find(({ name }) => name === specialRule.name))
-  );
+export function listContainsSpecialRule(units: ISelectedUnit[], specialRule: string) {
+  return units.some((unit) => {
+    const upgradeRules = UnitService.getAllUpgradedRules(unit);
+    return unit.specialRules.concat(upgradeRules).some(({ name }) => name === specialRule);
+  });
 }
