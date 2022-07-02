@@ -311,7 +311,7 @@ export default class PersistenceService {
       // Sort rules alphabetically
       keys.sort((a, b) => a.localeCompare(b));
 
-      return keys.map(key => {
+      const displayRules = keys.map(key => {
 
         // This has been copy/pasted from RuleList.tsx - refactor!
         const group: ISpecialRule[] = ruleGroups[key];
@@ -327,7 +327,9 @@ export default class PersistenceService {
         const count = rating > 0 ? 0 : group.length;
 
         return (count > 1 ? `${count}x ` : "") + RulesService.displayName({ ...rule, rating: rule.rating ? rating.toString() : null });
-      }).join(", ");
+      });
+
+      return displayRules.concat(unit.traits).join(", ");
     };
 
     const unitGroups = UnitService.getDisplayUnits(list.units);

@@ -277,6 +277,9 @@ export const listSlice = createSlice({
       if (!unit.xp)
         unit.xp = 0;
       unit.xp += xp;
+
+      state.points = UpgradeService.calculateListTotal(state.units);
+      
       debounceSave(current(state));
     },
     toggleTrait(state, action: PayloadAction<{ unitId: string, trait: string }>) {
