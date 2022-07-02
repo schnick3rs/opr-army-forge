@@ -92,6 +92,8 @@ export default function View() {
     PersistenceService.saveViewPreferences(newPrefs);
   }
 
+  const title = `${list.name} • ${list.points}pts`;
+
   return (
     <>
       <Paper className="no-print" elevation={2} color="primary" square>
@@ -108,7 +110,7 @@ export default function View() {
               <CloseIcon />
             </IconButton>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              {list.name} • {list.points}pts
+              {title}
             </Typography>
             <IconButton
               className="mr-4"
@@ -191,6 +193,9 @@ export default function View() {
           <span className="pl-1 full-compact-text">{isCardView ? "cards" : "list"}</span>
         </Button>
       </div>
+      <h1 className="mb-4 mx-4 print-only" style={{ fontWeight: 600 }}>
+        {title}
+      </h1>
       {isCardView ? <ViewCards prefs={preferences} /> : <ViewTable prefs={preferences} />}
     </>
   );

@@ -67,6 +67,10 @@ div[role="tooltip"] {
   display: none !important;
 }
 
+.print-only {
+  display: none;
+}
+
 @media print {
   body {
     zoom: 65%;
@@ -84,6 +88,10 @@ div[role="tooltip"] {
   * {
     background-color: transparent !important;
     color: black !important;
+  }
+
+  .print-only {
+    display: initial;
   }
 }
 
