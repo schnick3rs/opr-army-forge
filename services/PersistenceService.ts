@@ -10,6 +10,7 @@ import UnitService from "./UnitService";
 import UpgradeService from "./UpgradeService";
 import _ from "lodash";
 import { IViewPreferences } from "../pages/view";
+import { nanoid } from "nanoid";
 
 export default class PersistenceService {
 
@@ -126,6 +127,14 @@ export default class PersistenceService {
       ...save,
       favourite: isFavourite
     });
+  }
+
+  public static copyList(save: ISaveData) {
+
+    const copy: ISaveData = JSON.parse(JSON.stringify(save));
+    copy.list.creationTime = nanoid();
+    copy.list.name += " - Copy";
+    localStorage[this.getSaveKey(copy.list.creationTime)] = JSON.stringify(copy);
   }
 
   public static delete(list: ListState) {
