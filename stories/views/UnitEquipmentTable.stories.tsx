@@ -1,9 +1,9 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import UnitEquipmentTable from "./UnitEquipmentTable";
-import { store } from "../data/store";
 import { Provider } from "react-redux";
-import { addMockData } from "../data/mock";
+import UnitEquipmentTable from "../../views/UnitEquipmentTable";
+import { addMockData } from "../../data/mock";
+import { store } from "../../data/store";
 
 export default {
   title: "Army Forge/Unit Equipment Table",
@@ -20,14 +20,14 @@ const Template: ComponentStory<typeof UnitEquipmentTable> = (args) => (
 
 export const UpgradePanel = Template.bind({});
 UpgradePanel.args = {
-  loadout: store.getState().list.units[0].loadout,
+  loadout: store.getState().list.units[0]?.loadout,
   square: false,
   hideEquipment: false
 };
 
 export const CardView = Template.bind({});
 CardView.args = {
-  loadout: store.getState().list.units[0].loadout,
+  loadout: store.getState().list.units[0]?.loadout,
   square: true,
   hideEquipment: true
 };

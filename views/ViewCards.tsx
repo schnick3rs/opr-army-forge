@@ -98,7 +98,7 @@ interface UnitCardProps {
   traitDefinitions: ITrait[];
 }
 
-function UnitCard({
+export function UnitCard({
   unit,
   attachedTo,
   pointCost,
@@ -288,7 +288,7 @@ interface SpellsCardProps {
   list: ListState;
 }
 
-function SpellsCard({ army, list }: SpellsCardProps) {
+export function SpellsCard({ army, list }: SpellsCardProps) {
   const isGrimdark = army.gameSystem.startsWith("gf");
   return (
     <>
@@ -298,7 +298,7 @@ function SpellsCard({ army, list }: SpellsCardProps) {
           enable && (
             <ViewCard
               key={book.uid}
-              title={`${book.name} ${(isGrimdark ? "Psychic " : "")} Spells`}
+              title={`${book.name} ${isGrimdark ? "Psychic " : ""} Spells`}
               content={
                 <>
                   <hr className="my-0" />

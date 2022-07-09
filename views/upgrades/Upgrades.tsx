@@ -7,8 +7,6 @@ import {
   MenuItem,
   InputLabel,
   Select,
-  TextField,
-  Button,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../data/store";
@@ -24,7 +22,6 @@ import {
   removeUnit,
   moveUnit,
   selectUnit,
-  setUnitNotes,
 } from "../../data/listSlice";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SpellsTable from "../SpellsTable";
