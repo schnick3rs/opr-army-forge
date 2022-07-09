@@ -222,7 +222,7 @@ export function Upgrades({ mobile = false }) {
 
           {/* Equipment */}
           <div className="px-4 pb-4">
-            <UnitEquipmentTable unit={selectedUnit} square={true} />
+            <UnitEquipmentTable loadout={selectedUnit.loadout} square={true} />
           </div>
           {isPsychic && (
             <div className="px-4 pt-2">

@@ -274,7 +274,7 @@ function UnitCard({
           {rulesSection}
           {traitsSection}
           <div className="mt-4">
-            <UnitEquipmentTable unit={unit} hideEquipment={true} square />
+            <UnitEquipmentTable loadout={unit.loadout} hideEquipment square />
           </div>
           {unit.notes && <div className="p-2">{unit.notes}</div>}
         </>

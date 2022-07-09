@@ -232,7 +232,6 @@ function UnitRow({ unit, rules, count, prefs, ruleDefinitions, maxCellWidth }: U
           }
         )}
       </table>
-      {/* <UnitEquipmentTable unit={unit} square={true} header={false} /> */}
     </TableCell>
   );
 
