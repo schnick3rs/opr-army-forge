@@ -34,7 +34,13 @@ export default function UnitEquipmentTable({
 
   const weaponsFromItems = _.flatMap(
     loadout.filter((e) => e.type === "ArmyBookItem"),
-    (e) => (e as IUpgradeGainsItem).content.filter((item) => item.type === "ArmyBookWeapon")
+    (e: IUpgradeGainsItem) =>
+      e.content
+        .filter((item) => item.type === "ArmyBookWeapon")
+        .map((weapon: IUpgradeGainsWeapon) => ({
+          ...weapon,
+          count: (weapon.count || 1) * (e.count || 1),
+        }))
   );
   const weapons = loadout
     .filter((e) => isWeapon(e))
