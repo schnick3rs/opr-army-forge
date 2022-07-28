@@ -18,7 +18,7 @@ export default function UnitListItem(props: UnitListItemProps) {
   const unit = props.unit;
   const loadout = unit.loadout || unit.equipment;
 
-  const weaponGroups = _.groupBy(loadout, (x) => x.name);
+  const weaponGroups = _.groupBy(loadout, (x) => x.name + x.attacks);
   const unitSize = UnitService.getSize(unit);
 
   return (

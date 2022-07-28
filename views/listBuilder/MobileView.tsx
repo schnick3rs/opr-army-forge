@@ -10,7 +10,7 @@ import "react-spring-bottom-sheet/dist/style.css";
 import { Upgrades } from "../upgrades/Upgrades";
 import { BottomSheet } from "react-spring-bottom-sheet";
 import { AppBar, Paper, Tab, Tabs, Button } from "@mui/material";
-import { selectUnit, addUnit } from "../../data/listSlice";
+import { selectUnit } from "../../data/listSlice";
 import UpgradePanelHeader from "../components/UpgradePanelHeader";
 import Add from "@mui/icons-material/Add";
 import MainMenu from "../components/MainMenu";
@@ -60,6 +60,7 @@ export default function MobileView() {
     arrows: false,
     initialSlide: 1,
     beforeChange: (current, next) => handleSlideChange(null, next),
+    afterChange: () => window.scrollTo(0, 0),
   };
 
   return (

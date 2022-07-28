@@ -9,7 +9,8 @@ export default function UnitNotes({ selectedUnit }) {
   const [unitNotes, setUnitNotesState] = useState(null);
 
   useEffect(() => {
-    setUnitNotesState(selectedUnit?.notes);
+    console.log("Setting notes");
+    setUnitNotesState(selectedUnit?.notes ?? "");
   }, [selectedUnit]);
 
   const debounceSetNotes = useCallback(

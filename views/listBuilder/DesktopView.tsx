@@ -12,9 +12,7 @@ import UndoRemoveUnit from "../components/UndoRemoveUnit";
 
 export default function DesktopView() {
   const list = useSelector((state: RootState) => state.list);
-  const loadedArmyBooks = useSelector(
-    (state: RootState) => state.army.loadedArmyBooks
-  );
+  const loadedArmyBooks = useSelector((state: RootState) => state.army.loadedArmyBooks);
   const [validationOpen, setValidationOpen] = useState(false);
   const [showUndoRemove, setShowUndoRemove] = useState(false);
 
@@ -36,12 +34,8 @@ export default function DesktopView() {
         <MainMenu />
       </Paper>
       <div className="columns my-0" style={{ height: "calc(100vh - 64px)" }}>
-        <div
-          className="column py-0 pr-0"
-          style={columnStyle}
-          onScroll={setScrolled}
-        >
-          <Card square elevation={3}>
+        <div className="column py-0 pr-0" style={columnStyle} onScroll={setScrolled}>
+          <Card square elevation={1} style={{ position: "sticky", top: 0, zIndex: 1 }}>
             <h3 className="p-4 is-size-4 is-hidden-mobile">
               {loadedArmyBooks.length > 1
                 ? "Army Books"
@@ -51,24 +45,22 @@ export default function DesktopView() {
           <UnitSelection />
         </div>
         <div className="column p-0" style={columnStyle} onScroll={setScrolled}>
-          <Card square elevation={3}>
+          <Card square elevation={1} style={{ position: "sticky", top: 0, zIndex: 1 }}>
             <h3 className="p-4 is-size-4 is-hidden-mobile">
               {`My List - ${list.points}` +
                 (list.pointsLimit ? `/${list.pointsLimit}` : "") +
                 "pts"}
             </h3>
           </Card>
-          <MainList
-            onSelected={() => {}}
-            onUnitRemoved={() => setShowUndoRemove(true)}
-          />
+          <MainList onSelected={() => {}} onUnitRemoved={() => setShowUndoRemove(true)} />
         </div>
-        <div
-          className="column py-0 px-0 mr-4"
-          style={columnStyle}
-          onScroll={setScrolled}
-        >
-          <Card square elevation={1} className="px-4 pt-4 pb-2 sticky">
+        <div className="column py-0 px-0 mr-4" style={columnStyle} onScroll={setScrolled}>
+          <Card
+            square
+            elevation={1}
+            className="px-4 pt-4 pb-2"
+            style={{ position: "sticky", top: 0, zIndex: 1 }}
+          >
             <UpgradePanelHeader />
           </Card>
           <Upgrades />

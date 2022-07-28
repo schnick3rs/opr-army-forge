@@ -7,8 +7,6 @@ import {
   MenuItem,
   InputLabel,
   Select,
-  TextField,
-  Button,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../data/store";
@@ -24,7 +22,6 @@ import {
   removeUnit,
   moveUnit,
   selectUnit,
-  setUnitNotes,
 } from "../../data/listSlice";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SpellsTable from "../SpellsTable";
@@ -63,7 +60,7 @@ export function Upgrades({ mobile = false }) {
       .concat(unitUpgradeRules)
       .filter((r) => r.name !== "-");
 
-  const isSkirmish = gameSystem !== "gf" && gameSystem !== "aof";
+  const isSkirmish = gameSystem !== "gf" && gameSystem !== "aof" && gameSystem !== "aofr";
   const isHero = selectedUnit
     ? selectedUnit.specialRules.findIndex((sr) => sr.name === "Hero") > -1
     : false;
@@ -75,7 +72,7 @@ export function Upgrades({ mobile = false }) {
       const ruleDef = ruleDefinitions.find((rd) => rd.name === r.name);
       console.log(r.name, ruleDef);
       const ruleDesc = ruleDef?.description;
-      result ||= ruleDesc && /(?:Psychic|Wizard)\(\d\)/i.test(ruleDesc);
+      result ||= ruleDesc && /(?:Psychic|Wizard)\(\d\)/i.test(ruleDesc) && !(/(?:as if)/i.test(ruleDesc));
     }
     return result;
   })();
@@ -222,7 +219,7 @@ export function Upgrades({ mobile = false }) {
 
           {/* Equipment */}
           <div className="px-4 pb-4">
-            <UnitEquipmentTable unit={selectedUnit} square={true} />
+            <UnitEquipmentTable loadout={selectedUnit.loadout} square={true} />
           </div>
           {isPsychic && (
             <div className="px-4 pt-2">

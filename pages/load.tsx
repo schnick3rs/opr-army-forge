@@ -16,7 +16,6 @@ import {
   AppBar,
   Typography,
 } from "@mui/material";
-import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import _ from "lodash";
 import { Delete } from "@mui/icons-material";
 import PersistenceService from "../services/PersistenceService";
@@ -31,6 +30,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useLongPress } from "use-long-press";
 import UAParser from "ua-parser-js";
 import DownloadFileIcon from "../views/icons/DownloadFile";
+import FileCopyIcon from "@mui/icons-material/FileCopy";
 
 export default function Load() {
   const dispatch = useDispatch<typeof store.dispatch>();
@@ -115,6 +115,10 @@ export default function Load() {
     // True when any are not favourite (= favourite all selections)
     const targetState = selections.some((x) => !selectionIsFavourite(x));
     PersistenceService.toggleFavourite(save, targetState);
+  };
+
+  const copyList = (save: ISaveData) => {
+    PersistenceService.copyList(save);
   };
 
   const readSingleFile = (e) => {
@@ -215,6 +219,16 @@ export default function Load() {
                 ) : (
                   <StarBorderIcon />
                 )}
+              </IconButton>
+              <IconButton
+                disabled={!selections.length}
+                color="primary"
+                onClick={() => {
+                  forEachSelection(copyList);
+                  setSelections([]);
+                }}
+              >
+                <FileCopyIcon />
               </IconButton>
               <IconButton
                 color="primary"

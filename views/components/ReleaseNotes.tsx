@@ -67,6 +67,80 @@ interface IRelease {
 
 const releaseNotes: IRelease[] = [
   {
+    version: "0.9.2",
+    date: "02/07/22",
+    notes: [
+      "Enhancements:",
+      '- Added unit notes to card view',
+      "Bug fixes:",
+      "- Special rule comma separation fix"
+    ],
+  },
+  {
+    version: "0.9.1",
+    date: "02/07/22",
+    notes: [
+      "Bug fix - mobile tabs scroll to top on change",
+    ],
+  },
+  {
+    version: "0.9.0",
+    date: "02/07/22",
+    notes: [
+      "Enhancements:",
+      '- "Heroes only join units from their own faction" competitive warning',
+      "- Added list title/points to print header for card/list view",
+      "- Desktop sticky headers for columns",
+      "- Main options menu added to view screen",
+      "- Command group upgrades now hidden on combined units",
+      "- Campaign traits added to text export",
+      "Bug fixes:",
+      '- "Defense(+2)" changed to "Defense +2"',
+      "- Spells will only be displayed when list has a psychic/wizard from matching army book",
+      "- Text export displays weapons from additional model upgrades",
+      "- Unit count now updates when additional model upgrade is taken",
+      "- Maintain scroll position when opening upgrade panel on mobile",
+      '- Fixed weapon grouping by name only in "my list" view',
+      '- Command group upgrades no longer copied when "Combined Unit" is checked',
+      "- Army cost now updated when unit xp is added"
+    ],
+  },
+  {
+    version: "0.8.3",
+    date: "26/06/22",
+    notes: [
+      "Bug fix - can now refresh view screen.",
+    ],
+  },
+  {
+    version: "0.8.2",
+    date: "21/06/22",
+    notes: [
+      "Updated text export format (more compact).",
+    ],
+  },
+  {
+    version: "0.8.1",
+    date: "19/06/22",
+    notes: [
+      "Added AoF:R",
+    ],
+  },
+  {
+    version: "0.8.0",
+    date: "11/06/22",
+    notes: [
+      "Enhancements:",
+      "- Show joined to unit in card view",
+      "- Added competitive list validation optional message with link to rules",
+      "Bug fixes:",
+      "- Fixed custom list names in edit list screen",
+      "- Fixed units notes duplicating between units",
+      "- Fixed campaign traits not showing up in special rules card",
+      "- Fixed equipment rules not showing in card view when unit has no other special rules"
+    ],
+  },
+  {
     version: "0.7.1",
     date: "04/05/22",
     notes: [

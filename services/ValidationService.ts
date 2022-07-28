@@ -1,25 +1,27 @@
 import { ListState } from "../data/listSlice";
 import _ from "lodash";
 import { ArmyState } from "../data/armySlice";
-import UnitService from "./UnitService";
 import UpgradeService from "./UpgradeService";
 
 const unitPointThresholds = {
   "gf": 200,
   "gff": 30,
   "aof": 165,
+  "aofr": 165,
   "aofs": 25,
 };
 const heroPointThresholds = {
   "gf": 500,
   "gff": 150,
   "aof": 500,
+  "aofr": 500,
   "aofs": 150,
 };
 const duplicateUnitThresholds = {
   "gf": 1000,
   "gff": 150,
   "aof": 1000,
+  "aofr": 1000,
   "aofs": 150,
 };
 
@@ -45,6 +47,8 @@ export default class ValidationService {
     const joinedHeroes = heroes.filter(u => (u.joinToUnit && units.some(t => t.selectionId === u.joinToUnit)))
     const joinedIds = joinedHeroes.map(u => u.joinToUnit);
 
+    console.log(joinedHeroes);
+
     const duplicateUnitLimit = 1 + Math.floor((points / duplicateUnitThresholds[system]));
     const nonCombinedUnitsGrouped = _.groupBy(units.filter(u => !(u.combined && (!u.joinToUnit))), u => u.id);
     const unitsOverDuplicateLimit = Object
@@ -61,7 +65,7 @@ export default class ValidationService {
       errors.push(`Max 1 hero per full ${heroPointThresholds[system]}pts.`);
 
     if (unitCount > Math.floor(points / unitPointThresholds[system])) {
-      const combinedMsg = system === "gf" || system === "aof"
+      const combinedMsg = system === "gf" || system === "aof" || system === "aofr"
         ? ` (combined units count as just 1 unit)`
         : "";
       errors.push(`Max 1 unit per full ${unitPointThresholds[system]}pts${combinedMsg}.`);
@@ -72,7 +76,7 @@ export default class ValidationService {
 
     //#endregion
 
-    if (army.gameSystem === "gf" || army.gameSystem === "aof") {
+    if (army.gameSystem === "gf" || army.gameSystem === "aof" || army.gameSystem === "aofr") {
 
       if (units.some(u => u.combined && u.size === 1))
         errors.push(`Cannot combine units of unit size [1].`);
@@ -82,6 +86,9 @@ export default class ValidationService {
 
       if (new Set(joinedIds).size < joinedIds.length)
         errors.push(`A unit can only have a maximum of one Hero attached.`);
+
+      if (joinedHeroes.some(hero => list.units.find(unit => unit.selectionId === hero.joinToUnit).armyId !== hero.armyId))
+        errors.push(`Heroes only join units from their own faction.`);
     }
 
     if (army.loadedArmyBooks.length > 2) {

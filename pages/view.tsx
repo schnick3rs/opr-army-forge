@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../data/store";
 import { useRouter } from "next/router";
 import ViewCards from "../views/ViewCards";
-import ViewList from "../views/ViewList";
 import {
   AppBar,
   Button,
@@ -27,6 +26,11 @@ import ClearIcon from "@mui/icons-material/Clear";
 import PersistenceService from "../services/PersistenceService";
 import PrintIcon from "@mui/icons-material/Print";
 import ViewTable from "../views/ViewTable";
+import { getGameRules } from "../data/armySlice";
+import { ListState } from "../data/listSlice";
+import { ISelectedUnit, IUpgradeGainsRule } from "../data/interfaces";
+import UnitService from "../services/UnitService";
+import { MainMenuOptions } from "../views/components/MainMenu";
 
 export interface IViewPreferences {
   showFullRules: boolean;
@@ -37,13 +41,15 @@ export interface IViewPreferences {
 
 export default function View() {
   const list = useSelector((state: RootState) => state.list);
+  const armyState = useSelector((state: RootState) => state.army);
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const defaultPrefs = {
     showFullRules: false,
     showPointCosts: true,
     combineSameUnits: true,
-    showPsychic: listContainsPyschic(list),
+    showPsychic: listContainsPyschic(list.units),
   } as IViewPreferences;
 
   const [preferences, setPreferenceState] = useState(defaultPrefs);
@@ -55,9 +61,30 @@ export default function View() {
     setPreferenceState((prev) => ({
       ...prev,
       ...prefs,
-      showPsychic: listContainsPyschic(list) || ((prefs as any)?.showPsychic ?? false),
+      showPsychic: listContainsPyschic(list.units) || ((prefs as any)?.showPsychic ?? false),
     }));
   }, []);
+
+  // Load army list file
+  useEffect(() => {
+    // Redirect to game selection screen if no army selected
+    if (!armyState.loaded) {
+      const listId = router.query["listId"] as string;
+      if (listId) {
+        PersistenceService.loadFromKey(dispatch, listId, (_) => {});
+        return;
+      }
+
+      router.push({ pathname: "/gameSystem", query: router.query }, null, {
+        shallow: true,
+      });
+      return;
+    } else {
+      dispatch(getGameRules(armyState.gameSystem));
+    }
+  }, []);
+
+  if (!armyState.loaded) return <p>Loading...</p>;
 
   function setPreferences(setFunc) {
     const newPrefs = setFunc(preferences);
@@ -65,28 +92,28 @@ export default function View() {
     PersistenceService.saveViewPreferences(newPrefs);
   }
 
+  const title = `${list.name} • ${list.points}pts`;
+
   return (
     <>
       <Paper className="no-print" elevation={2} color="primary" square>
         <AppBar position="static" elevation={0}>
-          <Toolbar>
+          <Toolbar className="p-0">
             <IconButton
               size="large"
-              edge="start"
               color="inherit"
               aria-label="menu"
-              sx={{ mr: 2 }}
               onClick={() => router.back()}
+              style={{ marginLeft: "0" }}
+              className="mr-4"
             >
               <CloseIcon />
             </IconButton>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              {list.name} • {list.points}pts
+              {title}
             </Typography>
             <IconButton
-              className="mr-4"
               size="large"
-              edge="start"
               color="inherit"
               aria-label="menu"
               onClick={() => window.print()}
@@ -95,13 +122,13 @@ export default function View() {
             </IconButton>
             <IconButton
               size="large"
-              edge="start"
               color="inherit"
               aria-label="menu"
               onClick={() => setSettingsOpen(true)}
             >
               <SettingsIcon />
             </IconButton>
+            <MainMenuOptions />
           </Toolbar>
         </AppBar>
       </Paper>
@@ -164,19 +191,23 @@ export default function View() {
           <span className="pl-1 full-compact-text">{isCardView ? "cards" : "list"}</span>
         </Button>
       </div>
+      <h1 className="mb-4 mx-4 print-only" style={{ fontWeight: 600 }}>
+        {title}
+      </h1>
       {isCardView ? <ViewCards prefs={preferences} /> : <ViewTable prefs={preferences} />}
     </>
   );
 }
 
 // TODO: extract these as global helper functions
-function listContainsPyschic(list) {
+export function listContainsPyschic(units: ISelectedUnit[]) {
   // TODO: get the special rule def from a well known location
-  return listContainsSpecialRule(list, { key: "psychic", name: "Psychic", rating: "1" });
+  return listContainsSpecialRule(units, "Psychic") || listContainsSpecialRule(units, "Wizard");
 }
 
-function listContainsSpecialRule(list, specialRule) {
-  return list.units.some(({ specialRules }) =>
-    Boolean(specialRules.find(({ name }) => name === specialRule.name))
-  );
+export function listContainsSpecialRule(units: ISelectedUnit[], specialRule: string) {
+  return units.some((unit) => {
+    const upgradeRules = UnitService.getAllUpgradedRules(unit);
+    return unit.specialRules.concat(upgradeRules).some(({ name }) => name === specialRule);
+  });
 }

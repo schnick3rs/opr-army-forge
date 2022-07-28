@@ -67,37 +67,7 @@ export default class WebappApiService {
 
       const data: IArmyData = await armyBookRes.json();
 
-      const upgradePackages = data.upgradePackages.map(upgradePackage => ({
-        ...upgradePackage,
-        sections: upgradePackage.sections.map(section => ({
-          ...section,
-          isCommandGroup: section.options
-            .some(opt => opt.gains.some(g => g.name.toLocaleLowerCase() === "musician")),
-          options: section.options.map(option => {
-            const result: any = {
-              ...option,
-              parentSectionId: section.uid
-            };
-            delete result.proposedCost;
-            delete result.proposedCostHint;
-            delete result.proposedVersion;
-            delete result.parentPackageUid;
-            delete result.parentSectionUid;
-            return result;
-          })
-        }))
-      }));
-
-      const transformedData: IArmyData = {
-        ...data,
-        units: data.units.map((unit, index) => ({
-          ...unit,
-          selectedUpgrades: [],
-          sortId: index,
-          disabledUpgradeSections: UnitService.getDisabledUpgradeSections(unit, upgradePackages)
-        })),
-        upgradePackages: upgradePackages
-      };
+      const transformedData: IArmyData = this.transformArmyBookData(data, armyId);
 
       this.cacheResponse(cacheKey, transformedData);
 
@@ -107,4 +77,42 @@ export default class WebappApiService {
       return this.getFromCache(cacheKey);
     }
   };
+
+  public static transformArmyBookData(data: any, armyId: string) {
+
+    const upgradePackages = data.upgradePackages.map(upgradePackage => ({
+      ...upgradePackage,
+      sections: upgradePackage.sections.map(section => ({
+        ...section,
+        isCommandGroup: section.options
+          .some(opt => opt.gains.some(g => g.name.toLocaleLowerCase() === "musician")),
+        options: section.options.map(option => {
+          const result: any = {
+            ...option,
+            parentSectionId: section.uid
+          };
+          delete result.proposedCost;
+          delete result.proposedCostHint;
+          delete result.proposedVersion;
+          delete result.parentPackageUid;
+          delete result.parentSectionUid;
+          return result;
+        })
+      }))
+    }));
+
+    const transformedData: IArmyData = {
+      ...data,
+      units: data.units.map((unit, index) => ({
+        ...unit,
+        armyId: armyId,
+        selectedUpgrades: [],
+        sortId: index,
+        disabledUpgradeSections: UnitService.getDisabledUpgradeSections(unit, upgradePackages)
+      })),
+      upgradePackages: upgradePackages
+    };
+
+    return transformedData;
+  }
 }

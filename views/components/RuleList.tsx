@@ -52,13 +52,13 @@ export default function RuleList({ specialRules }: { specialRules: (ISpecialRule
           <Fragment key={index}>
             {index > 0 ? <span className="mr-1">, </span> : null}
             <RuleItem
-              label={
-                (count > 1 ? `${count}x ` : "") +
-                RulesService.displayName({
+              label={RulesService.displayName(
+                {
                   ...rule,
                   rating: rule.rating ? rating.toString() : null,
-                })
-              }
+                },
+                count
+              )}
               description={(rule as any).description || ruleDefinition?.description || ""}
             />
           </Fragment>

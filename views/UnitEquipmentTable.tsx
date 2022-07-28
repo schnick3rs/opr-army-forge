@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@mui/material";
 import {
-  ISelectedUnit,
+  IUpgradeGains,
   IUpgradeGainsItem,
   IUpgradeGainsRule,
   IUpgradeGainsWeapon,
@@ -19,26 +19,34 @@ import RuleList from "./components/RuleList";
 import _ from "lodash";
 import DataParsingService from "../services/DataParsingService";
 
-export default function UnitEquipmentTable({
-  unit,
-  square,
-  hideEquipment = false,
-}: {
-  unit: ISelectedUnit;
+interface UnitEquipmentTableProps {
+  loadout: IUpgradeGains[];
   square: boolean;
   hideEquipment?: boolean;
-}) {
+}
+
+export default function UnitEquipmentTable({
+  loadout,
+  square,
+  hideEquipment = false,
+}: UnitEquipmentTableProps) {
   const isWeapon = (e) => e.attacks;
 
   const weaponsFromItems = _.flatMap(
-    unit.loadout.filter((e) => e.type === "ArmyBookItem"),
-    (e) => (e as IUpgradeGainsItem).content.filter((item) => item.type === "ArmyBookWeapon")
+    loadout.filter((e) => e.type === "ArmyBookItem"),
+    (e: IUpgradeGainsItem) =>
+      e.content
+        .filter((item) => item.type === "ArmyBookWeapon")
+        .map((weapon: IUpgradeGainsWeapon) => ({
+          ...weapon,
+          count: (weapon.count || 1) * (e.count || 1),
+        }))
   );
-  const weapons = unit.loadout
+  const weapons = loadout
     .filter((e) => isWeapon(e))
     .concat(weaponsFromItems.map((item) => ({ ...item, count: item.count ?? 1 })));
 
-  const equipment = unit.loadout.filter((e) => !isWeapon(e));
+  const equipment = loadout.filter((e) => !isWeapon(e));
   const combinedEquipment = equipment.map((e) => {
     if (e.type === "ArmyBookItem")
       return {
@@ -58,7 +66,9 @@ export default function UnitEquipmentTable({
   const hasEquipment = equipment.length > 0; // || itemUpgrades.length > 0;
 
   const weaponGroups = _.groupBy(weapons, (w) => pluralise.singular(w.name ?? w.label) + w.attacks);
-  const itemGroups = _.groupBy(combinedEquipment, (w) => pluralise.singular(w.name ?? w.label));
+  const itemGroups = _.groupBy(combinedEquipment, (w) =>
+    pluralise.singular((w as any).name ?? w.label)
+  );
   const weaponGroupKeys = Object.keys(weaponGroups);
 
   const cellStyle = {
@@ -89,8 +99,8 @@ export default function UnitEquipmentTable({
             </TableHead>
             <TableBody>
               {weaponGroupKeys.map((key, i) => {
-                const group: IUpgradeGainsWeapon[] = weaponGroups[key];
-                const upgrade = group[0];
+                const group = weaponGroups[key];
+                const upgrade = group[0] as IUpgradeGainsWeapon;
                 const count = group.reduce((c, next) => c + next.count, 0);
                 const e = { ...upgrade, count };
 

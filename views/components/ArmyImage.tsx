@@ -7,14 +7,6 @@ export default function ArmyImage({
   size = "100px",
   ...props
 }) {
-  const path = armyData.gameSystem
-    ? armyData.gameSystem.indexOf("aof") === 0
-      ? "aof"
-      : "gf_armies"
-    : armyData.gameSystemId === 4
-    ? "aof"
-    : "gf_armies";
-
   const urlName = name
     .replace(/Daemons of.+/gi, "Daemons")
     .replace(/\s+/g, "-")
@@ -23,6 +15,7 @@ export default function ArmyImage({
   const directory = (() => {
     if (urlName === "jackals") return "2022/04";
     if (urlName === "havoc-war-clans") return "2022/05";
+    if (urlName === "saurian-starhost") return "2022/07";
     return "2022/02";
   })();
 
